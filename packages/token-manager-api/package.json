@@ -1,0 +1,79 @@
+{
+  "name": "token-manager-api",
+  "description": "token manager api",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "start": "node server.js",
+    "releaseas": "npx standard-version --release-as",
+    "release:show": "npx standard-version --dry-run",
+    "release:patch": "npx standard-version --release-as patch",
+    "release:minor": "npx standard-version --release-as minor",
+    "release:major": "npx standard-version --release-as major",
+    "reset:local:db": "yarn migrate:db:drop && yarn migrate:db && yarn seed:db",
+    "reset:uat:db": "yarn migrate:db:uat:drop && yarn migrate:db:uat && yarn seed:uat:db",
+    "start:watch": "./node_modules/nodemon/bin/nodemon.js server.js",
+    "start:watch:uat": "NODE_ENV=uat ./node_modules/nodemon/bin/nodemon.js server.js",
+    "start:docker": "NODE_ENV=uat ./node_modules/nodemon/bin/nodemon.js /usr/src/app/server.js",
+    "migrate:db": "cd database && npx sequelize-cli db:migrate && cd ..",
+    "migrate:db:drop": "cd database && npx sequelize-cli db:migrate:undo:all && cd ..",
+    "migrate:db:uat": "cd database && NODE_ENV=uat npx sequelize-cli db:migrate && cd ..",
+    "migrate:db:uat:drop": "cd database && NODE_ENV=uat npx sequelize-cli db:migrate:undo:all && cd ..",
+    "seed:db": "cd database && npx sequelize-cli db:seed:all && cd ..",
+    "seed:uat:db": "cd database && NODE_ENV=uat npx sequelize-cli db:seed:all && cd ..",
+    "test": "jest",
+    "test:watch": "jest --watch test --color",
+    "test:CI": "CI=true NODE_ENV=development ./node_modules/jest/bin/jest.js --coverage --detectOpenHandles"
+  },
+  "contributors": [
+    {
+      "name": "PassonTW",
+      "email": "passon.com.tw@gmail.com"
+    }
+  ],
+  "dependencies": {
+    "cookie-parser": "^1.4.5",
+    "cors": "^2.8.5",
+    "crypto": "^1.0.1",
+    "date-fns": "^2.22.1",
+    "dotenv": "^10.0.0",
+    "eetase": "^4.0.0",
+    "express": "^4.16.3",
+    "lodash": "^4.17.21",
+    "morgan": "^1.7.0",
+    "passport": "^0.4.1",
+    "passport-jwt": "^4.0.0",
+    "passport-local": "^1.0.0",
+    "pg": "^8.6.0",
+    "pg-hstore": "^2.3.3",
+    "sc-errors": "^2.0.1",
+    "scc-broker-client": "^8.0.0",
+    "sequelize": "^6.6.2",
+    "serve-static": "^1.13.2",
+    "socketcluster-client": "^16.0.1",
+    "socketcluster-server": "^16.0.0",
+    "swagger-ui-express": "^4.1.6",
+    "uuid": "^8.3.2",
+    "yup": "^0.32.9"
+  },
+  "keywords": [
+    "websocket",
+    "server",
+    "realtime",
+    "cluster",
+    "scalable",
+    "token"
+  ],
+  "readmeFilename": "README.md",
+  "devDependencies": {
+    "eslint": "^7.32.0",
+    "eslint-config-google": "^0.14.0",
+    "faker": "^5.5.3",
+    "jest": "^29.7.0",
+    "jest-junit": "^16.0.0",
+    "jest-stare": "^2.5.1",
+    "nodemon": "^3.1.0",
+    "supertest": "^6.1.6",
+    "zero-padding": "^1.0.0"
+  }
+}

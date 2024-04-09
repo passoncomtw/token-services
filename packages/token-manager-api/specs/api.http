@@ -1,0 +1,22 @@
+@DEV = http://localhost:8000/
+
+@domain = {{DEV}}
+@jsonContentType = application/json
+
+### public route
+GET {{domain}}health-check
+Content-Type: {{jsonContentType}}
+
+### private route
+GET {{domain}}home
+Content-Type: {{jsonContentType}}
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MCwiYWNjb3VudCI6Im1vY2tVc2VyIiwiaWF0IjoxNjEwMDMwMDk2fQ.KTUaufl4T8bHIj5nFv8zKpc-K3nZZwJT0fr50gbcY8E
+
+### Login username:password
+POST {{domain}}auth
+Content-Type: {{jsonContentType}}
+
+{
+  "account": "mockUser",
+  "password": "a12345678"
+}

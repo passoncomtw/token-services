@@ -1,0 +1,25 @@
+name: deploy-token-api-production
+
+on:
+  pull_request:
+    types: 
+      - closed
+    branches:
+      - main
+
+jobs:
+  do-deployment:
+    # needs: run-test-cases
+    if: github.event.pull_request.merged == true
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - name: Deploy newest code to dev machine
+      uses: ./.github/actions/run-deploy
+      with:
+        env-name: prod
+        folder-name: token-manager-api
+        branch-name: develop
+        env-value: ${{ secrets.PROD_ENV }}
+        host-name: ${{ secrets.DEV_HOST }}
+        ssh-key: ${{ secrets.SSH_KEY_PROD_VALUE }}

@@ -1,0 +1,82 @@
+{
+  "name": "token-app-api",
+  "description": "token wallet app api",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "start": "node server.js",
+    "reset:local:db": "yarn migrate:db:drop && yarn migrate:db && yarn seed:db",
+    "reset:uat:db": "yarn migrate:db:uat:drop && yarn migrate:db:uat && yarn seed:uat:db",
+    "start:watch": "./node_modules/nodemon/bin/nodemon.js server.js",
+    "start:watch:uat": "NODE_ENV=uat ./node_modules/nodemon/bin/nodemon.js server.js",
+    "start:docker": "NODE_ENV=uat ./node_modules/nodemon/bin/nodemon.js /usr/src/app/server.js",
+    "migrate:db": "cd database && npx sequelize-cli db:migrate && cd ..",
+    "migrate:db:drop": "cd database && npx sequelize-cli db:migrate:undo:all && cd ..",
+    "migrate:db:uat": "cd database && NODE_ENV=uat npx sequelize-cli db:migrate && cd ..",
+    "migrate:db:uat:drop": "cd database && NODE_ENV=uat npx sequelize-cli db:migrate:undo:all && cd ..",
+    "seed:db": "cd database && npx sequelize-cli db:seed:all && cd ..",
+    "seed:uat:db": "cd database && NODE_ENV=uat npx sequelize-cli db:seed:all && cd ..",
+    "test": "jest",
+    "test:watch": "jest --watch test --color",
+    "test:CI": "CI=true jest test --color --reporters=jest-junit --forceExit --coverage --coverageDirectory=output/coverage/jest"
+  },
+  "jest": {
+    "testURL": "http://localhost/",
+    "collectCoverageFrom": [
+      "routes/*.js",
+      "!src/server.js",
+      "!<rootDir>/node_modules/"
+    ],
+    "coverageReporters": [
+      "text",
+      "html"
+    ]
+  },
+  "contributors": [
+    {
+      "name": "Tomas",
+      "email": "tomas.lin@velocitylight.net"
+    }
+  ],
+  "dependencies": {
+    "connect": "^3.6.6",
+    "cookie-parser": "^1.4.5",
+    "cors": "^2.8.5",
+    "crypto": "^1.0.1",
+    "date-fns": "^2.22.1",
+    "dotenv": "^10.0.0",
+    "eetase": "^4.0.0",
+    "express": "^4.16.3",
+    "jest-cli": "^27.0.3",
+    "lodash": "^4.17.21",
+    "morgan": "^1.7.0",
+    "nodemon": "^1.18.9",
+    "passport": "^0.4.1",
+    "passport-jwt": "^4.0.0",
+    "passport-local": "^1.0.0",
+    "pg": "^8.6.0",
+    "pg-hstore": "^2.3.3",
+    "sc-errors": "^2.0.1",
+    "scc-broker-client": "^8.0.0",
+    "sequelize": "^6.6.2",
+    "serve-static": "^1.13.2",
+    "socketcluster-client": "^16.0.1",
+    "socketcluster-server": "^16.0.0",
+    "swagger-jsdoc": "6.0.0",
+    "swagger-ui-express": "^4.1.6",
+    "uuid": "^8.3.2",
+    "yup": "^0.32.9"
+  },
+  "keywords": [
+    "websocket",
+    "server",
+    "realtime",
+    "cluster",
+    "scalable"
+  ],
+  "readmeFilename": "README.md",
+  "devDependencies": {
+    "nodemon": "^3.1.0",
+    "supertest": "^6.1.3"
+  }
+}
