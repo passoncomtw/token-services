@@ -14,4 +14,4 @@ RUN yarn install
 EXPOSE 8220
 
 WORKDIR /app
-CMD ["NODE_ENV=prod", "yarn", "start:token-app-api"]
+CMD ["yarn", "start:token-app-api"]
