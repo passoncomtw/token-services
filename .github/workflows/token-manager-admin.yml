@@ -24,11 +24,9 @@ jobs:
           node-version: 18.17.0
       - name: Build And Deploy Token Manager Admin Web
         run: |
+            echo "${{ secrets.MANAGMENT_WEB_ENV }}" > ./packages/token-manager-admin/.env
             cd ./packages/token-manager-admin/
             yarn install
-            echo "${{ secrets.MANAGMENT_WEB_ENV }}"
-            ls 
-            echo "${{ secrets.MANAGMENT_WEB_ENV }}" > ./packages/token-manager-admin/.env
             yarn build
       - name: copy files to target server via scp
         uses: appleboy/scp-action@v0.1.3
