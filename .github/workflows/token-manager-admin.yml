@@ -26,6 +26,8 @@ jobs:
         run: |
             cd ./packages/token-manager-admin/
             yarn install
+            echo "${{ secrets.MANAGMENT_WEB_ENV }}"
+            ls ./packages/token-manager-admin/
             echo "${{ secrets.MANAGMENT_WEB_ENV }}" > ./packages/token-manager-admin/.env
             yarn build
       - name: copy files to target server via scp
