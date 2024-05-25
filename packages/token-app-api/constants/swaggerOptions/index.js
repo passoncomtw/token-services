@@ -3,10 +3,7 @@ dotenv.config();
 
 const paths = require('./paths');
 const definitions = require('./definitions');
-const env = process.env.NODE_ENV || 'development';
-const host = env === 'development'
-  ? "localhost:8889"
-  : "token-app-api.passon.tw";
+const host = process.env.SWAGGER_DOMAIN;
 
 const options = {
   swagger: "2.0",
