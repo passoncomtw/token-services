@@ -1,0 +1,16 @@
+# 使用 3.8 版的設定檔，通常新版本會有新的功能，並支援新的設定參數
+version: "3.8"
+
+# 定義 service 的區塊，一個 service 設定可以用來啟動多個 container
+services:
+  # 定義一個叫 npm 的 service
+  baccarat-managment-state:
+    image: passon/token-app-api
+    stdin_open: true
+    tty: true
+    working_dir: /app/packages/
+    ports:
+      - 9000:3000
+    # volumes:
+    #   - .:/usr/src/
+    #   - /usr/src/node_modules
