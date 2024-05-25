@@ -1,0 +1,71 @@
+name: deploy-token-app-api-production
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: token-app-api
+
+on:
+  pull_request:
+    types: 
+      - closed
+    branches:
+      - main
+    paths:
+      - 'packages/token-app-api/**'
+      - '.github/workflows/token-app-api.yml'      
+
+jobs:
+  # This workflow contains multiple jobs
+  build-and-deploy-token-app-api:
+    if: github.event.pull_request.merged == true
+    # The type of runner that the job will run on
+    runs-on: mac-mini-build
+    strategy:
+      matrix:
+        node-version: [18.17.0]
+    steps:
+      - name: Check out the repo
+        uses: actions/checkout@v4
+      - name: unlock-keychain-db
+        run: |
+          security unlock-keychain -p ${{ secrets.MAC_USER_PASSWORD }} /Users/admin/Library/Keychains/login.keychain-db
+          echo "${{ secrets.TOKEN_APP_API_ENV }}" > ./packages/token-app-api/.env
+      - name: Log in to Docker Hub
+        uses: docker/login-action@f4ef78c080cd8ba55a85445d5b36e214a81df20a
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_PASSWORD }}
+
+      - name: Build and push Docker image
+        id: push
+        uses: docker/build-push-action@3b5e8027fcad23fda98b2e3ac259d8d67585f671
+        with:
+          context: .
+          file: ./packages/${{ env.IMAGE_NAME }}/Dockerfile
+          push: true
+          tags: passon/${{ env.IMAGE_NAME }}:latest
+  do-deployment:
+    needs: build-and-deploy-token-app-api
+    if: github.event.pull_request.merged == true
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    # Copy docker-compose and .env files to target server
+    - name: copy files to target server via scp
+      uses: appleboy/scp-action@v0.1.3
+      with:
+        host: ${{ secrets.DEV_HOST }}
+        username: root
+        port: 22
+        key: ${{ secrets.SSH_KEY_DEV_VALUE }}
+        source: "./packages/${{ env.IMAGE_NAME }}/docker-compose.yaml"
+        target: "~/token/${{ env.IMAGE_NAME }}/"
+        strip_components: 3
+    - name: Deploy newest code to production machine
+      uses: ./.github/actions/run-deploy
+      with:
+        folder-name: token/${{ env.IMAGE_NAME }}/
+        branch-name: main
+        module-name: ${{ env.IMAGE_NAME }}
+        host-name: ${{ secrets.DEV_HOST }}
+        ssh-key: ${{ secrets.SSH_KEY_DEV_VALUE }}
