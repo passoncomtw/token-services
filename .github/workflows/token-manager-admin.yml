@@ -14,7 +14,7 @@ on:
 jobs:
   do-deployment:
     if: github.event.pull_request.merged == true
-    runs-on: mac-mini-build
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v2
