@@ -21,7 +21,7 @@ jobs:
       - name: Set up Node
         uses: actions/setup-node@v1
         with:
-          node-version: 18.17.0
+          node-version: 16.16.0
       - name: Build And Deploy Token Manager Admin Web
         run: |
             echo "${{ secrets.MANAGMENT_WEB_ENV }}" > ./packages/token-manager-admin/.env
