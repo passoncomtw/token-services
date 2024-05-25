@@ -1,13 +1,17 @@
-FROM node:18.17.0-slim
+FROM node:18.15.0-slim
 
-RUN mkdir -p /usr/src/
-WORKDIR /usr/src/
-COPY . /usr/src/
+RUN mkdir -p /app/packages/
+RUN yarn global add lerna
 
-COPY ./.env /usr/src/
+RUN ls -al
+COPY ./packages/token-app-api /app/packages/token-app-api
+COPY ./lerna.json /app
+COPY ./package.json /app
+COPY ./yarn.lock /app
 
-RUN npm install .
+WORKDIR /app/packages
+RUN yarn install
+EXPOSE 8220
 
-EXPOSE 3000
-
-CMD ["node", "server"]
+WORKDIR /app
+CMD ["yarn", "start:token-app-api"]
