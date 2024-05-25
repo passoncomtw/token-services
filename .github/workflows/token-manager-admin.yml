@@ -1,0 +1,40 @@
+name: deploy-token-manager-admin-production
+
+on:
+  pull_request:
+    types: 
+    - closed
+    branches:
+    - main
+    paths:
+    - 'deploy/token-manager-admin/*'
+    - 'packages/token-manager-admin/**'
+    - '.github/workflows/token-manager-admin.yml'
+
+jobs:
+  do-deployment:
+    if: github.event.pull_request.merged == true
+    runs-on: mac-mini-build
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Set up Node
+        uses: actions/setup-node@v1
+        with:
+          node-version: 18.17.0
+      - name: Build And Deploy Token Manager Admin Web
+        run: |
+            cd ./packages/token-manager-admin/
+            yarn install
+            echo "${{ secrets.MANAGMENT_WEB_ENV }}" > ./packages/token-manager-admin/.env
+            yarn build
+      - name: copy files to target server via scp
+        uses: appleboy/scp-action@v0.1.3
+        with:
+          host: ${{ secrets.DEV_HOST }}
+          username: root
+          port: 22
+          key: ${{ secrets.SSH_KEY_DEV_VALUE }}
+          source: packages/token-manager-admin/build/
+          target: /var/www/html/token-web.passon.tw/
+          strip_components: 3
