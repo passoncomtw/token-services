@@ -45,6 +45,10 @@ jobs:
           file: ./packages/${{ env.IMAGE_NAME }}/Dockerfile
           push: true
           tags: ${{ env.DOCKER_HUB_WORKSPACE }}/${{ env.IMAGE_NAME }}:latest
+      - name: clear docker image
+        run: |
+          docker images -a | grep none | awk '{ print $3; }' | xargs docker rmi
+          docker image rm -f ${{ env.IMAGE_NAME }} || echo "delete docker image done"
   do-deployment:
     needs: build-and-deploy-token-manager-api
     if: github.event.pull_request.merged == true
