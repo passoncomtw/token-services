@@ -5,7 +5,6 @@ env:
   IMAGE_NAME: token-manager-api
   DOCKER_HUB_WORKSPACE: passon
   SERVER_WORK_DIRECTORY: token
-
 on:
   pull_request:
     types: 

@@ -25,13 +25,10 @@ runs:
       uses: fifsky/ssh-action@master
       with:
         command: |
-          export NVM_DIR=~/.nvm
-          source ~/.nvm/nvm.sh
           cd ./${{ inputs.folder-name }}
-          ls -al
-          docker pull passon/${{ inputs.module-name }}
-          docker images -a | grep none | awk '{ print $3; }' | xargs docker rmi | echo "remove docker image done"
-          docker-compose down || echo "stop docker compose service"
+          docker pull passon/${{ inputs.module-name }} &&
+          docker images -a | grep none | awk '{ print $3; }' | xargs docker rmi | echo "remove docker image done" &&
+          docker-compose down || echo "stop docker compose service" &&
           docker-compose up -d
         host: ${{ inputs.host-name }}
         user: root
