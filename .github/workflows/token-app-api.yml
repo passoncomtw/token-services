@@ -37,37 +37,39 @@ jobs:
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_PASSWORD }}
-
-      - name: Build and push Docker image
-        id: push
-        uses: docker/build-push-action@3b5e8027fcad23fda98b2e3ac259d8d67585f671
-        with:
-          context: .
-          file: ./packages/${{ env.IMAGE_NAME }}/Dockerfile
-          push: true
-          tags: ${{ env.DOCKER_HUB_WORKSPACE }}/${{ env.IMAGE_NAME }}:latest
-  do-deployment:
-    needs: build-and-deploy-token-app-api
-    if: github.event.pull_request.merged == true
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v3
-    # Copy docker-compose and .env files to target server
-    - name: copy files to target server via scp
-      uses: appleboy/scp-action@v0.1.3
-      with:
-        host: ${{ secrets.DEV_HOST }}
-        username: root
-        port: 22
-        key: ${{ secrets.SSH_KEY_DEV_VALUE }}
-        source: "./packages/${{ env.IMAGE_NAME }}/docker-compose.yaml"
-        target: "~/${{ env.SERVER_WORK_DIRECTORY }}/${{ env.IMAGE_NAME }}/"
-        strip_components: 3
-    - name: Deploy newest code to production machine
-      uses: ./.github/actions/run-deploy
-      with:
-        folder-name: ${{ env.SERVER_WORK_DIRECTORY }}/${{ env.IMAGE_NAME }}/
-        branch-name: main
-        module-name: ${{ env.IMAGE_NAME }}
-        host-name: ${{ secrets.DEV_HOST }}
-        ssh-key: ${{ secrets.SSH_KEY_DEV_VALUE }}
+      - name: check .env file
+        run: |
+          cat ./packages/${{ env.IMAGE_NAME }}/.env
+      # - name: Build and push Docker image
+      #   id: push
+      #   uses: docker/build-push-action@3b5e8027fcad23fda98b2e3ac259d8d67585f671
+      #   with:
+      #     context: .
+      #     file: ./packages/${{ env.IMAGE_NAME }}/Dockerfile
+      #     push: true
+      #     tags: ${{ env.DOCKER_HUB_WORKSPACE }}/${{ env.IMAGE_NAME }}:latest
+  # do-deployment:
+  #   needs: build-and-deploy-token-app-api
+  #   if: github.event.pull_request.merged == true
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #   - uses: actions/checkout@v3
+  #   # Copy docker-compose and .env files to target server
+  #   - name: copy files to target server via scp
+  #     uses: appleboy/scp-action@v0.1.3
+  #     with:
+  #       host: ${{ secrets.DEV_HOST }}
+  #       username: root
+  #       port: 22
+  #       key: ${{ secrets.SSH_KEY_DEV_VALUE }}
+  #       source: "./packages/${{ env.IMAGE_NAME }}/docker-compose.yaml"
+  #       target: "~/${{ env.SERVER_WORK_DIRECTORY }}/${{ env.IMAGE_NAME }}/"
+  #       strip_components: 3
+  #   - name: Deploy newest code to production machine
+  #     uses: ./.github/actions/run-deploy
+  #     with:
+  #       folder-name: ${{ env.SERVER_WORK_DIRECTORY }}/${{ env.IMAGE_NAME }}/
+  #       branch-name: main
+  #       module-name: ${{ env.IMAGE_NAME }}
+  #       host-name: ${{ secrets.DEV_HOST }}
+  #       ssh-key: ${{ secrets.SSH_KEY_DEV_VALUE }}
