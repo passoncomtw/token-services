@@ -1,8 +1,8 @@
-name: deploy-token-app-api-production
+name: deploy-token-manager-api-production
 
 env:
   REGISTRY: ghcr.io
-  IMAGE_NAME: token-app-api
+  IMAGE_NAME: token-manager-api
   DOCKER_HUB_WORKSPACE: passon
   SERVER_WORK_DIRECTORY: token
 
@@ -13,12 +13,12 @@ on:
     branches:
       - main
     paths:
-      - 'packages/token-app-api/**'
-      - '.github/workflows/token-app-api.yml'      
+      - 'packages/token-manager-api/**'
+      - '.github/workflows/token-manager-api.yml'      
 
 jobs:
   # This workflow contains multiple jobs
-  build-and-deploy-token-app-api:
+  build-and-deploy-token-manager-api:
     if: github.event.pull_request.merged == true
     # The type of runner that the job will run on
     runs-on: mac-mini-build
@@ -47,7 +47,7 @@ jobs:
           push: true
           tags: ${{ env.DOCKER_HUB_WORKSPACE }}/${{ env.IMAGE_NAME }}:latest
   do-deployment:
-    needs: build-and-deploy-token-app-api
+    needs: build-and-deploy-token-manager-api
     if: github.event.pull_request.merged == true
     runs-on: ubuntu-latest
     steps:
