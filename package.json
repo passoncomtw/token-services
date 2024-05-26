@@ -5,9 +5,9 @@
     "packages/*"
   ],
   "scripts": {
-    "start:token-app-api": "lerna run start:watch --stream --scope=token-app-api",
+    "start:token-app-api": "lerna run start --stream --scope=token-app-api",
     "start:token-admin": "lerna run start --stream --scope=token-manager-admin",
-    "start:token-admin-api": "lerna run start:watch --stream --scope=token-manager-api",
+    "start:token-admin-api": "lerna run start --stream --scope=token-manager-api",
     "start:token-app": "lerna run start --stream --scope=token-passontw-wallet"
   },
   "dependencies": {
