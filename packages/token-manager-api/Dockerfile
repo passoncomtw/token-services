@@ -1,17 +1,16 @@
 FROM node:18.15.0-slim
 
-LABEL maintainer="Tomas"
-LABEL version="16.0.1"
-LABEL description="Docker file for SocketCluster with support for clustering."
+RUN mkdir -p /app/packages/
+RUN yarn global add lerna
 
-RUN mkdir -p /usr/src/
-WORKDIR /usr/src/
-COPY . /usr/src/
+COPY ./packages/start:token-admin-api /app/packages/start:token-admin-api
+COPY ./lerna.json /app
+COPY ./package.json /app
+COPY ./yarn.lock /app
 
-COPY ./.env /usr/src/
+WORKDIR /app/packages
+RUN yarn install
+EXPOSE 3000
 
-RUN npx yarn install
-
-EXPOSE 5500
-
-CMD ["npm", "run", "start:docker", "NODE_ENV=uat"]
+WORKDIR /app
+CMD ["yarn", "start:token-admin-api"]
