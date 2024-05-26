@@ -3,7 +3,8 @@ FROM node:18.15.0-slim
 RUN mkdir -p /app/packages/
 RUN yarn global add lerna
 
-COPY ./packages/start:token-admin-api /app/packages/start:token-admin-api
+RUN ls -al
+COPY ./packages/token-manager-api /app/packages/token-manager-api
 COPY ./lerna.json /app
 COPY ./package.json /app
 COPY ./yarn.lock /app
