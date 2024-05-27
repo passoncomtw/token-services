@@ -1,0 +1,42 @@
+name: Deploy to Testflight
+
+on:
+    pull_request:
+      types: 
+        - closed
+      branches:
+        - main
+      paths:
+        - 'packages/token-passontw-wallet/**'
+        - '.github/workflows/token-passontw-wallet.yml'
+jobs:
+  # This workflow contains multiple jobs
+  build-and-deploy-token-manager-api:
+    if: github.event.pull_request.merged == true
+    # The type of runner that the job will run on
+    runs-on: mac-mini-build
+    strategy:
+      matrix:
+        node-version: [18.17.0]
+    steps:
+      - name: Check out the repo
+        uses: actions/checkout@v4
+      - uses: expo/expo-github-action@v5
+        with:
+          expo-packager: yarn
+          expo-username: "${{ secrets.EXPO_USER }}"
+          expo-password: "${{ secrets.EXPO_PASSWORD }}"
+          expo-cache: true
+      - name: Build iOS App
+        run: expo build:ios --non-interactive
+        env:
+          EXPO_APPLE_ID: ${{secrets.APPLE_ACCOUNT_ID}}
+          EXPO_APPLE_PASSWORD: ${{secrets.APPLE_ACCOUNT_PASSWORD}}
+      - name: Download Artifact from expo
+        run: mkdir build_artifacts; export EXPO_ARTIFACT_URL=$(expo url:ipa); cURL $EXPO_ARTIFACT_URL --output ./build_artifacts/$(basename $EXPO_ARTIFACT_URL);
+      
+      - name: Upload Artifact to Testflight
+        run: xcrun altool --upload-app --type ios --file ./build_artifacts/$(basename $(expo url:ipa)) --username $APPLE_USER_NAME --password $APPLE_APP_SPECIFIC_PASSWORD
+        env:
+          APPLE_USER_NAME: ${{secrets.APPLE_ACCOUNT_ID}}
+          APPLE_APP_SPECIFIC_PASSWORD: ${{secrets.APP_SPECIFIC_PASSWORD}}
