@@ -1,28 +1,30 @@
 name: deploy-token-app-api-production
 
+on:
+  pull_request:
+    types: 
+    - closed
+    branches:
+    - main
+    paths:
+    - 'packages/token-app-api/**'
+    - '.github/workflows/token-app-api.yml'
+
 env:
   REGISTRY: ghcr.io
   IMAGE_NAME: token-app-api
   DOCKER_HUB_WORKSPACE: passon
   SERVER_WORK_DIRECTORY: token
-on:
-  pull_request:
-    types: 
-      - closed
-    branches:
-      - main
-    paths:
-      - 'packages/token-app-api/**'
-      - '.github/workflows/token-app-api.yml'      
+                        
 
 jobs:
-  # This workflow contains multiple jobs
+  # This workflow contains multiple jobs                   
   build-and-deploy-token-app-api:
     if: github.event.pull_request.merged == true
     # The type of runner that the job will run on
     runs-on: mac-mini-build
     strategy:
-      matrix:
+      matrix:                                                             
         node-version: [18.17.0]
     steps:
       - name: Check out the repo
