@@ -1,4 +1,4 @@
-require("dotenv").config({path: "../.env"})
+require("dotenv").config()
 const isEmpty = require("lodash/isEmpty");
 
 const {
