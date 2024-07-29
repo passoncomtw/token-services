@@ -1,28 +1,30 @@
-name: deploy-token-manager-api-production
+name: deploy-token-app-api-production
 
-env:
-  REGISTRY: ghcr.io
-  IMAGE_NAME: token-manager-api
-  DOCKER_HUB_WORKSPACE: passon
-  SERVER_WORK_DIRECTORY: token
 on:
   pull_request:
     types: 
-      - closed
+    - closed
     branches:
-      - main
+    - main
     paths:
-      - 'packages/token-manager-api/**'
-      - '.github/workflows/token-manager-api.yml'      
+    - 'packages/token-app-api/**'
+    - '.github/workflows/build-and-deploy-token-app-api.yml'
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: token-app-api
+  DOCKER_HUB_WORKSPACE: passon
+  SERVER_WORK_DIRECTORY: token
+                        
 
 jobs:
-  # This workflow contains multiple jobs
-  build-and-deploy-token-manager-api:
+  # This workflow contains multiple jobs                   
+  build-and-deploy-token-app-api:
     if: github.event.pull_request.merged == true
     # The type of runner that the job will run on
     runs-on: mac-mini-build
     strategy:
-      matrix:
+      matrix:                                                             
         node-version: [18.17.0]
     steps:
       - name: Check out the repo
@@ -30,13 +32,12 @@ jobs:
       - name: unlock-keychain-db
         run: |
           security unlock-keychain -p ${{ secrets.MAC_USER_PASSWORD }} /Users/admin/Library/Keychains/login.keychain-db
-          echo "${{ secrets.TOKEN_MANAGMENT_API_ENV }}" > ./packages/${{ env.IMAGE_NAME }}/.env
+          echo "${{ secrets.TOKEN_APP_API_ENV }}" > ./packages/${{ env.IMAGE_NAME }}/.env
       - name: Log in to Docker Hub
         uses: docker/login-action@f4ef78c080cd8ba55a85445d5b36e214a81df20a
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_PASSWORD }}
-
+          password: ${{ secrets.DOCKERHUB_PASSWORD }}      
       - name: Build and push Docker image
         id: push
         uses: docker/build-push-action@3b5e8027fcad23fda98b2e3ac259d8d67585f671
@@ -50,7 +51,7 @@ jobs:
           docker images -a | grep none | awk '{ print $3; }' | xargs docker rmi
           docker image rm -f ${{ env.IMAGE_NAME }} || echo "delete docker image done"
   do-deployment:
-    needs: build-and-deploy-token-manager-api
+    needs: build-and-deploy-token-app-api
     if: github.event.pull_request.merged == true
     runs-on: ubuntu-latest
     steps:
