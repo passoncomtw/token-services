@@ -9,7 +9,7 @@ on:
     paths:
     - 'deploy/token-manager-admin/*'
     - 'packages/token-manager-admin/**'
-    - '.github/workflows/token-manager-admin.yml'
+    - '.github/workflows/build-and-deploy-token-manager-admin.yml'
 
 jobs:
   do-deployment:
@@ -31,7 +31,7 @@ jobs:
       - name: copy files to target server via scp
         uses: appleboy/scp-action@v0.1.3
         with:
-          host: ${{ secrets.DEV_HOST }}
+          host: ${{ secrets.WEB_HOST }}
           username: root
           port: 22
           key: ${{ secrets.SSH_KEY_DEV_VALUE }}
