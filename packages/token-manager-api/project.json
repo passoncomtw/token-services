@@ -1,0 +1,26 @@
+{
+  "name": "token-manager-api",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "packages/token-manager-api",
+  "projectType": "application",
+  "tags": [],
+  "targets": {
+    "serve": {
+      "executor": "@nx/js:node",
+      "defaultConfiguration": "development",
+      "dependsOn": ["build"],
+      "options": {
+        "buildTarget": "token-manager-api:build",
+        "runBuildTargetDependencies": false
+      },
+      "configurations": {
+        "development": {
+          "buildTarget": "token-manager-api:build:development"
+        },
+        "production": {
+          "buildTarget": "token-manager-api:build:production"
+        }
+      }
+    }
+  }
+}
