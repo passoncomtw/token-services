@@ -50,6 +50,12 @@
         "serveStaticTargetName": "serve-static",
         "typecheckTargetName": "typecheck"
       }
+    },
+    {
+      "plugin": "@nx/playwright/plugin",
+      "options": {
+        "targetName": "e2e"
+      }
     }
   ],
   "generators": {
@@ -58,7 +64,7 @@
         "babel": true,
         "style": "css",
         "linter": "eslint",
-        "bundler": "vite"
+        "bundler": "webpack"
       },
       "component": {
         "style": "css"
@@ -67,6 +73,11 @@
         "style": "css",
         "linter": "eslint"
       }
+    }
+  },
+  "targetDefaults": {
+    "e2e-ci--**/*": {
+      "dependsOn": ["^build"]
     }
   }
 }

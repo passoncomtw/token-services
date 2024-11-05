@@ -2,14 +2,8 @@ const paths = require('./paths');
 const definitions = require('./definitions');
 const packageJson = require("../../../../../package.json");
 
-const env = process.env.NODE_ENV || 'development';
-const isDev = env === 'development';
-const host = isDev
-  ? 'localhost:8300'
-  : 'token-api.passon.tw';
-const schemes = isDev
-  ? ['http', 'https']
-  : ['http', 'https'];
+const host = 'token-manager-api.passon.tw';
+const schemes = ['http', 'https'];
 
 const options = {
   swagger: '2.0',
