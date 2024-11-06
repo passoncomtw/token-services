@@ -80,3 +80,20 @@ And join the Nx community:
 - [Follow us on X](https://twitter.com/nxdevtools) or [LinkedIn](https://www.linkedin.com/company/nrwl)
 - [Our Youtube channel](https://www.youtube.com/@nxdevtools)
 - [Our blog](https://nx.dev/blog?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
+
+
+## Android build error
+
+[fix error](https://github.com/facebook/react-native/issues/46069#issuecomment-2298066865)
+
+## Redux Devtool
+
+[react-native-get-random-values](https://github.com/LinusU/react-native-get-random-values)
+[@redux-devtools/remote](https://github.com/reduxjs/redux-devtools/tree/main/packages/redux-devtools-remote)
+[redux-devtool fixed issue](https://github.com/reduxjs/redux-devtools/issues/1382#issuecomment-1615995161)
+
+### update redux devtool code
+
+```
+$ cp ./npmpackages/@redux-devtools ./node_modulex
+```

@@ -1,10 +1,11 @@
 import { Platform } from 'react-native';
-import { composeWithDevTools } from 'remote-redux-devtools';
 import { createStore, applyMiddleware, compose } from 'redux';
 import { dialogHandlerMiddleware } from '~/middleware/dialogHandlerMiddleware';
+import { composeWithDevTools } from '@redux-devtools/remote';
 import createSagaMiddleware from 'redux-saga';
 import rootReducer from '~/reducers';
 import rootSaga from '~/sagas';
+import 'react-native-get-random-values';
 
 const configureStore = () => {
   const sagaMiddleware = createSagaMiddleware({});
@@ -14,7 +15,7 @@ const configureStore = () => {
     dialogHandlerMiddleware,
   ];
 
-  const composeEnhancers = __DEV__ ? composeWithDevTools({ realtime: true, name: `token-wallet-app-${Platform.OS}`, port: 8000, hostname: "10.141.31.150" }) : compose;
+  const composeEnhancers = __DEV__ ? composeWithDevTools({ hostname: 'localhost', realtime: true, port: 8000 }) : compose;
 
   const store = createStore(
     rootReducer,
