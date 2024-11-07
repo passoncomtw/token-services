@@ -1,8 +1,13 @@
 {
   "name": "@token-services/source",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "license": "MIT",
-  "scripts": {},
+  "scripts": {
+    "release": "standard-version",
+    "release:minor": "standard-version --release-as minor",
+    "release:patch": "standard-version --release-as patch",
+    "release:major": "standard-version --release-as major"
+  },
   "private": true,
   "dependencies": {
     "@date-io/date-fns": "^3.0.0",
