@@ -4,11 +4,12 @@ dotenv.config();
 const paths = require('./paths');
 const definitions = require('./definitions');
 const host = process.env.SWAGGER_DOMAIN;
+const packageJson = require("../../../../../package.json");
 
 const options = {
   swagger: "2.0",
   info: {
-    version: "1.0.0", //version of the OpenAPI Specification
+    version: packageJson.version, //version of the OpenAPI Specification
     title: "錢包 app api",
     description: "錢包 app api",
     license: {
