@@ -5,7 +5,14 @@ import Radio from '~/components/FormFields/Radio';
 import DialogWrapper from '~/components/DialogWrapper';
 import TextInput from '~/components/FormFields/TextInput';
 
-const CancelOrderDialog = ({ onCancel, handleConfirm, ...props }) => {
+const CancelOrderDialog = ({
+  handleConfirm,
+  open = false,
+  onCancel = () => {},
+  onClose = () => {},
+  onExited = () => {},
+  ...props
+}) => {
   const [selected, setSelected] = useState('zero');
   const [reason, setReason] = useState('無交易需求');
   const [error, setError] = useState('');
@@ -47,40 +54,40 @@ const CancelOrderDialog = ({ onCancel, handleConfirm, ...props }) => {
   return (
     <DialogWrapper
       {...props}
-      mode='ask'
-      maxWidth='xs'
+      mode="ask"
+      maxWidth="xs"
       onConfirm={onConfirm}
       onCancel={onCancel}
-      onExited={onCancel}
-      title='取消原因'
+      onExited={onExited}
+      title="取消原因"
     >
-      <Box display='flex' flexDirection='column'>
+      <Box display="flex" flexDirection="column">
         <Radio
           checked={selected === 'zero'}
-          value='zero'
-          label='無交易需求'
+          value="zero"
+          label="無交易需求"
           onChange={onChange}
         />
         <Radio
           checked={selected === 'edit'}
-          value='edit'
-          label='欲更改訂單內容'
+          value="edit"
+          label="欲更改訂單內容"
           onChange={onChange}
         />
         <Radio
           checked={selected === 'other'}
-          value='other'
-          label='其他'
+          value="other"
+          label="其他"
           onChange={onChange}
         />
         <TextInput
           hide={selected != 'other'}
           multiline
-          name='reason'
+          name="reason"
           rowsMin={3}
           maxLength={256}
           onBlur={onBlur}
-          placeholder='請輸入取消原因'
+          placeholder="請輸入取消原因"
           errorMessage={error}
           onChange={onChangeText}
         />
@@ -96,10 +103,4 @@ CancelOrderDialog.propTypes = {
   onCancel: propTypes.func,
 };
 
-CancelOrderDialog.defaultProps = {
-  open: false,
-  onCancel: null,
-  onClose: () => {},
-  onExited: () => {},
-};
 export default CancelOrderDialog;

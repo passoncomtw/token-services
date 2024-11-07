@@ -11,7 +11,7 @@ import Typography from '~/components/Typography';
 import { Panel, PanelFooter } from '~/components/Panels';
 import TextButton from '~/components/Buttons/TextButton';
 
-const style = theme => ({
+const style = (theme) => ({
   paper: {
     minWidth: '300px',
     width: '100%',
@@ -30,39 +30,39 @@ const style = theme => ({
 const DialogTitle = ({ children }) => (
   <Box
     px={3}
-    display='flex'
-    flexDirection='row'
-    justifyContent='space-between'
-    alignItems='center'
+    display="flex"
+    flexDirection="row"
+    justifyContent="space-between"
+    alignItems="center"
     minHeight={56}
-    borderBottom='1px solid #EBEDF3'
+    borderBottom="1px solid #EBEDF3"
   >
     {children}
   </Box>
 );
 
-const DialogWrapper = props => {
+const DialogWrapper = (props) => {
   const {
-    open,
-    mode,
-    title,
-    isFlex,
-    classes,
-    onClose,
     hasLine,
-    onCancel,
-    maxWidth,
+    classes,
     children,
     onConfirm,
-    rightTitleElement,
-    confirmText,
-    cancelText,
-    isConfirmDisabled,
+    open = false,
+    isFlex = false,
+    isConfirmDisabled = false,
+    mode = 'confirm',
+    title = '',
+    maxWidth = 'md',
+    confirmText = '完成',
+    cancelText = '取消',
+    onCancel = null,
+    rightTitleElement = null,
+    onClose = () => {},
   } = props;
 
   return (
     <Dialog
-      aria-labelledby='detail-dialog'
+      aria-labelledby="detail-dialog"
       open={open}
       onClose={onClose}
       maxWidth={maxWidth}
@@ -70,7 +70,7 @@ const DialogWrapper = props => {
     >
       <Panel>
         <DialogTitle>
-          <Typography variant='h2'>{title}</Typography>
+          <Typography variant="h2">{title}</Typography>
           {rightTitleElement}
         </DialogTitle>
         <DialogContent
@@ -114,20 +114,6 @@ DialogWrapper.propTypes = {
   onClose: propTypes.func,
   onCancel: propTypes.func,
   onConfirm: propTypes.func.isRequired,
-};
-
-DialogWrapper.defaultProps = {
-  title: '',
-  maxWidth: 'md',
-  mode: 'confirm',
-  open: false,
-  isFlex: false,
-  rightTitleElement: null,
-  confirmText: '完成',
-  cancelText: '取消',
-  isConfirmDisabled: false,
-  onCancel: null,
-  onClose: () => {},
 };
 
 export default withMobileDialog()(withStyles(style)(DialogWrapper));

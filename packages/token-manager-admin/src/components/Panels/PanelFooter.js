@@ -24,7 +24,7 @@ const styles = theme => ({
   },
 });
 
-const PanelFooter = ({ classes, children, align, hasLine, ...props }) => {
+const PanelFooter = ({ classes, children, align = 'between', hasLine = true, ...props }) => {
   const justifyContent = ALIGN_MAP[align];
   return (
     <div
@@ -40,11 +40,6 @@ const PanelFooter = ({ classes, children, align, hasLine, ...props }) => {
 
 PanelFooter.propTypes = {
   align: propTypes.oneOf(['between', 'center', 'left', 'right']),
-};
-
-PanelFooter.defaultProps = {
-  align: 'between',
-  hasLine: true,
 };
 
 export default withStyles(styles)(PanelFooter);

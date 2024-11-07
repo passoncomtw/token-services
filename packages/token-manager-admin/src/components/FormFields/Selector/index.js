@@ -29,13 +29,18 @@ const StyledMenuItem = styled(MenuItem)`
   font-size: ${inputFontSize};
 `;
 
-const Selector = ({ items, onChange, ...props }) => {
+const Selector = ({
+  items = [],
+  onChange = () => false,
+  defaultValue = '',
+  ...props
+}) => {
   const handleOnChange = ({ target: { name, value } }) => {
     onChange({ name, value });
   };
 
   return (
-    <StyledSelect variant='outlined' onChange={handleOnChange} {...props}>
+    <StyledSelect variant="outlined" onChange={handleOnChange} defaultValue={defaultValue} {...props}>
       {items.map((item, index) => {
         return (
           <StyledMenuItem value={item.value} key={`${item.value}-${index}`}>
@@ -56,12 +61,6 @@ Selector.propTypes = {
       text: propTypes.string,
     })
   ),
-};
-
-Selector.defaultProps = {
-  items: [],
-  defaultValue: '',
-  onChange: () => {},
 };
 
 export default Selector;

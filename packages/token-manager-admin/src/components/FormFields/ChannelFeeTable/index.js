@@ -19,32 +19,39 @@ const handleCreate = (rows, onValueChange) => () => {
   onValueChange([...rows, defaultRowData]);
 };
 
-const handleDelete = (rows, onValueChange) => deleteIndex => {
+const handleDelete = (rows, onValueChange) => (deleteIndex) => {
   const filteredRows = rows.filter((_, index) => index !== deleteIndex);
   onValueChange(filteredRows);
 };
-const handleRowChange = (rows, onValueChange) => changedIndex => ({
-  name,
-  value,
-}) => {
-  const result = rows.map((row, index) => {
-    return index === changedIndex ? { ...row, [name]: value } : row;
-  });
-  onValueChange(result);
-};
+const handleRowChange =
+  (rows, onValueChange) =>
+  (changedIndex) =>
+  ({ name, value }) => {
+    const result = rows.map((row, index) => {
+      return index === changedIndex ? { ...row, [name]: value } : row;
+    });
+    onValueChange(result);
+  };
 
-const ChannelFeeTable = ({ name, hide, rows, typeText, onChange, errors }) => {
+const ChannelFeeTable = ({
+  rows = [],
+  name = 'steps',
+  typeText = '',
+  hide = false,
+  errors = {},
+  onChange,
+}) => {
   if (hide) return <Fragment />;
 
   const headers = [`${typeText}金额`, ' ', '手续费率', '操作'];
-  const onValueChange = value => onChange({ name, value });
+  const onValueChange = (value) => onChange({ name, value });
   const onCreate = handleCreate(rows, onValueChange);
   const onDelete = handleDelete(rows, onValueChange);
   const onRowChange = handleRowChange(rows, onValueChange);
 
   return (
     <Grid item xs={12} md={12} lg={12}>
-      <BasicTable className='dialog-table'>
+      <BasicTable className="dialog-table">
         <TableHead headers={headers} />
         <TableBody>
           {rows.map((row, index) => (
@@ -62,7 +69,7 @@ const ChannelFeeTable = ({ name, hide, rows, typeText, onChange, errors }) => {
         </TableBody>
       </BasicTable>
       <Box pt={2}>
-        <Button text='新增' onClick={onCreate} startIcon={<AddIcon />} />
+        <Button text="新增" onClick={onCreate} startIcon={<AddIcon />} />
       </Box>
     </Grid>
   );
@@ -76,13 +83,6 @@ ChannelFeeTable.propTypes = {
   rows: propTypes.array.isRequired,
   typeText: propTypes.string.isRequired,
   onChange: propTypes.func.isRequired,
-};
-
-ChannelFeeTable.defaultProps = {
-  typeText: '',
-  hide: false,
-  errors: {},
-  name: 'steps',
 };
 
 export default ChannelFeeTable;

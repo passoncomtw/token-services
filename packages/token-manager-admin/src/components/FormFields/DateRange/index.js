@@ -12,7 +12,7 @@ const InvalidDateMessage = () => {
   return <span style={{ position: 'absolute' }}></span>;
 };
 
-const styles = theme => ({
+const styles = (theme) => ({
   ...basicDatePickerProps(theme),
   separator: {
     color: theme.colors.greydark,
@@ -21,21 +21,27 @@ const styles = theme => ({
   },
 });
 
-const handleOnDateChange = (name, onChange) => date => {
+const handleOnDateChange = (name, onChange) => (date) => {
   const value = isDate(date) ? date : null;
   onChange({ name, value });
 };
 
-const DateRange = props => {
+const DateRange = (props) => {
   const {
-    title,
-    labelSize,
     classes,
-    onChange,
-    required,
-    textFormat,
-    endDateProps,
-    startDateProps,
+    title = '',
+    labelSize = 'md',
+    required = false,
+    textFormat = DATE_TIME_FORMAT,
+    endDateProps = {
+      name: 'endDate',
+      value: null,
+    },
+    startDateProps = {
+      name: 'startDate',
+      value: null,
+    },
+    onChange = () => {},
   } = props;
 
   const datePickerClasses = {
@@ -57,13 +63,13 @@ const DateRange = props => {
           strictCompareDates
           format={textFormat}
           value={startDateProps.value}
-          okLabel='确认'
-          cancelLabel='取消'
-          placeholder='请选择时间'
-          inputVariant='outlined'
+          okLabel="确认"
+          cancelLabel="取消"
+          placeholder="请选择时间"
+          inputVariant="outlined"
           invalidDateMessage={<InvalidDateMessage />}
           maxDate={endDateProps.value}
-          maxDateMessage='不可大于结束时间'
+          maxDateMessage="不可大于结束时间"
           classes={{
             root: classes.root,
           }}
@@ -73,9 +79,10 @@ const DateRange = props => {
           onChange={handleOnDateChange(startDateProps.name, onChange)}
         />
         <Typography
-          component='span'
-          display='inline'
-          className={classes.separator}>
+          component="span"
+          display="inline"
+          className={classes.separator}
+        >
           ~
         </Typography>
         <DateTimePicker
@@ -83,14 +90,14 @@ const DateRange = props => {
           strictCompareDates
           value={endDateProps.value}
           format={textFormat}
-          okLabel='确认'
-          cancelLabel='取消'
-          placeholder='请选择时间'
-          inputVariant='outlined'
+          okLabel="确认"
+          cancelLabel="取消"
+          placeholder="请选择时间"
+          inputVariant="outlined"
           invalidDateMessage={<InvalidDateMessage />}
           minDate={startDateProps.value}
-          minDateMessage='不可小于开始时间'
-          maxDate='9999-12-31'
+          minDateMessage="不可小于开始时间"
+          maxDate="9999-12-31"
           classes={{
             root: classes.root,
           }}
@@ -124,22 +131,6 @@ DateRange.propTypes = {
       propTypes.instanceOf(Date),
     ]),
   }),
-};
-
-DateRange.defaultProps = {
-  title: '',
-  required: false,
-  textFormat: DATE_TIME_FORMAT,
-  labelSize: 'md',
-  endDateProps: {
-    name: 'endDate',
-    value: null,
-  },
-  startDateProps: {
-    name: 'startDate',
-    value: null,
-  },
-  onChange: () => {},
 };
 
 export default withStyles(styles)(DateRange);

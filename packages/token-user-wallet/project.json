@@ -1,0 +1,9 @@
+{
+  "name": "token-user-wallet",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "packages/token-user-wallet/src",
+  "projectType": "application",
+  "tags": [],
+  "// targets": "to see all targets run: nx show project token-user-wallet --web",
+  "targets": {}
+}

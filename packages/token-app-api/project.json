@@ -1,0 +1,26 @@
+{
+  "name": "token-app-api",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "packages/token-app-api",
+  "projectType": "application",
+  "tags": [],
+  "targets": {
+    "serve": {
+      "executor": "@nx/js:node",
+      "defaultConfiguration": "development",
+      "dependsOn": ["build"],
+      "options": {
+        "buildTarget": "token-app-api:build",
+        "runBuildTargetDependencies": false
+      },
+      "configurations": {
+        "development": {
+          "buildTarget": "token-app-api:build:development"
+        },
+        "production": {
+          "buildTarget": "token-app-api:build:production"
+        }
+      }
+    }
+  }
+}

@@ -7,7 +7,7 @@ const styles = theme => ({
     ...theme.font.h4,
   },
 });
-const Link = ({ hide, children, color, ...props }) => {
+const Link = ({ hide = false, children, color, ...props }) => {
   return hide ? null : (
     <BaseLink
       type='Link'
@@ -22,10 +22,6 @@ const Link = ({ hide, children, color, ...props }) => {
 
 Link.propTypes = {
   hide: propTypes.bool,
-};
-
-Link.defaultProps = {
-  hide: false,
 };
 
 export default withStyles(styles)(Link);

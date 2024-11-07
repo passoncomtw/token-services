@@ -1,7 +1,7 @@
 import { fork, all, takeLatest } from 'redux-saga/effects';
 import { basicAsyncActionTypes } from '~/constants/actionTypes';
 import types from '~/constants/actionTypes';
-import { toCamelStyle } from 'utils/format';
+import { toCamelStyle } from '~/utils/format';
 
 import * as Watchers from './watcher';
 import * as authSagas from './authSagas';

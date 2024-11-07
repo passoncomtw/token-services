@@ -7,13 +7,10 @@ import {
 } from '../middlewares/fetchingHandlerMiddleware';
 import { authTokenMiddleware } from '../middlewares/authTokenMiddleware';
 import { snackbarMiddleware } from '../middlewares/snackbarMiddleware';
-import { composeWithDevTools } from 'redux-devtools-extension';
 import { createStore, applyMiddleware, compose } from 'redux';
 
-const { NODE_ENV } = process.env;
-
 const composeEnhancers =
-  NODE_ENV === 'development' ? composeWithDevTools : compose;
+    window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;
 
 const configureStore = () => {
   const sagaMiddleware = createSagaMiddleware({});

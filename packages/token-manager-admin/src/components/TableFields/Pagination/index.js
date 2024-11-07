@@ -14,13 +14,19 @@ const PAGE_SIZE = [
   { text: '50 筆', value: 50 },
 ];
 
-const Pagination = props => {
-  const { size, page, totalCount, totalPageCount, onPageChange, onSizeChange } =
-    props;
+const Pagination = (props) => {
+  const {
+    page = 1,
+    size = 10,
+    totalCount = 0,
+    totalPageCount = 0,
+    onPageChange = () => false,
+    onSizeChange = () => false,
+  } = props;
 
   const isFirstPage = page <= 1;
   const isLastPage = page === totalPageCount;
-  const handleOnPageChange = page => () => {
+  const handleOnPageChange = (page) => () => {
     onPageChange(page);
   };
 
@@ -31,19 +37,19 @@ const Pagination = props => {
   return (
     <Box
       p={2}
-      display='flex'
-      flexDirection='row'
-      justifyContent='flex-end'
-      alignItems='center'
+      display="flex"
+      flexDirection="row"
+      justifyContent="flex-end"
+      alignItems="center"
     >
-      <Typography variant='h6' style={{ marginRight: 48 }}>
+      <Typography variant="h6" style={{ marginRight: 48 }}>
         共 {totalCount} 條 第 {page}/{totalPageCount} 頁
       </Typography>
-      <Typography variant='h6' style={{ marginRight: 4 }}>
+      <Typography variant="h6" style={{ marginRight: 4 }}>
         每頁筆數：
       </Typography>
       <Selector
-        name='size'
+        name="size"
         items={PAGE_SIZE}
         value={size}
         onChange={handleOnSizeChange}
@@ -73,13 +79,6 @@ Pagination.propTypes = {
   totalPageCount: propTypes.number,
   onPageChange: propTypes.func.isRequired,
   onSizeChange: propTypes.func.isRequired,
-};
-
-Pagination.defaultProps = {
-  page: 1,
-  size: 10,
-  totalCount: 0,
-  totalPageCount: 0,
 };
 
 export default Pagination;

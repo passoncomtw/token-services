@@ -58,12 +58,12 @@ const BankCell = ({ bank }) => {
 };
 
 const PendingTable = ({
-  isUser,
+  isUser = false,
   data,
-  handleCancelPendingOrder,
-  handleDeletePendingOrder,
-  handleOpenPendingOrder,
-  handleStopPendingOrder,
+  handleCancelPendingOrder = () => false,
+  handleDeletePendingOrder = () => false,
+  handleOpenPendingOrder = () => false,
+  handleStopPendingOrder = () => false,
 }) => {
   const [openDialogType, setOpenDialogType] = useState('');
   const [selectedId, setSelectedId] = useState('');
@@ -170,14 +170,6 @@ const PendingTable = ({
       </Table>
     </>
   );
-};
-
-PendingTable.defaultProps = {
-  isUser: false,
-  handleCancelPendingOrder: () => false,
-  handleDeletePendingOrder: () => false,
-  handleOpenPendingOrder: () => false,
-  handleStopPendingOrder: () => false,
 };
 
 export default PendingTable;

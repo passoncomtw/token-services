@@ -99,10 +99,10 @@ const getHeaders = () =>
   [DEFAULT_HEADERS[0], '帳號'].concat(DEFAULT_HEADERS.slice(1));
 
 const OrderTable = ({
-  isUser,
   data,
-  handleCancelOrder,
-  handleCompleteOrder,
+  isUser = false,
+  handleCancelOrder = () => false,
+  handleCompleteOrder = () => false,
 }) => {
   const [openDialogType, setOpenDialogType] = useState('');
   const [selectedId, setSelectedId] = useState('');
@@ -190,12 +190,6 @@ const OrderTable = ({
       </Table>
     </>
   );
-};
-
-OrderTable.defaultProps = {
-  isUser: false,
-  handleCancelOrder: () => false,
-  handleCompleteOrder: () => false,
 };
 
 export default OrderTable;

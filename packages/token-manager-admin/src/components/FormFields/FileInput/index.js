@@ -26,13 +26,13 @@ const styles = () => ({
 });
 
 const FileInput = ({
+  value = '',
+  buttonAlign = 'center',
+  accept = '.xlsx,image/*',
   name,
-  value,
   displayText,
   onChange,
-  buttonAlign,
   classes,
-  accept,
   ...props
 }) => {
   return (
@@ -72,12 +72,6 @@ FileInput.propTypes = {
   buttonAlign: propTypes.string,
   value: propTypes.string,
   accept: propTypes.string,
-};
-
-FileInput.defaultProps = {
-  buttonAlign: 'center',
-  value: '',
-  accept: '.xlsx,image/*',
 };
 
 export default withStyles(styles)(FileInput);

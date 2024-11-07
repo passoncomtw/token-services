@@ -33,7 +33,7 @@ const SearchContent = ({ children, onSearch, onReset, classes }) => {
 };
 
 const SearchPanel = props => {
-  const { children, onSearch, onReset, classes, withoutPanel } = props;
+  const { children, onSearch, onReset, classes, withoutPanel = false } = props;
 
   if (withoutPanel) {
     return (
@@ -58,10 +58,6 @@ SearchPanel.propTypes = {
   withoutPanel: propTypes.bool,
   onReset: propTypes.func.isRequired,
   onSearch: propTypes.func.isRequired,
-};
-
-SearchPanel.defaultProps = {
-  withoutPanel: false,
 };
 
 export default withStyles(styles)(SearchPanel);

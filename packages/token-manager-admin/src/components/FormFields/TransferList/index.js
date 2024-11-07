@@ -51,12 +51,12 @@ const styles = theme => ({
 const TransferList = ({
   classes,
   name,
-  title,
-  required,
-  allItems,
-  selectedItems,
-  errorMessage,
-  onChange,
+  title = '',
+  errorMessage = '',
+  required = false,
+  allItems = [],
+  selectedItems = [],
+  onChange = () => false,
 }) => {
   const [leftChecked, setLeftChecked] = useState([]);
   const [rightChecked, setRightChecked] = useState([]);
@@ -138,15 +138,6 @@ TransferList.propTypes = {
     })
   ),
   selectedItems: propTypes.arrayOf(propTypes.number),
-};
-
-TransferList.defaultProps = {
-  title: '',
-  errorMessage: '',
-  required: false,
-  allItems: [],
-  selectedIds: [],
-  selectedItems: [],
 };
 
 export default withStyles(styles)(TransferList);
