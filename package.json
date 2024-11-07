@@ -3,10 +3,10 @@
   "version": "0.1.1",
   "license": "MIT",
   "scripts": {
-    "release": "standard-version",
-    "release:minor": "standard-version --release-as minor",
-    "release:patch": "standard-version --release-as patch",
-    "release:major": "standard-version --release-as major"
+    "release": "npx standard-version",
+    "release:minor": "npx standard-version --release-as minor",
+    "release:patch": "npx standard-version --release-as patch",
+    "release:major": "npx standard-version --release-as major"
   },
   "private": true,
   "dependencies": {
