@@ -7,6 +7,10 @@ RUN ls ./
 
 COPY ./packages/token-app-api /app/packages/token-app-api
 COPY .env /app/
+COPY nx.json /app/
+COPY package.json /app/
+COPY yarn.lock /app/
+COPY node_modules /app/
 
 EXPOSE 3000
 
