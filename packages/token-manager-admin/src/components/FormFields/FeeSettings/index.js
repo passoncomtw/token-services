@@ -23,13 +23,13 @@ const DEFAULT_FEE = [
 const PercentFeeContent = props => {
   const {
     show,
-    errors,
     propsName,
-    feePercent,
-    maxFee,
-    minFee,
-    onBlur,
-    onChange,
+    errors = {},
+    maxFee = 0,
+    minFee = 0,
+    feePercent = 0,
+    onBlur = () => false,
+    onChange = () => false,
   } = props;
 
   if (!show) return <Fragment />;
@@ -186,20 +186,6 @@ FeeSettings.propTypes = {
   onBlur: propTypes.func,
   onChange: propTypes.func,
   transactionType: propTypes.number,
-};
-
-FeeSettings.defaultProps = {
-  channelStatus: 1,
-  feeType: 1,
-  feePercentage: 0,
-  feeRate: 0,
-  minFee: 0,
-  maxFee: 0,
-  steps: [],
-  errors: {},
-  onBlur: () => false,
-  onChange: () => false,
-  transactionType: 0,
 };
 
 export default FeeSettings;

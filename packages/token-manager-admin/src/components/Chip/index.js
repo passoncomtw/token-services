@@ -4,7 +4,7 @@ import { withStyles } from '@material-ui/core/styles';
 import { Box, Chip as BasicChip } from '@material-ui/core';
 import colors from '~/theme/colors';
 
-const styles = theme => ({
+const styles = (theme) => ({
   root: {
     display: 'inline-flex',
     flexWrap: 'wrap',
@@ -17,12 +17,18 @@ const styles = theme => ({
   },
 });
 
-const Chip = ({ classes, label, href, bgColor, ...props }) => {
+const Chip = ({
+  classes,
+  label = '',
+  href = '#',
+  bgColor = 'greylight',
+  ...props
+}) => {
   return (
     <Box className={classes.root}>
       <BasicChip
         clickable
-        component='a'
+        component="a"
         href={href}
         label={label}
         className={classes.chip}
@@ -40,12 +46,6 @@ Chip.defaultPropTypes = {
   label: propTypes.string,
   href: propTypes.string,
   bgColor: propTypes.string,
-};
-
-Chip.defaultProps = {
-  label: '',
-  href: '#',
-  bgColor: 'greylight',
 };
 
 export default withStyles(styles)(Chip);

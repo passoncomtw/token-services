@@ -71,14 +71,14 @@ const slidingStyles = {
 };
 
 const SlideVerify = ({
-  onVerifyPass,
-  onVerifyFaild,
-  puzzle,
-  puzzlePiece,
-  showRefresh,
-  refresh,
-  displayType,
-  slideTips,
+  puzzle = require('./images/puzzle.jpg'),
+  puzzlePiece = require('./images/puzzlePiece.png'),
+  showRefresh = false,
+  displayType = 'embedded',
+  slideTips = '向右滑動左側箭頭填充拼圖',
+  refresh = () => false,
+  onVerifyPass = () => false,
+  onVerifyFaild = () => false,
 }) => {
   const [offsetXAnim, setOffsetXAnim] = useState(new Animated.Value(0));
   const [slideStatus, setSlideStatus] = useState(slidingStyles.READY);
@@ -264,17 +264,6 @@ SlideVerify.propTypes = {
   onVerifyPass: PropTypes.func,
   onVerifyFaild: PropTypes.func,
   refresh: PropTypes.func,
-};
-
-SlideVerify.defaultProps = {
-  showRefresh: false,
-  displayType: 'embedded',
-  puzzle: require('./images/puzzle.jpg'),
-  puzzlePiece: require('./images/puzzlePiece.png'),
-  slideTips: '向右滑动左侧箭头填充拼图',
-  onVerifyPass: () => false,
-  onVerifyFaild: () => false,
-  refresh: () => false,
 };
 
 const styles = StyleSheet.create({

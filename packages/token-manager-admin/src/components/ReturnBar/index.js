@@ -12,7 +12,7 @@ const flexRow = {
   flexDirection: 'row',
 };
 
-const styles = theme => ({
+const styles = (theme) => ({
   root: {
     ...flexRow,
     justifyContent: 'space-between',
@@ -34,13 +34,19 @@ const styles = theme => ({
   },
 });
 
-const ReturnBar = ({ hide, title, onClick, classes, rightElement }) => {
+const ReturnBar = ({
+  classes,
+  title = '',
+  hide = false,
+  rightElement = null,
+  onClick = () => false,
+}) => {
   if (hide) return <Fragment />;
   return (
     <Box className={classes.root}>
       <Box className={classes.flexRowBlock}>
         <Box className={classes.backBtn} onClick={onClick}>
-          <IconButton color='secondary'>
+          <IconButton color="secondary">
             <KeyboardBackspaceIcon />
           </IconButton>
         </Box>
@@ -57,13 +63,6 @@ ReturnBar.propTypes = {
   hide: propTypes.bool,
   title: propTypes.string,
   onClick: propTypes.func,
-};
-
-ReturnBar.defaultProps = {
-  hide: false,
-  title: '',
-  rightElement: null,
-  onClick: () => false,
 };
 
 export default withStyles(styles)(ReturnBar);

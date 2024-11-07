@@ -16,23 +16,15 @@ class DialogBox extends PureComponent {
     confirmText: PropTypes.string,
   };
 
-  static defaultProps = {
-    descript: '發生錯誤請稍後再試',
-    type: 'confirm',
-    cancelText: '取消',
-    confirmText: '確認',
-    onCancel: () => false,
-  };
-
   render() {
     const {
       open,
-      descript,
-      onConfirm,
-      onCancel,
-      type,
-      cancelText,
-      confirmText,
+      descript = '發生錯誤請稍後再試',
+      type = 'confirm',
+      cancelText = '取消',
+      confirmText = '確認',
+      onConfirm = () => false,
+      onCancel = () => false,
     } = this.props;
 
     return (
@@ -40,7 +32,8 @@ class DialogBox extends PureComponent {
         visible={open}
         key={`modal-${type}-${descript}`}
         transparent
-        onRequestClose={() => false}>
+        onRequestClose={() => false}
+      >
         <View style={styles.loadingBox}>
           <View style={styles.dialogWrap}>
             <Content descript={descript} />
@@ -74,6 +67,5 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
 });
-
 
 export default DialogBox;

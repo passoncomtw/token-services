@@ -5,7 +5,7 @@ import ImageInfoContent from '~/components/ImageInfoContent';
 import colors from '~/theme/color';
 import imgEmptyPayment from '~/assets/images/imgEmptyPayment.png';
 
-const EmptyContent = ({ hide, onPress }) => {
+const EmptyContent = ({ hide = false, onPress = () => false }) => {
   if (hide) return null;
   return (
     <ImageInfoContent
@@ -21,11 +21,6 @@ const EmptyContent = ({ hide, onPress }) => {
 EmptyContent.propTypes = {
   hide: propTypes.bool,
   onPress: propTypes.func,
-};
-
-EmptyContent.defaultProps = {
-  hide: false,
-  onPress: () => false,
 };
 
 export default EmptyContent;

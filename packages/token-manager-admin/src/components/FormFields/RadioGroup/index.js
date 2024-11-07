@@ -24,14 +24,14 @@ const handleOnChange = onChange => ({ target: { name, value } }) => {
 const RadioGroup = props => {
   const {
     name,
-    hide,
-    items,
     title,
     required,
     classes,
     value,
-    onChange: propsOnChange,
     disabled,
+    hide = false,
+    items = [],
+    onChange: propsOnChange = () => false,
   } = props;
 
   if (hide) return <Fragment />;
@@ -73,12 +73,6 @@ RadioGroup.propTypes = {
     })
   ).isRequired,
   onChange: propTypes.func,
-};
-
-RadioGroup.defaultProps = {
-  items: [],
-  hide: false,
-  onChange: () => false,
 };
 
 export default withStyles(styles)(RadioGroup);

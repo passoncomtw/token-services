@@ -11,14 +11,15 @@ class Button extends React.PureComponent {
     ...Button.propTypes,
   };
 
-  static defaultProps = {
-    isVisible: true,
-    type: 'solid',
-  };
-
   render() {
-    const { isVisible, onPress, type, buttonStyle, titleStyle, ...props } =
-      this.props;
+    const {
+      type = 'solid',
+      isVisible = true,
+      buttonStyle = {},
+      titleStyle = {},
+      onPress = () => false,
+      ...props
+    } = this.props;
     if (!isVisible) return null;
     const styles = getStyles(type);
     return (

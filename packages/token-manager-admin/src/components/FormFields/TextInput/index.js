@@ -45,27 +45,27 @@ const UnitText = ({ text, ...props }) => {
 
 const TextInput = props => {
   const {
-    type,
     name,
-    labelSize,
-    hide,
-    title,
-    value,
-    onBlur,
     classes,
-    required,
-    disabled,
-    unitText,
-    onChange,
-    placeholder,
-    maxLength,
-    showErrorDetail,
-    errorMessage,
-    startAdornment,
-    endAdornment,
-    multiline,
-    rowsMin,
     inputProps,
+    placeholder,
+    endAdornment,
+    startAdornment,
+    showErrorDetail,
+    rowsMin = 3,
+    maxLength = 50,
+    title = '',
+    unitText = '',
+    type = 'text',
+    labelSize = 'md',
+    errorMessage = '',
+    value = null,
+    hide = false,
+    required = false,
+    disabled = false,
+    onBlur = () => false,
+    onChange = () => false,
+    multiline = false,
   } = props;
 
   const [text, setText] = useState('');
@@ -139,24 +139,6 @@ TextInput.propTypes = {
   startAdornment: propTypes.node,
   endAdornment: propTypes.node,
   onChange: propTypes.func.isRequired,
-};
-
-TextInput.defaultProps = {
-  value: null,
-  labelSize: 'md',
-  hide: false,
-  disabled: false,
-  unitText: '',
-  title: '',
-  type: 'text',
-  showErrorDetail: true,
-  errorMessage: '',
-  defaultValue: '',
-  maxLength: 50,
-  multiline: false,
-  rowsMin: 3,
-  onBlur: () => false,
-  onChange: () => false,
 };
 
 export default withStyles(styles)(TextInput);

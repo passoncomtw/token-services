@@ -3,19 +3,20 @@ import propTypes from 'prop-types';
 import { Checkbox as BasicCheckbox, withStyles } from '@material-ui/core';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 
-const styles = theme => ({
+const styles = (theme) => ({
   root: {
     color: theme.colors.grey,
   },
 });
 
-const CheckBox = ({ label, classes, ...props }) => {
+const CheckBox = ({ classes, label = '', checked = false, ...props }) => {
   return (
     <FormControlLabel
       control={
         <BasicCheckbox
-          color='secondary'
+          color="secondary"
           classes={{ root: classes.root }}
+          checked={checked}
           {...props}
         />
       }
@@ -28,12 +29,6 @@ CheckBox.propTypes = {
   label: propTypes.string,
   checked: propTypes.bool,
   onChange: propTypes.func,
-};
-
-CheckBox.defaultProps = {
-  label: '',
-  checked: false,
-  onChange: () => {},
 };
 
 export default withStyles(styles)(CheckBox);

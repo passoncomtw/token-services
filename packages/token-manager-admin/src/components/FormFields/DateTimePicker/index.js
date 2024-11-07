@@ -30,13 +30,13 @@ const handleOnChange = (name, onChange) => date => {
 
 const DateTimePicker = props => {
   const {
-    labelSize,
-    name,
-    value,
-    title,
     classes,
-    required,
-    textFormat,
+    name = '',
+    title = '',
+    labelSize = 'md',
+    value = null,
+    required = false,
+    textFormat = DATE_TIME_FORMAT,
     onChange: onChangeProp,
   } = props;
 
@@ -96,16 +96,6 @@ DateTimePicker.propTypes = {
     propTypes.oneOf([null]),
     propTypes.instanceOf(Date),
   ]),
-};
-
-DateTimePicker.defaultProps = {
-  name: '',
-  title: '',
-  labelSize: 'md',
-  value: null,
-  required: false,
-  textFormat: DATE_TIME_FORMAT,
-  onChange: () => false,
 };
 
 export default withStyles(styles)(DateTimePicker);

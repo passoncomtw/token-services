@@ -14,13 +14,14 @@ const styles = StyleSheet.create({
   },
 });
 
-const EmptyContent = ({ hide, ...props }) => {
+const EmptyContent = ({ hide = false, title='', ...props }) => {
   if (hide) return <Fragment />;
 
   return (
     <View style={styles.container}>
       <ImageInfoContent
         btnTitle='新增'
+        title={title}
         imageSource={imgEmptyPending}
         btnIcon={<Icon name='add' size={30} color={colors.secondary} />}
         {...props}
@@ -34,8 +35,4 @@ EmptyContent.propTypes = {
   title: propTypes.string,
 };
 
-EmptyContent.defaultProps = {
-  hide: false,
-  title: '',
-};
 export default EmptyContent;

@@ -4,7 +4,7 @@ import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { Icon } from 'react-native-elements';
 import themeSet from '~/theme';
 
-const SelectItem = ({ label, value, onPress, selected }) => {
+const SelectItem = ({ label = '', value = '', selected = false, onPress = () => false }) => {
   const styles = getStyle(themeSet, selected);
 
   return (
@@ -40,11 +40,6 @@ const getStyle = (theme) => {
 SelectItem.propTypes = {
   label: propTypes.string,
   selected: propTypes.bool,
-};
-
-SelectItem.defaultProps = {
-  label: '',
-  selected: false,
 };
 
 export default SelectItem;

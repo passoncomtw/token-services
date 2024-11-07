@@ -41,13 +41,13 @@ const styles = theme => ({
 });
 
 const SelectTextInput = ({
-  title,
-  items,
   classes,
-  required,
-  onChange,
-  selectProps,
-  keywordsProps,
+  title = '',
+  items = [],
+  required = false,
+  selectProps = {},
+  keywordsProps = {},
+  onChange = () => false,
 }) => {
   const handleOnChange = ({ target: { name, value } }) => {
     onChange({ name, value });
@@ -100,14 +100,6 @@ SelectTextInput.propTypes = {
   required: propTypes.bool,
   selectProps: propTypes.object,
   keywordsProps: propTypes.object,
-};
-
-SelectTextInput.defaultProps = {
-  title: '',
-  items: [],
-  required: false,
-  selectProps: {},
-  keywordsProps: {},
 };
 
 export default withStyles(styles)(SelectTextInput);

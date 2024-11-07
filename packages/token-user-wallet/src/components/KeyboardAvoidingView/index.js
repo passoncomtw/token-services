@@ -7,7 +7,7 @@ import {
   KeyboardAvoidingView as BasicKeyboardAvoidingView,
 } from 'react-native';
 
-const KeyboardAvoidingView = ({ children, offset }) => {
+const KeyboardAvoidingView = ({ children, offset = 64 }) => {
   return (
     <BasicKeyboardAvoidingView
       behavior={Platform.OS == 'ios' ? 'padding' : null}
@@ -21,10 +21,6 @@ const KeyboardAvoidingView = ({ children, offset }) => {
 
 KeyboardAvoidingView.propTypes = {
   offset: propTypes.number,
-};
-
-KeyboardAvoidingView.defaultProps = {
-  offset: 64,
 };
 
 export default KeyboardAvoidingView;

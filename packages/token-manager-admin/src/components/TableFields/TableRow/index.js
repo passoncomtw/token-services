@@ -45,16 +45,12 @@ const StyledTableRow = styled(BasicTableRow)`
   }
 `;
 
-const TableRow = ({ underline, ...props }) => {
+const TableRow = ({ underline = true, ...props }) => {
   return <StyledTableRow underline={underline.toString()} {...props} />;
 };
 
 TableRow.propTypes = {
   underline: propTypes.bool,
-};
-
-TableRow.defaultProps = {
-  underline: true,
 };
 
 export default TableRow;

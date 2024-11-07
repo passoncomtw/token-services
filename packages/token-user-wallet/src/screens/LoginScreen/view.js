@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import * as yup from 'yup';
-import { Text } from 'react-native-elements';
-import { View, StyleSheet, TouchableOpacity, Dimensions } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Dimensions } from 'react-native';
 import ConfirmButton from '~/components/Button/ConfirmButton';
 import ViewBox from '~/components/ViewBox';
 import PasswordInput from '~/components/Inputs/PasswordInput';
@@ -42,12 +41,6 @@ const LoginScreen = ({ showIntroScreen, handleLogin, ...props }) => {
 
   const onChange = handleOnChange({ setPayload });
 
-  // useEffect(() => {
-  //   if (showIntroScreen) {
-  //     showOverlay('Introduction');
-  //   }
-  // }, [showIntroScreen, showOverlay]);
-
   const onPressLogin = () => {
     const { isValid, errors } = validate(schema, payload);
 
@@ -55,11 +48,6 @@ const LoginScreen = ({ showIntroScreen, handleLogin, ...props }) => {
 
     if (isValid) {
       handleLogin(payload);
-      // push('VerifyView', {
-      //   passProps: {
-      //     onLogin: () => handleLogin(payload),
-      //   },
-      // });
     }
   };
 

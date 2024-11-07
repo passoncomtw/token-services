@@ -16,7 +16,7 @@ const FONT_COLOR_MAP = {
   clear: theme.colors.greylight,
 };
 
-const styles = theme => ({
+const styles = (theme) => ({
   root: {
     ...theme.font.h5,
     boxShadow: 'none',
@@ -26,17 +26,29 @@ const styles = theme => ({
   },
 });
 
-const Button = ({ hide, text, type, style, ...props }) => {
+const Button = (args) => {
+  const {
+    hide,
+    startIcon = null,
+    text = '',
+    type = 'primary',
+    style,
+    onClick = () => {},
+    ...props
+  } = args;
   return hide ? null : (
     <BaseButton
-      type='button'
-      variant='contained'
+      type="button"
+      variant="contained"
       style={{
         backgroundColor: BACKGROUND_COLOR_MAP[type],
         color: FONT_COLOR_MAP[type],
         ...style,
       }}
-      {...props}>
+      startIcon={startIcon}
+      onClick={onClick}
+      {...props}
+    >
       {text}
     </BaseButton>
   );
@@ -45,13 +57,6 @@ const Button = ({ hide, text, type, style, ...props }) => {
 Button.propTypes = {
   onClick: propTypes.func,
   type: propTypes.oneOf(['primary', 'secondary', 'light', 'clear']),
-};
-
-Button.defaultProps = {
-  text: '',
-  type: 'primary',
-  startIcon: null,
-  onClick: () => {},
 };
 
 export default withStyles(styles)(Button);

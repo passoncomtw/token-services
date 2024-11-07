@@ -7,14 +7,14 @@ import themeSet from '~/theme';
 import ConfirmButton from '~/components/Button/ConfirmButton';
 
 const ImageInfoContent = ({
-  title,
-  imageSource,
-  hint,
-  smallHint,
-  onPress,
-  btnTitle,
-  btnIcon,
-  btnType,
+  title = '',
+  btnTitle = '',
+  btnType = 'primary',
+  btnIcon = null,
+  imageSource = null,
+  hint = [],
+  smallHint = [],
+  onPress = () => false,
 }) => {
   const styles = getStyle(themeSet);
 
@@ -56,17 +56,6 @@ ImageInfoContent.propTypes = {
   hint: propTypes.arrayOf(propTypes.string),
   smallHint: propTypes.arrayOf(propTypes.string),
   onPress: propTypes.oneOfType([propTypes.object, propTypes.func]),
-};
-
-ImageInfoContent.defaultProps = {
-  title: '',
-  imageSource: null,
-  hint: [],
-  smallHint: [],
-  onPress: null,
-  btnTitle: '',
-  btnIcon: null,
-  btnType: 'primary',
 };
 
 const getStyle = (theme) =>

@@ -7,14 +7,15 @@ import { StyleSheet } from 'react-native';
 import theme from '~/theme';
 import { TouchableWithoutFeedback } from 'react-native';
 
-const CollapseBox = ({ title, children, ...props }) => {
+const CollapseBox = ({ title = '', children, ...props }) => {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const styles = getStyle(theme, props);
 
   return (
     <View style={styles.root}>
       <TouchableWithoutFeedback
-        onPress={() => setIsCollapsed((state) => !state)}>
+        onPress={() => setIsCollapsed((state) => !state)}
+      >
         <View style={styles.content}>
           <Text style={styles.title}>{title}</Text>
           <Icon name={isCollapsed ? 'expand-more' : 'expand-less'} size={25} />
@@ -49,12 +50,6 @@ const getStyle = (theme, props) =>
 
 CollapseBox.propTypes = {
   title: propTypes.string,
-  offsetHeight: propTypes.number,
-};
-
-CollapseBox.defaultProps = {
-  title: '',
-  offsetHeight: 0,
 };
 
 export default CollapseBox;

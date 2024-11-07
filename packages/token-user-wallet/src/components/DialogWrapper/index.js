@@ -5,23 +5,13 @@ import { View, StyleSheet } from 'react-native';
 import Button from '../Button';
 
 const DialogWrapper = ({
-  type,
   children,
-  onConfirm,
-  onCancel,
-  cancelText,
-  confirmText,
-}) => {
-  
-  const handleOnConfirm = () => {
-    // if (!isFunction(onConfirm)) return dismiss();
-
-    // if (!autoDismiss) return onConfirm(dismiss);
-
-    onConfirm();
-    // dismiss();
-  };
-
+  type = 'confirm',
+  onConfirm = () => false,
+  onCancel = () => false,
+  cancelText = '取消',
+  confirmText = '確認',
+}) => {  
   const handleOnCancel = () => {
     if (isFunction(onCancel)) onCancel();
     // dismiss();
@@ -41,7 +31,7 @@ const DialogWrapper = ({
             title={cancelText}
             onPress={handleOnCancel}
           />
-          <Button type='clear' title={confirmText} onPress={handleOnConfirm} />
+          <Button type='clear' title={confirmText} onPress={onConfirm} />
         </View>
       </View>
     </View>
@@ -54,16 +44,6 @@ DialogWrapper.propTypes = {
   onCancel: propTypes.func,
   confirmText: propTypes.string,
   cancelText: propTypes.string,
-  autoDismiss: propTypes.bool,
-};
-
-DialogWrapper.defaultProps = {
-  type: 'confirm',
-  autoDismiss: true,
-  onConfirm: () => false,
-  onCancel: () => false,
-  confirmText: '确认',
-  cancelText: '取消',
 };
 
 const styles = StyleSheet.create({

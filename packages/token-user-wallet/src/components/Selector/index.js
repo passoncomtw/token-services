@@ -8,11 +8,12 @@ import theme from '~/theme';
 import spacing from '~/theme/spacing';
 
 const Selector = ({
-  label,
-  hint,
-  errorMessage,
-  containerStyle,
-  disabled,
+  label = '',
+  errorMessage = '',
+  hint = null,
+  containerStyle = {},
+  disabled = false,
+  placeholder = { label: '請選擇...', value: null },
   ...props
 }) => {
   const hasError = !isEmpty(errorMessage);
@@ -116,12 +117,6 @@ const styles = StyleSheet.create({
 
 Selector.propTypes = {
   ...RNPickerSelect.propTypes,
-};
-
-Selector.defaultProps = {
-  placeholder: { label: '请选择...', value: null },
-  containerStyle: {},
-  hint: null,
 };
 
 export default Selector;

@@ -15,7 +15,7 @@ const TextInputField = ({
   inputStyle,
   leftIconContainerStyle,
   hidden,
-  maxLength,
+  maxLength = 30,
   placeholderTextColor,
   ...props
 }) => {
@@ -103,11 +103,6 @@ TextInputField.propTypes = {
   iconName: propTypes.string,
   hint: propTypes.arrayOf(propTypes.string),
   ...Input.propTypes,
-};
-
-TextInputField.defaultProps = {
-  maxLength: 30,
-  hint: [],
 };
 
 export default TextInputField;

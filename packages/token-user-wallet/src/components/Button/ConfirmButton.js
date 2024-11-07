@@ -15,7 +15,12 @@ const FONT_COLOR_MAP = {
   light: theme.colors.secondary,
 };
 
-const ConfirmButton = ({ onPress, containerStyle, type, ...props }) => {
+const ConfirmButton = ({
+  type = 'primary',
+  containerStyle = {},
+  onPress = () => false,
+  ...props
+}) => {
   const styles = StyleSheet.create({
     containerStyle: {
       width: '100%',
@@ -45,15 +50,9 @@ const ConfirmButton = ({ onPress, containerStyle, type, ...props }) => {
 };
 
 ConfirmButton.propTypes = {
-  onPress: propTypes.func.isRequired,
+  onPress: propTypes.func,
   containerStyle: propTypes.object,
   type: propTypes.oneOf(['primary', 'secondary', 'light']),
-};
-
-ConfirmButton.defaultProps = {
-  type: 'primary',
-  containerStyle: {},
-  onPress: () => false,
 };
 
 export default ConfirmButton;

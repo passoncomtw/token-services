@@ -9,15 +9,15 @@ import DialogWrapper from '../DialogWrapper';
 import { validate } from '~/utils/yupCheck';
 
 const InputDialog = ({
-  componentId,
-  type,
   label,
-  placeholder,
-  onConfirm,
   schema,
-  onCancel,
-  cancelText,
-  confirmText,
+  placeholder,
+  componentId,
+  type = 'confirm',
+  cancelText = '取消',
+  confirmText = '確認',
+  onCancel = () => false,
+  onConfirm = () => false,
 }) => {
   const [value, setValue] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
@@ -62,20 +62,10 @@ const InputDialog = ({
 
 InputDialog.propTypes = {
   type: propTypes.string,
-  message: propTypes.string,
   onConfirm: propTypes.func,
   onCancel: propTypes.func,
   confirmText: propTypes.string,
   cancelText: propTypes.string,
-};
-
-InputDialog.defaultProps = {
-  type: 'confirm',
-  message: '',
-  onConfirm: () => false,
-  onCancel: () => false,
-  confirmText: '确认',
-  cancelText: '取消',
 };
 
 const styles = StyleSheet.create({

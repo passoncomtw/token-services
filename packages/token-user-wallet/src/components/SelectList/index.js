@@ -4,7 +4,11 @@ import { View, StyleSheet } from 'react-native';
 import SelectItem from './components/SelectItem';
 import themeSet from '~/theme';
 
-const SelectList = ({ items, value, onPress, ...props }) => {
+const SelectList = ({
+  value,
+  items = [],
+  onPress = () => false,
+}) => {
   const styles = getStyle(themeSet);
 
   return (
@@ -39,10 +43,6 @@ SelectList.propTypes = {
       value: propTypes.string,
     })
   ),
-};
-
-SelectList.defaultProps = {
-  items: [],
 };
 
 export default SelectList;

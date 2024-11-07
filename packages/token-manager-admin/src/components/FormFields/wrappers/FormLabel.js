@@ -39,7 +39,7 @@ const styles = theme => ({
   },
 });
 
-const FormLabel = ({ classes, required, hide, size, ...props }) => {
+const FormLabel = ({ classes, required, hide, size = 'md', ...props }) => {
   if (hide) return null;
   const labelClass = classnames({
     [classes.label]: true,
@@ -54,10 +54,6 @@ const FormLabel = ({ classes, required, hide, size, ...props }) => {
 };
 FormLabel.propTypes = {
   size: propTypes.oneOf(['sm', 'md', 'lg']),
-};
-
-FormLabel.defaultProps = {
-  size: 'md',
 };
 
 export default withStyles(styles)(FormLabel);

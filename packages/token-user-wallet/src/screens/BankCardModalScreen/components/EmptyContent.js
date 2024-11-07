@@ -5,11 +5,12 @@ import ImageInfoContent from '~/components/ImageInfoContent';
 import colors from '~/theme/color';
 import imgEmptyPayment from '~/assets/images/imgEmptyPayment.png';
 
-const EmptyContent = ({ hide, onPress }) => {
+const EmptyContent = ({ hide = false, onPress = () => false }) => {
   if (hide) return null;
+
   return (
     <ImageInfoContent
-      hint={['您还没有收付款账户']}
+      hint={['您還沒有收付款賬户']}
       btnTitle='新增'
       imageSource={imgEmptyPayment}
       onPress={onPress}
@@ -21,11 +22,6 @@ const EmptyContent = ({ hide, onPress }) => {
 EmptyContent.propTypes = {
   hide: propTypes.bool,
   onPress: propTypes.func,
-};
-
-EmptyContent.defaultProps = {
-  hide: false,
-  onPress: () => false,
 };
 
 export default EmptyContent;

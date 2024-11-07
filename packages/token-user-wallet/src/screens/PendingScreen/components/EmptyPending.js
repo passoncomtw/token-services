@@ -5,7 +5,7 @@ import ImageInfoContent from '~/components/ImageInfoContent';
 import imgEmptyPending from '~/assets/images/pending/imgEmptyPending.png';
 import colors from '~/theme/color';
 
-const EmptyPending = ({ hide, onPress }) => {
+const EmptyPending = ({ hide = false, onPress = () => false }) => {
   if (hide) return <Fragment />;
 
   return (
@@ -21,10 +21,6 @@ const EmptyPending = ({ hide, onPress }) => {
       btnIcon={<Icon name='add' size={30} color={colors.secondary} />}
     />
   );
-};
-
-EmptyPending.defaultProps = {
-  hide: false,
 };
 
 EmptyPending.propTypes = {

@@ -4,10 +4,10 @@ import { View, StyleSheet } from 'react-native';
 import colors from '~/theme/color';
 
 const ViewBox = ({
-  isVisible,
   children,
-  flex,
-  fill,
+  isVisible = true,
+  flex = false,
+  fill = false,
   containerStyle,
   ...props
 }) => {
@@ -31,12 +31,6 @@ ViewBox.propTypes = {
   isVisible: propTypes.bool,
   flex: propTypes.bool,
   fill: propTypes.bool,
-};
-
-ViewBox.defaultProps = {
-  isVisible: true,
-  flex: false,
-  fill: false,
 };
 
 const styles = StyleSheet.create({

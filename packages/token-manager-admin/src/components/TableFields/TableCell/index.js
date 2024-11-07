@@ -13,12 +13,20 @@ const StyledTableCell = styled(BasicTableCell)`
   padding-left: 0;
   ${theme.font.h5}
   color: ${theme.colors.greydark};
-  ${props => (props.amount === 'true' ? amountCellStyle : '')}
-  ${props => (props.account === 'true' ? accountCellStyle : '')}
-  ${props => (props.operator === 'true' ? operatorCellStyle : '')}
+  ${(props) => (props.amount === 'true' ? amountCellStyle : '')}
+  ${(props) => (props.account === 'true' ? accountCellStyle : '')}
+  ${(props) => (props.operator === 'true' ? operatorCellStyle : '')}
 `;
 
-const TableCell = ({ amount, hide, account, operator, children, ...props }) => {
+const TableCell = ({
+  amount = 0,
+  hide = false,
+  account = false,
+  operator = false,
+  children = '-',
+  align = 'center',
+  ...props
+}) => {
   if (hide) return <Fragment />;
 
   return (
@@ -26,7 +34,8 @@ const TableCell = ({ amount, hide, account, operator, children, ...props }) => {
       amount={amount.toString()}
       account={account.toString()}
       operator={operator.toString()}
-      children={children || '-'}
+      children={children}
+      align={align}
       {...props}
     />
   );
@@ -38,14 +47,6 @@ TableCell.propTypes = {
   amount: propTypes.bool,
   account: propTypes.bool,
   operator: propTypes.bool,
-};
-
-TableCell.defaultProps = {
-  hide: false,
-  align: 'center',
-  amount: false,
-  account: false,
-  operator: false,
 };
 
 export default TableCell;

@@ -31,7 +31,7 @@ const styles = theme => ({
   },
 });
 
-const ValidErrorMessage = ({ classes, noLabel, errorMessage }) => {
+const ValidErrorMessage = ({ classes = {}, errorMessage = '', noLabel }) => {
   const show = !isEmpty(errorMessage);
 
   return (
@@ -48,11 +48,6 @@ const ValidErrorMessage = ({ classes, noLabel, errorMessage }) => {
 ValidErrorMessage.propTypes = {
   classes: propTypes.object,
   errorMessage: propTypes.string,
-};
-
-ValidErrorMessage.defaultProps = {
-  classes: {},
-  errorMessage: '',
 };
 
 export default withStyles(styles)(ValidErrorMessage);

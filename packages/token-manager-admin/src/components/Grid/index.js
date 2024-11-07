@@ -1,7 +1,14 @@
 import React from 'react';
 import { Grid as BasicGrid } from '@material-ui/core';
 
-const Grid = ({ container, sixth, quarter, third, even, ...props }) => {
+const Grid = ({
+  container = null,
+  sixth = null,
+  quarter = null,
+  third = null,
+  even = null,
+  ...props
+}) => {
   if (container) {
     return <BasicGrid container spacing={2} {...props} />;
   }
@@ -26,11 +33,3 @@ const Grid = ({ container, sixth, quarter, third, even, ...props }) => {
 };
 
 export default Grid;
-
-Grid.defaultProps = {
-  container: null,
-  third: null,
-  sixth: null,
-  quarter: null,
-  even: null,
-};

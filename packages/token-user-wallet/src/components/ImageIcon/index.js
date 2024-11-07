@@ -2,7 +2,7 @@ import React from 'react';
 import propTypes from 'prop-types';
 import { Image } from 'react-native';
 
-const ImageIcon = ({ source, size, style }) => {
+const ImageIcon = ({ source, style = {}, size = 16 }) => {
   const styleProps = {
     ...style,
     width: size,
@@ -14,10 +14,6 @@ const ImageIcon = ({ source, size, style }) => {
 
 ImageIcon.propTypes = {
   size: propTypes.number,
-};
-
-ImageIcon.defaultProps = {
-  size: 16,
 };
 
 export default ImageIcon;

@@ -2,16 +2,22 @@ import React, { Fragment } from 'react';
 import propTypes from 'prop-types';
 import { Box, Typography } from '@material-ui/core';
 
-const HeaderBar = ({ hide, variant, title, rightElement }) => {
+const HeaderBar = ({
+  hide,
+  variant = 'h1',
+  title = '',
+  rightElement = null,
+}) => {
   if (hide) return <Fragment />;
 
   return (
     <Box
-      display='flex'
-      flexDirection='row'
-      justifyContent='space-between'
-      alignItems='center'>
-      <Typography variant={variant} color='secondary'>
+      display="flex"
+      flexDirection="row"
+      justifyContent="space-between"
+      alignItems="center"
+    >
+      <Typography variant={variant} color="secondary">
         {title}
       </Typography>
       {rightElement}
@@ -32,12 +38,6 @@ HeaderBar.propTypes = {
     'body1',
     'body2',
   ]),
-};
-
-HeaderBar.defaultProps = {
-  title: '',
-  variant: 'h1',
-  rightElement: null,
 };
 
 export default HeaderBar;

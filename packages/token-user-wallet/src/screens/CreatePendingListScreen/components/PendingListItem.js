@@ -7,7 +7,13 @@ import Text from '~/components/Text';
 import ImageIcon from '~/components/ImageIcon';
 import theme from '~/theme';
 
-const PendingListItem = ({ isVisible, title, icon, action, disabled }) => {
+const PendingListItem = ({
+  icon,
+  title = '-',
+  disabled = false,
+  isVisible = true,
+  action = () => false,
+}) => {
   if (!isVisible) return null;
 
   const titleColor = disabled ? 'greyLight' : 'secondary';
@@ -46,13 +52,6 @@ PendingListItem.propTypes = {
   isVisible: propTypes.bool,
   title: propTypes.string,
   disabled: propTypes.bool,
-};
-
-PendingListItem.defaultProps = {
-  isVisible: true,
-  title: '-',
-  action: () => false,
-  disabled: false,
 };
 
 const styles = StyleSheet.create({

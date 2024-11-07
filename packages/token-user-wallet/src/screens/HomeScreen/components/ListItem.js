@@ -8,11 +8,11 @@ import spacing from '~/theme/spacing';
 import Text from '~/components/Text';
 
 const ListItem = ({
-  isVisible,
-  icon,
-  title,
-  onPress,
-  rightTitle,
+  icon = null,
+  isVisible = true,
+  title = '',
+  rightTitle = '',
+  onPress = () => false,
   ...props
 }) => {
   if (!isVisible) return null;
@@ -47,14 +47,6 @@ export default preventDoubleClickHOC(ListItem);
 ListItem.propTypes = {
   isVisible: propTypes.bool,
   onPress: propTypes.func,
-};
-
-ListItem.defaultProps = {
-  isVisible: true,
-  title: '',
-  rightTitle: '',
-  icon: null,
-  onPress: () => false,
 };
 
 const styles = StyleSheet.create({

@@ -33,13 +33,14 @@ const styles = theme => ({
 const SelectInput = ({
   classes,
   required,
-  hide,
+  hide = false,
+  disabled = false,
   title = '',
+  errorMessage = '',
   items = [],
   labelProps = {},
-  onChange,
-  defaultItem,
-  errorMessage,
+  defaultItem = {},
+  onChange = () => null,
   ...props
 }) => {
   if (hide) return null;
@@ -67,6 +68,8 @@ const SelectInput = ({
             onChange={handleOnChange}
             className={selectClass}
             disableUnderline={true}
+            disabled={disabled}
+            value={value}
             {...props}>
             {mergedItems !== null &&
               mergedItems.map((data, index) => (
@@ -108,14 +111,4 @@ SelectInput.propTypes = {
   onChange: propTypes.func.isRequired,
 };
 
-SelectInput.defaultProps = {
-  value: '',
-  hide: false,
-  disabled: false,
-  title: '',
-  items: [],
-  defaultItem: {},
-  errorMessage: '',
-  onChange: () => null,
-};
 export default withStyles(styles)(SelectInput);

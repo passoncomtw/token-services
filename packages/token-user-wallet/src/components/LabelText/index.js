@@ -28,12 +28,11 @@ const CopyButton = ({ showCopy, styles, content }) => {
 };
 
 const LabelText = ({
-  label,
-  text,
-  labelStyle,
-  textStyle,
-  showCopy,
-  ...props
+  label = '',
+  text = '',
+  showCopy = false,
+  labelStyle = {},
+  textStyle = {},
 }) => {
   const styles = getStyles(theme, showCopy);
 
@@ -57,14 +56,6 @@ LabelText.propTypes = {
   labelStyle: propTypes.shape(),
   textStyle: propTypes.shape(),
   showCopy: propTypes.bool,
-};
-
-LabelText.defaultProps = {
-  label: '',
-  text: '',
-  labelStyle: {},
-  textStyle: {},
-  showCopy: false,
 };
 
 const getStyles = (theme, showCopy) => {

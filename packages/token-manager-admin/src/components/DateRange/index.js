@@ -18,12 +18,6 @@ class DateRange extends React.Component {
     onDateChange: propTypes.func,
   };
 
-  static defaultProps = {
-    startDate: null,
-    endDate: null,
-    onDateChange: state => state,
-  };
-
   constructor(props) {
     super(props);
     this.state = {
