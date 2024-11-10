@@ -23,10 +23,6 @@ jobs:
     steps:
     - uses: actions/checkout@v3
     # Copy docker-compose and .env files to target server
-    - name: show files
-      run: |
-        pwd
-        ls
     - name: copy files to target server via scp
       uses: appleboy/scp-action@v0.1.3
       with:
