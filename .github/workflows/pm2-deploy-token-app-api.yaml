@@ -9,6 +9,7 @@ on:
     paths:
     - 'packages/token-app-api/**'
     - '.github/workflows/pm2-deploy-token-app-api.yaml'
+    - '.github/actions/pm2-run-deploy/*'
 
 env:
   REGISTRY: ghcr.io
