@@ -1,0 +1,43 @@
+name: deploy-token-app-api-production
+
+on:
+  pull_request:
+    # types: 
+    # - closed
+    branches:
+    - develop
+    paths:
+    - 'packages/token-app-api/**'
+    - '.github/workflows/pm2-deploy-token-app-api.yaml'
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: token-app-api
+  DOCKER_HUB_WORKSPACE: passon
+  SERVER_WORK_DIRECTORY: token-services
+
+jobs:
+  do-deployment:
+    # if: github.event.pull_request.merged == true
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    # Copy docker-compose and .env files to target server
+    - name: copy files to target server via scp
+      uses: appleboy/scp-action@v0.1.3
+      with:
+        host: ${{ secrets.DEV_HOST }}
+        username: root
+        port: 22
+        key: ${{ secrets.SSH_KEY_DEV_VALUE }}
+        source: "./*"
+        target: "/opt/services//${{ env.SERVER_WORK_DIRECTORY }}/"
+        strip_components: 3
+    # - name: Deploy newest code to production machine
+    #   uses: ./.github/actions/run-deploy
+    #   with:
+    #     folder-name: ${{ env.SERVER_WORK_DIRECTORY }}/${{ env.IMAGE_NAME }}/
+    #     branch-name: main
+    #     module-name: ${{ env.IMAGE_NAME }}
+    #     host-name: ${{ secrets.DEV_HOST }}
+    #     ssh-key: ${{ secrets.SSH_KEY_DEV_VALUE }}

@@ -5,7 +5,7 @@ on:
     types: 
     - closed
     branches:
-    - main
+    - ci_pause # 暫停使用
     paths:
     - 'packages/token-app-api/**'
     - '.github/workflows/build-and-deploy-token-app-api.yml'
