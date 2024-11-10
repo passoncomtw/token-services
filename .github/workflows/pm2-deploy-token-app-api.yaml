@@ -43,10 +43,10 @@ jobs:
         port: 22
         key: ${{ secrets.SSH_KEY_DEV_VALUE }}
         script: |
-          source ~/.bashrc
+          source /root/.bashrc
           node --version
-          npm install -g yarn pm2
-          npm add --global nx@latest
-          yarn install
-          nx build ${{ inputs.module-name }}
-          pm2 start ./deploy/{{ inputs.module-name }}/ecosystem.config.js
+          # npm install -g yarn pm2
+          # npm add --global nx@latest
+          # yarn install
+          # nx build ${{ inputs.module-name }}
+          # pm2 start ./deploy/{{ inputs.module-name }}/ecosystem.config.js
