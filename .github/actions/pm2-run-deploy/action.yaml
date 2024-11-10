@@ -22,7 +22,7 @@ runs:
   using: "composite"
   steps:
     - name: Pulling newest code and restart pm2 app
-      uses: fifsky/ssh-action@master
+      uses: appleboy/ssh-action@v1.1.0
       with:
         command: |
           source ~/.bashrc
