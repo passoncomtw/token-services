@@ -68,7 +68,7 @@ jobs:
         target: "~/${{ env.SERVER_WORK_DIRECTORY }}/${{ env.IMAGE_NAME }}/"
         strip_components: 3
     - name: Deploy newest code to production machine
-      uses: ./.github/actions/run-deploy
+      uses: ./.github/actions/docker-run-deploy
       with:
         folder-name: ${{ env.SERVER_WORK_DIRECTORY }}/${{ env.IMAGE_NAME }}/
         branch-name: main
