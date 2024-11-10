@@ -34,4 +34,4 @@ runs:
           pm2 start ./deploy/{{ inputs.module-name }}/ecosystem.config.js
         host: ${{ inputs.host-name }}
         user: root
-        key: ${{ inputs.ssh-key }}
+        passphrase: ${{ inputs.ssh-key }}
