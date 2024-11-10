@@ -26,7 +26,9 @@ runs:
       with:
         command: |
           cd ${{ inputs.folder-name }}
-          yarn install
+          ls -al
+          tar zxvf ${{ inputs.module_name }}.tar.gz
+          ls -al
         host: ${{ inputs.host-name }}
         user: root
         key: ${{ inputs.ssh-key }}
