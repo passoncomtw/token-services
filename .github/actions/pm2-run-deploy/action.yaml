@@ -26,9 +26,9 @@ runs:
       with:
         command: |
           cd ${{ inputs.folder-name }}
-          ls -al
-          tar zxvf ${{ inputs.module_name }}.tar.gz
-          ls -al
+          yarn install
+          nx build ${{ inputs.module-name }}
+          pm2 start ./deploy/{{ inputs.module-name }}/ecosystem.config.js
         host: ${{ inputs.host-name }}
         user: root
         key: ${{ inputs.ssh-key }}
