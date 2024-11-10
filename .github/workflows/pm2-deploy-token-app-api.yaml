@@ -26,7 +26,7 @@ jobs:
     # Copy docker-compose and .env files to target server
     - name: show files
       run: |
-        scp ./* root@${{ secrets.DEV_HOST }}:/opt/services//${{ env.SERVER_WORK_DIRECTORY }}/
+        scp -a ./* root@${{ secrets.DEV_HOST }}:/opt/services//${{ env.SERVER_WORK_DIRECTORY }}/
     # - name: copy files to target server via scp
     #   uses: appleboy/scp-action@v0.1.3
     #   with:
