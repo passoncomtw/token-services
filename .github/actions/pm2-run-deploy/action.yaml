@@ -26,6 +26,9 @@ runs:
       with:
         command: |
           cd ${{ inputs.folder-name }}
+          node --version
+          npm install -g yarn pm2
+          npm add --global nx@latest
           yarn install
           nx build ${{ inputs.module-name }}
           pm2 start ./deploy/{{ inputs.module-name }}/ecosystem.config.js
