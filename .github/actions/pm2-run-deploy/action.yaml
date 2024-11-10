@@ -3,14 +3,14 @@ name: "Deployment"
 description: "Deploy newest code to the machine."
 
 inputs:
+  password:
+    description: 'Host password'
+    required: true
   folder-name:
     description: 'Project folder name'
     required: true
   module-name:
     description: '模組名稱'
-    required: true
-  ssh-key:
-    description: 'Ssh key for login the target machine'
     required: true
   host-name:
     description: 'Host domain or ip'
@@ -34,4 +34,4 @@ runs:
           pm2 start ./deploy/{{ inputs.module-name }}/ecosystem.config.js
         host: ${{ inputs.host-name }}
         user: root
-        passphrase: ${{ inputs.ssh-key }}
+        password: ${{ inputs.password }}

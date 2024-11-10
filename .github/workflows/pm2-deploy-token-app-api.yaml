@@ -42,4 +42,4 @@ jobs:
         branch-name: develop
         module-name: ${{ env.IMAGE_NAME }}
         host-name: ${{ secrets.DEV_HOST }}
-        ssh-key: ${{ secrets.SSH_KEY_DEV_VALUE }}        
+        password: ${{ secrets.HOST_PASSWORD }}        
