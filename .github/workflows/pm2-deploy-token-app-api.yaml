@@ -23,26 +23,21 @@ jobs:
     steps:
     - uses: actions/checkout@v3
     # Copy docker-compose and .env files to target server
-    - name: show files
-      run: |
-        pwd
-        ls
-
-    # - name: copy files to target server via scp
-    #   uses: appleboy/scp-action@v0.1.3
-    #   with:
-    #     host: ${{ secrets.DEV_HOST }}
-    #     username: root
-    #     port: 22
-    #     key: ${{ secrets.SSH_KEY_DEV_VALUE }}
-    #     source: "./*"
-    #     target: "/opt/services//${{ env.SERVER_WORK_DIRECTORY }}/"
-    #     strip_components: 3
-    # - name: Deploy newest code to production machine
-    #   uses: ./.github/actions/pm2-run-deploy
-    #   with:
-    #     folder-name: /opt/services//${{ env.SERVER_WORK_DIRECTORY }}/
-    #     branch-name: develop
-    #     module-name: ${{ env.IMAGE_NAME }}
-    #     host-name: ${{ secrets.DEV_HOST }}
-    #     ssh-key: ${{ secrets.SSH_KEY_DEV_VALUE }}
+    - name: copy files to target server via scp
+      uses: appleboy/scp-action@v0.1.3
+      with:
+        host: ${{ secrets.DEV_HOST }}
+        username: root
+        port: 22
+        key: ${{ secrets.SSH_KEY_DEV_VALUE }}
+        source: "*"
+        target: "/opt/services//${{ env.SERVER_WORK_DIRECTORY }}/"
+        strip_components: 3
+    - name: Deploy newest code to production machine
+      uses: ./.github/actions/pm2-run-deploy
+      with:
+        folder-name: /opt/services//${{ env.SERVER_WORK_DIRECTORY }}/
+        branch-name: develop
+        module-name: ${{ env.IMAGE_NAME }}
+        host-name: ${{ secrets.DEV_HOST }}
+        ssh-key: ${{ secrets.SSH_KEY_DEV_VALUE }}
