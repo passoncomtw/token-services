@@ -26,6 +26,7 @@ runs:
       with:
         command: |
           cd ${{ inputs.folder-name }}
+          source ~/.zshrc
           node --version
           npm install -g yarn pm2
           npm add --global nx@latest
