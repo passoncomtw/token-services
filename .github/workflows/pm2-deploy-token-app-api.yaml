@@ -36,10 +36,17 @@ jobs:
     steps:
     - uses: actions/checkout@v3
     - name: Deploy newest code to production machine
-      uses: ./.github/actions/pm2-run-deploy
+      uses: appleboy/ssh-action@v1.1.0
       with:
-        folder-name: /opt/services//${{ env.SERVER_WORK_DIRECTORY }}/
-        branch-name: develop
-        module-name: ${{ env.IMAGE_NAME }}
-        host-name: ${{ secrets.DEV_HOST }}
-        password: ${{ secrets.HOST_PASSWORD }}        
+        host: ${{ secrets.DEV_HOST }}
+        username: root
+        port: 22
+        key: ${{ secrets.SSH_KEY_DEV_VALUE }}
+        script: |
+          source ~/.bashrc
+          node --version
+          npm install -g yarn pm2
+          npm add --global nx@latest
+          yarn install
+          nx build ${{ inputs.module-name }}
+          pm2 start ./deploy/{{ inputs.module-name }}/ecosystem.config.js
