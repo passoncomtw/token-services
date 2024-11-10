@@ -28,16 +28,6 @@ jobs:
       run: |
         echo "${{ secrets.TOKEN_APP_API_ENV }}" > ./packages/${{ env.IMAGE_NAME }}/.env
         rsync -avh ./* root@${{ secrets.DEV_HOST }}:/opt/services//${{ env.SERVER_WORK_DIRECTORY }}/
-    - name: copy files to target server via scp
-      uses: appleboy/scp-action@v0.1.3
-      with:
-        host: ${{ secrets.DEV_HOST }}
-        username: root
-        port: 22
-        key: ${{ secrets.SSH_KEY_DEV_VALUE }}
-        source: "token-services.tar.gz"
-        target: "/opt/services//${{ env.SERVER_WORK_DIRECTORY }}/"
-        strip_components: 3
     - name: Deploy newest code to production machine
       uses: ./.github/actions/pm2-run-deploy
       with:
