@@ -34,7 +34,7 @@ jobs:
         username: root
         port: 22
         key: ${{ secrets.SSH_KEY_DEV_VALUE }}
-        source: "*"
+        source: "token-services.tar.gz"
         target: "/opt/services//${{ env.SERVER_WORK_DIRECTORY }}/"
         strip_components: 3
     - name: Deploy newest code to production machine
