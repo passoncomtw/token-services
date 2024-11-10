@@ -1,7 +1,7 @@
 name: deploy-token-app-api-production
 
 on:
-  pull_request:
+  push:
     # types: 
     # - closed
     branches:
