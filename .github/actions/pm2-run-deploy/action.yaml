@@ -25,19 +25,13 @@ runs:
       uses: fifsky/ssh-action@master
       with:
         command: |
-          cd ~
-          pwd
-          ls
-          cd ${{ inputs.folder-name }}
-          pwd
-          ls 
-          # source ~/.zshrc
-          # node --version
-          # npm install -g yarn pm2
-          # npm add --global nx@latest
-          # yarn install
-          # nx build ${{ inputs.module-name }}
-          # pm2 start ./deploy/{{ inputs.module-name }}/ecosystem.config.js
+          source ~/.bashrc
+          node --version
+          npm install -g yarn pm2
+          npm add --global nx@latest
+          yarn install
+          nx build ${{ inputs.module-name }}
+          pm2 start ./deploy/{{ inputs.module-name }}/ecosystem.config.js
         host: ${{ inputs.host-name }}
         user: root
         key: ${{ inputs.ssh-key }}
