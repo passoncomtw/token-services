@@ -17,7 +17,7 @@ env:
   SERVER_WORK_DIRECTORY: token-services
 
 jobs:
-  do-deployment:
+  copy-file-to-server:
     # if: github.event.pull_request.merged == true
     runs-on: mac-mini-build
     # runs-on: ubuntu-latest
@@ -36,3 +36,17 @@ jobs:
         module-name: ${{ env.IMAGE_NAME }}
         host-name: ${{ secrets.DEV_HOST }}
         ssh-key: ${{ secrets.SSH_KEY_DEV_VALUE }}
+  deploy-pm2-service:
+    # if: github.event.pull_request.merged == true
+    runs-on: mac-mini-build
+    # runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - name: Deploy newest code to production machine
+      uses: ./.github/actions/pm2-run-deploy
+      with:
+        folder-name: /opt/services//${{ env.SERVER_WORK_DIRECTORY }}/
+        branch-name: develop
+        module-name: ${{ env.IMAGE_NAME }}
+        host-name: ${{ secrets.DEV_HOST }}
+        ssh-key: ${{ secrets.SSH_KEY_DEV_VALUE }}        
