@@ -44,7 +44,8 @@ jobs:
         key: ${{ secrets.SSH_KEY_DEV_VALUE }}
         script: |
           source /root/.bashrc
-          node --version
+          cat ~/.bashrc
+          whereis node
           # npm install -g yarn pm2
           # npm add --global nx@latest
           # yarn install
