@@ -44,6 +44,7 @@ jobs:
         key: ${{ secrets.SSH_KEY_DEV_VALUE }}
         script: |
           source /root/.bashrc
+          curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.1/install.sh | bash
           cat ~/.bashrc
           whereis node
           # npm install -g yarn pm2
