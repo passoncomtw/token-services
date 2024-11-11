@@ -39,7 +39,7 @@ jobs:
       run: |
         ssh root@${{ secrets.DEV_HOST }} "
         source ~/.zshrc
-        node --version 
+        npm add --global nx@latest 
         cd /opt/services/${{ env.SERVER_WORK_DIRECTORY }}
         yarn install
         nx build ${{ inputs.module-name }}
