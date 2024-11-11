@@ -28,7 +28,7 @@ jobs:
     - name: sync files to server
       run: |
         echo "${{ secrets.TOKEN_APP_API_ENV }}" > ./packages/${{ env.IMAGE_NAME }}/.env
-        rsync -avh ./* root@${{ secrets.DEV_HOST }}:/opt/services//${{ env.SERVER_WORK_DIRECTORY }}/
+        rsync -avh ./* root@${{ secrets.DEV_HOST }}:/opt/services/${{ env.SERVER_WORK_DIRECTORY }}/
   deploy-pm2-service:
     # if: github.event.pull_request.merged == true
     # runs-on: mac-mini-build
@@ -39,7 +39,7 @@ jobs:
       run: |
         ssh root@${{ secrets.DEV_HOST }} |
         node --version
-        cd /opt/services//${{ env.SERVER_WORK_DIRECTORY }}
+        cd /opt/services/${{ env.SERVER_WORK_DIRECTORY }}
         yarn install
         nx build ${{ inputs.module-name }}
         pm2 start ./deploy/{{ inputs.module-name }}/ecosystem.config.js
