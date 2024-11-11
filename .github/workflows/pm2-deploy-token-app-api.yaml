@@ -25,33 +25,21 @@ jobs:
     steps:
     - uses: actions/checkout@v3
     # Copy docker-compose and .env files to target server
-    - name: show files
+    - name: sync files to server
       run: |
         echo "${{ secrets.TOKEN_APP_API_ENV }}" > ./packages/${{ env.IMAGE_NAME }}/.env
         rsync -avh ./* root@${{ secrets.DEV_HOST }}:/opt/services//${{ env.SERVER_WORK_DIRECTORY }}/
   deploy-pm2-service:
     # if: github.event.pull_request.merged == true
     # runs-on: mac-mini-build
-    runs-on: ubuntu-latest
+    runs-on: mac-mini-build
     steps:
     - uses: actions/checkout@v3
     - name: Deploy newest code to production machine
-      uses: appleboy/ssh-action@v1.1.0
-      with:
-        host: ${{ secrets.DEV_HOST }}
-        username: root
-        port: 22
-        key: ${{ secrets.SSH_KEY_DEV_VALUE }}
-        script: |
-          source /root/.bashrc
-          curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.1/install.sh | bash
-          cat ~/.bashrc
-          nvm install 20.17.0
-          nvm alias default 20.17.0
-          whereis node
-          node --version
-          # npm install -g yarn pm2
-          # npm add --global nx@latest
-          # yarn install
-          # nx build ${{ inputs.module-name }}
-          # pm2 start ./deploy/{{ inputs.module-name }}/ecosystem.config.js
+      run: |
+        ssh root@${{ secrets.DEV_HOST }} |
+        node --version
+        cd /opt/services//${{ env.SERVER_WORK_DIRECTORY }}
+        yarn install
+        nx build ${{ inputs.module-name }}
+        pm2 start ./deploy/{{ inputs.module-name }}/ecosystem.config.js
