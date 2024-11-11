@@ -46,7 +46,10 @@ jobs:
           source /root/.bashrc
           curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.1/install.sh | bash
           cat ~/.bashrc
+          nvm install 20.17.0
+          nvm alias default 20.17.0
           whereis node
+          node --version
           # npm install -g yarn pm2
           # npm add --global nx@latest
           # yarn install
