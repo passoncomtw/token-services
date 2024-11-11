@@ -34,4 +34,5 @@ jobs:
         cd /opt/services/${{ env.SERVER_WORK_DIRECTORY }}
         yarn install
         nx build ${{ env.IMAGE_NAME }}
-        pm2 restart ./deploy/${{ env.IMAGE_NAME }}/ecosystem.config.js"
+        cd ./deploy/${{ env.IMAGE_NAME }}/
+        pm2 restart ecosystem.config.js"
