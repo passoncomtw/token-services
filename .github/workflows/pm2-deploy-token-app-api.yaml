@@ -1,11 +1,11 @@
 name: deploy-token-app-api-production
 
 on:
-  push:
-    # types: 
-    # - closed
+  pull_request:
+    types: 
+    - closed
     branches:
-    - develop
+    - main
     paths:
     - 'packages/token-app-api/**'
     - '.github/workflows/pm2-deploy-token-app-api.yaml'
@@ -42,4 +42,4 @@ jobs:
         cd /opt/services/${{ env.SERVER_WORK_DIRECTORY }}
         yarn install
         nx build ${{ env.IMAGE_NAME }}
-        pm2 start ./deploy/${{ env.IMAGE_NAME }}/ecosystem.config.js"
+        pm2 restart ./deploy/${{ env.IMAGE_NAME }}/ecosystem.config.js"
