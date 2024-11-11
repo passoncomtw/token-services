@@ -49,7 +49,6 @@ export default function* fetchAPIResult({
     yield put(okFetch(result.data, action, message));
     if (onSuccess) onSuccess();
   } catch (error) {
-    console.log("🚀 ~ error:", error)
     yield put(errFetch(error.data, action));
     if (onError) onError();
   }

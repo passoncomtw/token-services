@@ -4,7 +4,6 @@ import { loginResult } from '~/apis/api';
 import fetchAPIResult from '~/utils/sagaUtils';
 
 export function* loginSaga({ payload }) {
-  console.log("🚀 ~ function*loginSaga ~ payload:", payload)
   return yield fetchAPIResult({
     apiResult: loginResult,
     action: types.LOGIN,
