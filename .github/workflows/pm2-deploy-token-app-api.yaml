@@ -38,10 +38,9 @@ jobs:
     - name: Deploy newest code to production machine
       run: |
         ssh root@${{ secrets.DEV_HOST }} "
+        source ~/.zshrc
         node --version 
-        ls /opt 
-        ls /opt/services"
-        # cd /opt/services/${{ env.SERVER_WORK_DIRECTORY }}
-        # yarn install
-        # nx build ${{ inputs.module-name }}
-        # pm2 start ./deploy/{{ inputs.module-name }}/ecosystem.config.js
+        cd /opt/services/${{ env.SERVER_WORK_DIRECTORY }}
+        yarn install
+        nx build ${{ inputs.module-name }}
+        pm2 start ./deploy/{{ inputs.module-name }}/ecosystem.config.js"
