@@ -37,9 +37,11 @@ jobs:
     - uses: actions/checkout@v3
     - name: Deploy newest code to production machine
       run: |
-        ssh root@${{ secrets.DEV_HOST }} |
-        node --version
-        cd /opt/services/${{ env.SERVER_WORK_DIRECTORY }}
-        yarn install
-        nx build ${{ inputs.module-name }}
-        pm2 start ./deploy/{{ inputs.module-name }}/ecosystem.config.js
+        ssh root@${{ secrets.DEV_HOST }} "
+        node --version 
+        ls /opt 
+        ls /opt/services"
+        # cd /opt/services/${{ env.SERVER_WORK_DIRECTORY }}
+        # yarn install
+        # nx build ${{ inputs.module-name }}
+        # pm2 start ./deploy/{{ inputs.module-name }}/ecosystem.config.js
