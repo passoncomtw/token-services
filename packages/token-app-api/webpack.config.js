@@ -20,6 +20,7 @@ module.exports = {
         './src/specs',
         './src/constants',
         './.sequelizerc',
+        './ecosystem.config.js',
         './.env',
       ],
       optimization: false,
