@@ -20,6 +20,7 @@ module.exports = {
         './src/specs',
         './src/constants',
         './.sequelizerc',
+        './.env',
       ],
       optimization: false,
       outputHashing: 'none',
