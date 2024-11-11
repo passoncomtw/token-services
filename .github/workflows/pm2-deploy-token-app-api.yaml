@@ -39,8 +39,7 @@ jobs:
       run: |
         ssh root@${{ secrets.DEV_HOST }} "
         source ~/.zshrc
-        npm install -g pm2
         cd /opt/services/${{ env.SERVER_WORK_DIRECTORY }}
         yarn install
         nx build ${{ env.IMAGE_NAME }}
-        pm2 start ./deploy/{{ inputs.module-name }}/ecosystem.config.js"
+        pm2 start ./deploy/${{ env.IMAGE_NAME }}/ecosystem.config.js"
