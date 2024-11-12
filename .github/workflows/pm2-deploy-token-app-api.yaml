@@ -34,5 +34,6 @@ jobs:
         cd /opt/services/${{ env.SERVER_WORK_DIRECTORY }}
         yarn install
         nx build ${{ env.IMAGE_NAME }}
-        cd ./deploy/${{ env.IMAGE_NAME }}/
-        pm2 restart ecosystem.config.js"
+
+        pm2 delete ${{ env.IMAGE_NAME }} || echo "Delete PM2 Process Success."
+        nx run ${{ env.IMAGE_NAME }}:pm2
