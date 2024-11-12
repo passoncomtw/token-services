@@ -29,12 +29,10 @@ jobs:
       run: |
         echo "${{ secrets.TOKEN_APP_API_ENV }}" > ./packages/${{ env.IMAGE_NAME }}/.env
         rsync -avh ./* root@${{ secrets.DEV_HOST }}:/opt/services/${{ env.SERVER_WORK_DIRECTORY }}/
-
         ssh root@${{ secrets.DEV_HOST }} "
         source ~/.zshrc
         cd /opt/services/${{ env.SERVER_WORK_DIRECTORY }}
         yarn install
         nx build ${{ env.IMAGE_NAME }}
-
         pm2 delete ${{ env.IMAGE_NAME }} || echo 'Delete PM2 Process Success.'
         nx run ${{ env.IMAGE_NAME }}:pm2"
