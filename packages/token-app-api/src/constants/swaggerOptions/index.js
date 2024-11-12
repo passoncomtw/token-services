@@ -28,13 +28,6 @@ const options = {
   schemes: ["http", "https"],
   consumes: ["application/json"],
   produces: ["application/json"],
-  // securityDefinitions: {
-  //   Bearer: {
-  //     type: 'apiKey',
-  //     name: 'Authorization',
-  //     in: 'header',
-  //   }
-  // },
   paths: {
     ...paths,
   },
