@@ -5,7 +5,7 @@ on:
     types: 
     - closed
     branches:
-    - main
+    - ci_pause
     paths:
     - 'deploy/token-manager-admin/*'
     - 'packages/token-manager-admin/**'
