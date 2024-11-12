@@ -152,6 +152,8 @@ module.exports.updateUserNotificationToken = async (userId, notificationToken) =
 };
 
 const getBackendUserWithPasswordBy = async (account) => {
+  console.log("🚀 ~ getBackendUserWithPasswordBy ~ database.Backenduser:", database.Backenduser)
+
   const backendUserResult = await database.Backenduser.findOne({
     include: [{
       as: 'backendactor',

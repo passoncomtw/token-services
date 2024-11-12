@@ -46,7 +46,7 @@ module.exports.updateUserNotificationToken = async (userId, notificationToken) =
   await userResult.save();
 };
 
-const getUserWithPasswordBy = async (whereCondition, options = {}) => {
+const getUserWithPasswordBy = async (whereCondition, options = {}) => {  
   return await database.User.findOne({
     include: [{
       as: 'wallet',
@@ -65,7 +65,7 @@ const getUserWithPasswordBy = async (whereCondition, options = {}) => {
     ],
     ...options,
     where: whereCondition,
-  });
+  });  
 };
 
 const getUser = async (userId) => {
