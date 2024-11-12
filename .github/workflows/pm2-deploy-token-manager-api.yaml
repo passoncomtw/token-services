@@ -1,0 +1,40 @@
+name: deploy-token-manager-api-production
+
+on:
+  pull_request:
+    types: 
+    - closed
+    branches:
+    - main
+    paths:
+    - 'packages/token-manager-api/**'
+    - '.github/workflows/pm2-deploy-token-manager-api.yaml'
+    - '.github/actions/pm2-run-deploy/*'
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: token-manager-api
+  DOCKER_HUB_WORKSPACE: passon
+  SERVER_WORK_DIRECTORY: token-services
+
+jobs:
+  copy-file-to-server:
+    # if: github.event.pull_request.merged == true
+    runs-on: mac-mini-build
+    # runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    # Copy docker-compose and .env files to target server
+    - name: sync files to server
+      run: |
+        echo "${{ secrets.TOKEN_MANAGMENT_API_ENV }}" > ./packages/${{ env.IMAGE_NAME }}/.env
+        rsync -avh ./* root@${{ secrets.DEV_HOST }}:/opt/services/${{ env.SERVER_WORK_DIRECTORY }}/
+
+        ssh root@${{ secrets.DEV_HOST }} "
+        source ~/.zshrc
+        cd /opt/services/${{ env.SERVER_WORK_DIRECTORY }}
+        yarn install
+        nx build ${{ env.IMAGE_NAME }}
+
+        pm2 delete ${{ env.IMAGE_NAME }} || echo 'Delete PM2 Process Success.'
+        nx run ${{ env.IMAGE_NAME }}:pm2"
