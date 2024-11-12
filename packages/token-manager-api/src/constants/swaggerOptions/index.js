@@ -2,7 +2,7 @@ const paths = require('./paths');
 const definitions = require('./definitions');
 const packageJson = require("../../../../../package.json");
 
-const host = 'token-manager-api.passon.tw';
+const host = process.env.SWAGGER_DOMAIN;
 const schemes = ['http', 'https'];
 
 const options = {

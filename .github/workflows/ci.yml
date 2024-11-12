@@ -5,6 +5,8 @@ on:
     branches:
       - ci_pause
   pull_request:
+    branches:
+      - ci_pause
 
 permissions:
   actions: read
