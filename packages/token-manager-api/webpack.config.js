@@ -17,6 +17,7 @@ module.exports = {
         './src/database',
         './src/helpers',
         './src/services',
+        './src/constants',
         './.sequelizerc',
         './.env',
       ],
