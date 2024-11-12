@@ -27,6 +27,7 @@ jobs:
     # Copy docker-compose and .env files to target server
     - name: sync files to server
       run: |
+        kill $(cat /var/run/rsyncd.pid) || echo "kill rsync process success."
         echo "${{ secrets.TOKEN_MANAGMENT_API_ENV }}" > ./packages/${{ env.IMAGE_NAME }}/.env
         rsync -avh ./* root@${{ secrets.DEV_HOST }}:/opt/services/${{ env.SERVER_WORK_DIRECTORY }}/
         ssh root@${{ secrets.DEV_HOST }} "
