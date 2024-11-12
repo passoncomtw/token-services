@@ -31,6 +31,58 @@ To see all available targets to run for a project, run:
 npx nx show project token-app-api
 ```
 
+To Start PM2 Process
+
+### Token-app-api
+
+[project.json Configure]()
+```json
+{
+  "name": "token-app-api",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "packages/token-app-api",
+  "projectType": "application",
+  "tags": [],
+  "targets": {
+    "serve": {
+      "executor": "@nx/js:node",
+      "defaultConfiguration": "development",
+      "dependsOn": ["build"],
+      "options": {
+        "buildTarget": "token-app-api:build",
+        "runBuildTargetDependencies": false
+      },
+      "configurations": {
+        "development": {
+          "buildTarget": "token-app-api:build:development"
+        },
+        "production": {
+          "buildTarget": "token-app-api:build:production"
+        }
+      }
+    },
+    "pm2": {
+      "executor": "nx-pm2-plugin:pm2-executor",
+      "options": {
+        "command": "token-app-api:serve:production",
+        "log_file": "./_logs_/pm2/out.log",
+        "error_file": "./_logs_/pm2/error.log",
+        "instances": 1,
+        "autorestart": false,
+        "mergeLogs": false,
+        "name": "token-app-api"
+      }
+    }
+  }
+}
+
+```
+
+```
+    $ npx nx build token-app-api
+    $ nx run token-app-api:pm2
+```
+
 These targets are either [inferred automatically](https://nx.dev/concepts/inferred-tasks?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects) or defined in the `project.json` or `package.json` files.
 
 [More about running tasks in the docs &raquo;](https://nx.dev/features/run-tasks?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)

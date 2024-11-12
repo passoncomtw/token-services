@@ -21,6 +21,15 @@
           "buildTarget": "token-app-api:build:production"
         }
       }
+    },
+    "pm2": {
+      "executor": "nx-pm2-plugin:pm2-executor",
+      "options": {
+        "command": "token-app-api:serve:production",
+        "instances": 1,
+        "autorestart": false,
+        "name": "token-app-api"
+      }
     }
   }
 }

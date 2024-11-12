@@ -43,6 +43,7 @@ Thumbs.db
 # NX config
 .nx
 .env
+*log*
 
 package-lock.json
 vite.config.*.timestamp*

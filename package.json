@@ -40,6 +40,7 @@
     "flux-constants": "^0.2.2",
     "jsonwebtoken": "^9.0.2",
     "nodemon": "^3.1.7",
+    "nx-pm2-plugin": "^1.0.5",
     "passport": "^0.7.0",
     "passport-jwt": "^4.0.1",
     "passport-local": "^1.0.0",
