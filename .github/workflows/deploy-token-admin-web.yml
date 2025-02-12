@@ -36,6 +36,7 @@ jobs:
           node-version: 16.15.1
       - name: Install Packages
         run: |
-            yarn build
-            scp -r ./build/** root@${{ secrets.DEV_FROENT_HOST }}:/var/www/html/token-web.passon.tw
+          cd ./apps/token-admin-web/
+          yarn build
+          scp -r ./build/** root@${{ secrets.DEV_FROENT_HOST }}:/var/www/html/token-web.passon.tw
         
