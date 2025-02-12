@@ -28,7 +28,8 @@ jobs:
       - name: Install Packages
         run: |
           pwd
-          cd ./apps/token-admin-web
+          cd ./apps/token-admin-web/
+          pwd
           yarn install
           echo "${{ secrets.TOKEN_MANAGMENT_WEB_ENV }}" > ./.env
           yarn build
