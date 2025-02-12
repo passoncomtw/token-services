@@ -35,7 +35,7 @@ jobs:
   start_pm2_token-app-api-service:
     # if: github.event.pull_request.merged == true
     needs: [copy-file-to-server]
-    runs-on: ubuntu-latest
+    runs-on: mac-mini-build
     steps:
       - uses: actions/checkout@v3
       - name: Deploy newest code to dev machine

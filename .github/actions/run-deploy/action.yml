@@ -34,9 +34,8 @@ runs:
         command: |
           cd /opt/services/apps/${{ inputs.folder-name }}/
           source ~/.bashrc
-          npm install -g yarn pm2
-          yarn install
-          pm2 restart ecosystem.config.js --env ${{ inputs.env-name }}
+          npx yarn install
+          npx pm2 restart ecosystem.config.js --env ${{ inputs.env-name }}
         host: ${{ inputs.host-name }}
         user: root
         key: ${{ inputs.ssh-key }}
