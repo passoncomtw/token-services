@@ -46,8 +46,10 @@ jobs:
           port: 22
           script: |
             cd /opt/services/${{ env.SERVER_WORK_DIRECTORY }}/
+            curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.1/install.sh | bash
             source ~/.bashrc
             node --version
+            npm install -g yarn
             npx yarn install
 
 
