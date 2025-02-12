@@ -45,7 +45,7 @@ jobs:
           folder-name: token-app-api
           branch-name: develop
           env-value: ${{ secrets.PROD_ENV }}
-          host-name: ${{ secrets.DEV_HOST }}
+          host-name: ${{ secrets.DEV_BACKEND_HOST }}
           ssh-key: ${{ secrets.SSH_KEY_PROD_VALUE }}
 
 
