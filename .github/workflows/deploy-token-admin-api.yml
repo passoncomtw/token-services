@@ -14,7 +14,7 @@ on:
 
 env:
   REGISTRY: ghcr.io
-  IMAGE_NAME: token-app-api
+  IMAGE_NAME: token-admin-api
   DOCKER_HUB_WORKSPACE: passon
   SERVER_WORK_DIRECTORY: token-services
 
