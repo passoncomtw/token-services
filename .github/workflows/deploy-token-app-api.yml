@@ -28,7 +28,7 @@ jobs:
     - name: sync files to server
       run: |
         kill $(cat /var/run/rsyncd.pid) || echo "kill rsync process success."
-        echo "${{ secrets.TOKEN_MANAGMENT_API_ENV }}" > ./apps/${{ env.IMAGE_NAME }}/.env
+        echo "${{ secrets.TOKEN_APP_API_ENV }}" > ./apps/${{ env.IMAGE_NAME }}/.env
         rsync -avh ./apps/${{ env.IMAGE_NAME }} root@${{ secrets.DEV_BACKEND_HOST }}:/opt/services/apps/
         
   start_pm2_token-app-api-service:
