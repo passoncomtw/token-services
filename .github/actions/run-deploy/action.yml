@@ -33,9 +33,9 @@ runs:
       with:
         command: |
           cd /opt/services/apps/${{ inputs.folder-name }}/
-          source ~/.bashrc
-          npx yarn install
-          npx pm2 restart ecosystem.config.js --env ${{ inputs.env-name }}
+          source ~/.zshrc
+          yarn install
+          pm2 restart ecosystem.config.js --env ${{ inputs.env-name }}
         host: ${{ inputs.host-name }}
         user: root
         key: ${{ inputs.ssh-key }}
