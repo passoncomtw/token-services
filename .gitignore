@@ -1,4 +1,3 @@
-# See http://help.github.com/ignore-files/ for more about ignoring files.
 
 # compiled output
 dist
@@ -24,33 +23,9 @@ node_modules
 !.vscode/launch.json
 !.vscode/extensions.json
 
-# misc
-.sass-cache
-connect.lock
-coverage
-libpeerconnection.log
-npm-debug.log
-yarn-error.log
-testem.log
-typings
-
 # System Files
 .DS_Store
 Thumbs.db
 
-.nx/cache
-.nx/workspace-data
-
 .env
 .env.local
-
-# Build Result 
-build
-*.js
-*.map
-
-# Local Database Data
-data
-
-# Express Gateway Config yaml
-gateway.config.yml

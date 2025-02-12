@@ -32,13 +32,8 @@ runs:
       uses: fifsky/ssh-action@master
       with:
         command: |
-          export NVM_DIR=~/.nvm
-          source ~/.nvm/nvm.sh    
-          cd ./${{ inputs.folder-name }}
-          git fetch
-          git reset --hard
-          git checkout origin/${{ inputs.branch-name }}
-          echo "${{ inputs.env-value }}" > .env
+          cd /opt/services/apps/${{ inputs.folder-name }}/
+          source ~/.bashrc
           yarn install
           pm2 restart ecosystem.config.js --env ${{ inputs.env-name }}
         host: ${{ inputs.host-name }}

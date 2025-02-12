@@ -37,20 +37,17 @@ jobs:
     needs: [copy-file-to-server]
     runs-on: ubuntu-latest
     steps:
-      - name: executing remote ssh commands using password
-        uses: appleboy/ssh-action@v1.2.0
+      - uses: actions/checkout@v3
+      - name: Deploy newest code to dev machine
+        uses: ./.github/actions/run-deploy
         with:
-          host: ${{ secrets.DEV_BACKEND_HOST }}
-          username: ${{ secrets.DEV_USER_NAME }}
-          password: ${{ secrets.HOST_PASSWORD }}
-          port: 22
-          script: |
-            cd /opt/services/${{ env.SERVER_WORK_DIRECTORY }}/
-            curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.1/install.sh | bash
-            source ~/.bashrc
-            node --version
-            npm install -g yarn
-            npx yarn install
+          env-name: prod
+          folder-name: token-app-api
+          branch-name: develop
+          env-value: ${{ secrets.PROD_ENV }}
+          host-name: ${{ secrets.DEV_HOST }}
+          ssh-key: ${{ secrets.SSH_KEY_PROD_VALUE }}
+
 
 
 # ssh root@${{ secrets.DEV_BACKEND_HOST }} "
