@@ -1,15 +1,14 @@
-name: deploy-token-app-api-production
+name: deploy-token-admin-api-production
 
 on:
-  push:
+  pull_request:
+    types: 
+      - closed
     branches:
-      - develop
-# on:
-#   pull_request:
-#     types: 
-#       - closed
-#     branches:
-#       - main
+      - main
+    paths:
+      - 'packages/token-admin-api/**'
+      - '.github/workflows/deploy-token-admin-api.yml'
 
 
 env:
@@ -20,12 +19,11 @@ env:
 
 jobs:
   copy-file-to-server:
-    # if: github.event.pull_request.merged == true
+    if: github.event.pull_request.merged == true
     runs-on: mac-mini-build
     # runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
-    # Copy docker-compose and .env files to target server
     - name: sync files to server
       run: |
         kill $(cat /var/run/rsyncd.pid) || echo "kill rsync process success."
@@ -33,7 +31,7 @@ jobs:
         rsync -avh ./apps/${{ env.IMAGE_NAME }} root@${{ secrets.DEV_BACKEND_HOST }}:/opt/services/apps/
         
   start_pm2_token-app-api-service:
-    # if: github.event.pull_request.merged == true
+    if: github.event.pull_request.merged == true
     needs: [copy-file-to-server]
     runs-on: ubuntu-latest
     steps:

@@ -1,0 +1,35 @@
+name: deploy-token-admin-web-production
+
+on:
+  push:
+    branches:
+      - develop
+# on:
+#   pull_request:
+#     types: 
+#       - closed
+#     branches:
+#       - main
+#     paths:
+#       - 'packages/token-admin-web/**'
+#       - '.github/workflows/deploy-token-admin-web.yml'
+
+jobs:
+  do-deployment:
+    # if: github.event.pull_request.merged == true
+    runs-on: mac-mini-build
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Set up Node
+        uses: actions/setup-node@v1
+        with:
+          node-version: 16.15.1
+      - name: Install Packages
+        run: yarn install
+      - name: create env file
+        run: echo "${{ secrets.TOKEN_MANAGMENT_WEB_ENV }}" > ./.env
+      - name: build web app
+        run: yarn build
+      - name: ssh and copy file to server
+        run: scp -r ./build/** root@${{ secrets.DEV_FROENT_HOST }}:/var/www/html/token-web.passon.tw
