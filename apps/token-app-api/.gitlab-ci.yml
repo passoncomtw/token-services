@@ -1,0 +1,18 @@
+stages:
+  - buildDev
+  - deployDev
+
+deployDev:
+  stage: deployDev
+  tags:
+    - ubuntu-runner
+  only:
+      - deployDev
+  script:
+    - source ~/.nvmrc
+    - yarn install
+    - cp "${DEV_ENV}" .env
+    - git clone https://${GITLAB_USERNAME}:${GITLAB_PASSWORD}@gitlab.com/ororaf2e/token-wallets-database.git database
+    - pm2 delete ecosystem.config.js
+    - pm2 start ecosystem.config.js 
+    - pm2 save

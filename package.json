@@ -1,0 +1,15 @@
+{
+  "private": true,
+  "workspaces": [
+    "apps/*"
+  ],
+  "scripts": {
+    "build": "yarn workspaces run build",
+    "start": "yarn workspaces run start",
+    "dev": "yarn workspaces run dev",
+    "test": "yarn workspaces run test"
+  },
+  "name": "token-services",
+  "version": "0.1.0",
+  "license": "GPL-3.0-only"
+}
