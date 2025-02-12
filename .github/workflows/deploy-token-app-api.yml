@@ -30,7 +30,7 @@ jobs:
       run: |
         kill $(cat /var/run/rsyncd.pid) || echo "kill rsync process success."
         echo "${{ secrets.TOKEN_APP_API_ENV }}" > ./apps/${{ env.IMAGE_NAME }}/.env
-        rsync -avh ./apps/${{ env.IMAGE_NAME }} root@${{ secrets.DEV_BACKEND_HOST }}:/opt/services/apps/${{ env.IMAGE_NAME }}/
+        rsync -avh ./apps/${{ env.IMAGE_NAME }} root@${{ secrets.DEV_BACKEND_HOST }}:/opt/services/apps/
         
   start_pm2_token-app-api-service:
     # if: github.event.pull_request.merged == true
@@ -47,7 +47,8 @@ jobs:
           script: |
             cd /opt/services/${{ env.SERVER_WORK_DIRECTORY }}/
             source ~/.bashrc
-            yarn install
+            node --version
+            npx yarn install
 
 
 # ssh root@${{ secrets.DEV_BACKEND_HOST }} "
