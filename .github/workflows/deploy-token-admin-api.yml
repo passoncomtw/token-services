@@ -1,14 +1,15 @@
 name: deploy-token-app-api-production
 
 on:
-  pull_request:
-    types: 
-      - closed
+  push:
     branches:
-      - main
-    paths:
-      - 'packages/token-app-api/**'
-      - '.github/workflows/deploy-token-app-api.yml'
+      - develop
+# on:
+#   pull_request:
+#     types: 
+#       - closed
+#     branches:
+#       - main
 
 
 env:
@@ -19,7 +20,7 @@ env:
 
 jobs:
   copy-file-to-server:
-    if: github.event.pull_request.merged == true
+    # if: github.event.pull_request.merged == true
     runs-on: mac-mini-build
     # runs-on: ubuntu-latest
     steps:
@@ -28,11 +29,11 @@ jobs:
     - name: sync files to server
       run: |
         kill $(cat /var/run/rsyncd.pid) || echo "kill rsync process success."
-        echo "${{ secrets.TOKEN_MANAGMENT_API_ENV }}" > ./apps/${{ env.IMAGE_NAME }}/.env
+        echo "${{ secrets.TOKEN_APP_API_ENV }}" > ./apps/${{ env.IMAGE_NAME }}/.env
         rsync -avh ./apps/${{ env.IMAGE_NAME }} root@${{ secrets.DEV_BACKEND_HOST }}:/opt/services/apps/
         
   start_pm2_token-app-api-service:
-    if: github.event.pull_request.merged == true
+    # if: github.event.pull_request.merged == true
     needs: [copy-file-to-server]
     runs-on: ubuntu-latest
     steps:
@@ -41,7 +42,7 @@ jobs:
         uses: ./.github/actions/run-deploy
         with:
           env-name: prod
-          folder-name: token-app-api
+          folder-name: token-admin-api
           branch-name: develop
           env-value: ${{ secrets.PROD_ENV }}
           host-name: ${{ secrets.DEV_BACKEND_HOST }}

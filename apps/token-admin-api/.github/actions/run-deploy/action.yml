@@ -1,0 +1,51 @@
+name: "Deployment"
+
+description: "Deploy newest code to the machine."
+
+inputs:
+  env-name:
+    description: 'Project folder name'
+    required: true
+  folder-name:
+    description: 'Project folder name'
+    required: true
+  db-config:
+    description: 'db config json string'
+    required: true
+  env-value:
+    description: 'env file value'
+    required: true
+  ssh-key:
+    description: 'Ssh key for login the target machine'
+    required: true
+  host-name:
+    description: 'Host domain or ip'
+    required: true
+  branch-name:
+    description: 'The branch you want to checkout with'
+    required: true
+
+runs:
+  using: "composite"
+  steps:
+    - name: Pulling newest code and restart pm2 app
+      uses: fifsky/ssh-action@master
+      with:
+        command: |
+          export NVM_DIR=~/.nvm
+          source ~/.nvm/nvm.sh    
+          cd ./${{ inputs.folder-name }}
+          git fetch
+          git reset --hard
+          git checkout origin/${{ inputs.branch-name }}
+          echo "${{ inputs.env-value }}" > .env
+          yarn install
+          ls
+          pm2 restart ecosystem.config.js --env ${{ inputs.env-name }}
+        host: ${{ inputs.host-name }}
+        user: root
+        key: ${{ inputs.ssh-key }}
+
+
+
+
