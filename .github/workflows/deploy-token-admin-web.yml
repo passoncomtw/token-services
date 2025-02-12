@@ -24,16 +24,12 @@ jobs:
       - name: Set up Node
         uses: actions/setup-node@v1
         with:
-          node-version: 18.17
-      - name: Install Packages
-        run: yarn install
-      - name: create env file
-        run: echo "${{ secrets.TOKEN_MANAGMENT_WEB_ENV }}" > ./.env
-      - name: Set up Node
-        uses: actions/setup-node@v1
-        with:
           node-version: 16.15.1
-      - name: build web app
-        run: yarn build
-      - name: ssh and copy file to server
-        run: scp -r ./build/** root@${{ secrets.DEV_FROENT_HOST }}:/var/www/html/token-web.passon.tw
+      - name: Install Packages
+        run: |
+          pwd
+          yarn install
+          echo "${{ secrets.TOKEN_MANAGMENT_WEB_ENV }}" > ./.env
+          yarn build
+          scp -r ./build/** root@${{ secrets.DEV_FROENT_HOST }}:/var/www/html/token-web.passon.tw
+      
