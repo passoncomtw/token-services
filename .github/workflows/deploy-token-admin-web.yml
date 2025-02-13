@@ -1,18 +1,14 @@
 name: deploy-token-admin-web-production
 
 on:
-  push:
+  pull_request:
+    types: 
+      - closed
     branches:
-      - develop
-# on:
-#   pull_request:
-#     types: 
-#       - closed
-#     branches:
-#       - main
-#     paths:
-#       - 'packages/token-admin-web/**'
-#       - '.github/workflows/deploy-token-admin-web.yml'
+      - main
+    paths:
+      - 'packages/token-admin-web/**'
+      - '.github/workflows/deploy-token-admin-web.yml'
 
 jobs:
   do-deployment:

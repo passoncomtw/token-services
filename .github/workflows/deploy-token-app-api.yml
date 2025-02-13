@@ -10,7 +10,6 @@ on:
       - 'packages/token-app-api/**'
       - '.github/workflows/deploy-token-app-api.yml'
 
-
 env:
   REGISTRY: ghcr.io
   IMAGE_NAME: token-app-api
