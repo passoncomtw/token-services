@@ -7,8 +7,8 @@ on:
     branches:
       - main
     paths:
-      - 'packages/token-admin-web/**'
-      - '.github/workflows/deploy-token-admin-web.yml'
+      - 'apps/token-admin-web/**'
+      - '.github/workflows/deploy-token-admin-web.yaml'
 
 jobs:
   do-deployment:

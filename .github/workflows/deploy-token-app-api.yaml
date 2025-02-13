@@ -1,4 +1,4 @@
-name: deploy-token-admin-api-production
+name: deploy-token-app-api-production
 
 on:
   pull_request:
@@ -7,13 +7,12 @@ on:
     branches:
       - main
     paths:
-      - 'packages/token-admin-api/**'
-      - '.github/workflows/deploy-token-admin-api.yml'
-
+      - 'apps/token-app-api/**'
+      - '.github/workflows/deploy-token-app-api.yaml'
 
 env:
   REGISTRY: ghcr.io
-  IMAGE_NAME: token-admin-api
+  IMAGE_NAME: token-app-api
   DOCKER_HUB_WORKSPACE: passon
   SERVER_WORK_DIRECTORY: token-services
 
@@ -24,10 +23,11 @@ jobs:
     # runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
+    # Copy docker-compose and .env files to target server
     - name: sync files to server
       run: |
         kill $(cat /var/run/rsyncd.pid) || echo "kill rsync process success."
-        echo "${{ secrets.TOKEN_MANAGMENT_API_ENV }}" > ./apps/${{ env.IMAGE_NAME }}/.env
+        echo "${{ secrets.TOKEN_APP_API_ENV }}" > ./apps/${{ env.IMAGE_NAME }}/.env
         rsync -avh ./apps/${{ env.IMAGE_NAME }} root@${{ secrets.DEV_BACKEND_HOST }}:/opt/services/apps/
         
   start_pm2_token-app-api-service:
@@ -40,7 +40,7 @@ jobs:
         uses: ./.github/actions/run-deploy
         with:
           env-name: prod
-          folder-name: token-admin-api
+          folder-name: token-app-api
           branch-name: develop
           env-value: ${{ secrets.PROD_ENV }}
           host-name: ${{ secrets.DEV_BACKEND_HOST }}
