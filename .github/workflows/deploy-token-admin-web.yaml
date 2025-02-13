@@ -1,31 +1,31 @@
-name: deploy-token-admin-web-production
+  name: deploy-token-admin-web-production
 
-on:
-  pull_request:
-    types: 
-      - closed
-    branches:
-      - main
-    paths:
-      - 'apps/token-admin-web/**'
-      - '.github/workflows/deploy-token-admin-web.yaml'
+  on:
+    pull_request:
+      types: 
+        - closed
+      branches:
+        - main
+      paths:
+        - 'apps/token-admin-web/**'
+        - '.github/workflows/deploy-token-admin-web.yaml'
 
-jobs:
-  do-deployment:
-    # if: github.event.pull_request.merged == true
-    runs-on: mac-mini-build
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v2
-      - name: Set up Node
-        uses: actions/setup-node@v1
-        with:
-          node-version: 16.15.1
-      - name: Install Packages
-        run: |
-          cd ./apps/token-admin-web/
-          yarn install --ignore-enginess
-          echo "${{ secrets.TOKEN_MANAGMENT_WEB_ENV }}" > ./.env
-          yarn build
-          scp -r ./build/** root@${{ secrets.DEV_FROENT_HOST }}:/var/www/html/token-web.passon.tw
-      
+  jobs:
+    do-deployment:
+      if: github.event.pull_request.merged == true
+      runs-on: mac-mini-build
+      steps:
+        - name: Checkout
+          uses: actions/checkout@v2
+        - name: Set up Node
+          uses: actions/setup-node@v1
+          with:
+            node-version: 16.15.1
+        - name: Install Packages
+          run: |
+            cd ./apps/token-admin-web/
+            yarn install --ignore-enginess
+            echo "${{ secrets.TOKEN_MANAGMENT_WEB_ENV }}" > ./.env
+            yarn build
+            scp -r ./build/** root@${{ secrets.DEV_FROENT_HOST }}:/var/www/html/token-web.passon.tw
+        
