@@ -1,0 +1,852 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Token Admin - 銀行管理</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #ffcc00;
+            --primary-light: #ffd633;
+            --primary-dark: #f2c200;
+            --secondary: #15151b;
+            --secondary-light: #2e2e33;
+            --secondary-dark: #0b0b0d;
+            --success: #0dc884;
+            --warning: #ff8e00;
+            --danger: #ff4a46;
+            --info: #00BCD4;
+            --white: #FFFFFF;
+            --black: #000000;
+            --body-bg: #ebedf2;
+            --grey-dark: #484848;
+            --grey-darker: #4d5b69;
+            --menu-bg: #2e2e33;
+            --border-color: #e0e0e0;
+        }
+        
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Roboto', sans-serif;
+            background-color: var(--body-bg);
+            color: var(--grey-darker);
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .browser-frame {
+            width: 1200px;
+            height: 800px;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+            background-color: var(--white);
+        }
+        
+        .browser-header {
+            height: 40px;
+            background-color: #f1f1f1;
+            display: flex;
+            align-items: center;
+            padding: 0 15px;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        .browser-controls {
+            display: flex;
+            gap: 5px;
+        }
+        
+        .browser-control {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+        
+        .browser-control.close {
+            background-color: #ff5f56;
+        }
+        
+        .browser-control.minimize {
+            background-color: #ffbd2e;
+        }
+        
+        .browser-control.maximize {
+            background-color: #27c93f;
+        }
+        
+        .browser-address-bar {
+            margin-left: 20px;
+            height: 28px;
+            flex-grow: 1;
+            background-color: #fff;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            padding: 0 10px;
+            font-size: 14px;
+            color: #333;
+        }
+        
+        .browser-content {
+            flex-grow: 1;
+            display: flex;
+            position: relative;
+        }
+        
+        .sidebar {
+            width: 250px;
+            background-color: var(--secondary);
+            color: var(--white);
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+        }
+        
+        .sidebar-header {
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .sidebar-header img {
+            height: 40px;
+        }
+        
+        .sidebar-menu {
+            flex-grow: 1;
+            padding: 20px 0;
+        }
+        
+        .menu-item {
+            padding: 12px 20px;
+            display: flex;
+            align-items: center;
+            font-size: 14px;
+            color: rgba(255, 255, 255, 0.8);
+            text-decoration: none;
+            transition: background-color 0.2s;
+        }
+        
+        .menu-item:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+        
+        .menu-item.active {
+            background-color: var(--primary);
+            color: var(--secondary);
+        }
+        
+        .menu-item .material-icons {
+            margin-right: 10px;
+            font-size: 20px;
+        }
+        
+        .sidebar-footer {
+            padding: 15px 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.6);
+        }
+        
+        .main-content {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+            background-color: var(--body-bg);
+        }
+        
+        .top-bar {
+            height: 64px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 20px;
+            background-color: var(--white);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+        
+        .page-title {
+            font-size: 20px;
+            font-weight: 500;
+            color: var(--grey-darker);
+        }
+        
+        .user-menu {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .user-name {
+            font-size: 14px;
+            font-weight: 500;
+        }
+        
+        .user-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background-color: var(--primary-light);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--secondary);
+            font-weight: 500;
+        }
+        
+        .content-container {
+            padding: 20px;
+            flex-grow: 1;
+        }
+        
+        .card {
+            background-color: var(--white);
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+            overflow: hidden;
+        }
+        
+        .card-header {
+            padding: 16px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .card-title {
+            font-size: 18px;
+            font-weight: 500;
+            color: var(--grey-darker);
+        }
+        
+        .filter-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .search-input {
+            padding: 8px 12px;
+            padding-left: 36px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            font-size: 14px;
+            position: relative;
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 0 24 24" width="24"><path d="M0 0h24v24H0z" fill="none"/><path fill="%23757575" d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>');
+            background-repeat: no-repeat;
+            background-position: 10px center;
+            background-size: 16px 16px;
+            width: 200px;
+        }
+        
+        .action-button {
+            padding: 8px 16px;
+            background-color: var(--primary);
+            color: var(--secondary);
+            border: none;
+            border-radius: 4px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        
+        .action-button:hover {
+            background-color: var(--primary-dark);
+        }
+        
+        .table-container {
+            width: 100%;
+            overflow-x: auto;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        th {
+            padding: 12px 20px;
+            text-align: left;
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--grey-dark);
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        td {
+            padding: 12px 20px;
+            font-size: 14px;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        tr:hover {
+            background-color: rgba(0, 0, 0, 0.02);
+        }
+        
+        .bank-logo {
+            width: 40px;
+            height: 40px;
+            object-fit: contain;
+            border-radius: 4px;
+        }
+        
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+        
+        .status-badge.active {
+            background-color: rgba(13, 200, 132, 0.1);
+            color: var(--success);
+        }
+        
+        .status-badge.inactive {
+            background-color: rgba(255, 74, 70, 0.1);
+            color: var(--danger);
+        }
+        
+        .table-action {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .action-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            color: var(--grey-dark);
+            transition: background-color 0.2s;
+        }
+        
+        .action-icon:hover {
+            background-color: var(--border-color);
+        }
+        
+        .pagination {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px 20px;
+            border-top: 1px solid var(--border-color);
+        }
+        
+        .pagination-info {
+            font-size: 14px;
+            color: var(--grey-dark);
+        }
+        
+        .pagination-actions {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .pagination-button {
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            background-color: var(--white);
+            color: var(--grey-dark);
+            cursor: pointer;
+        }
+        
+        .pagination-button.active {
+            background-color: var(--primary);
+            border-color: var(--primary);
+            color: var(--secondary);
+        }
+        
+        .pagination-button:hover:not(.active) {
+            background-color: var(--body-bg);
+        }
+        
+        .pagination-button.disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        /* Modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+        
+        .modal {
+            width: 500px;
+            background-color: var(--white);
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+        
+        .modal-header {
+            padding: 16px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .modal-title {
+            font-size: 18px;
+            font-weight: 500;
+            color: var(--grey-darker);
+        }
+        
+        .modal-close {
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: transparent;
+            border: none;
+            color: var(--grey-dark);
+            cursor: pointer;
+            border-radius: 4px;
+        }
+        
+        .modal-close:hover {
+            background-color: var(--border-color);
+        }
+        
+        .modal-body {
+            padding: 20px;
+        }
+        
+        .form-group {
+            margin-bottom: 16px;
+        }
+        
+        .form-label {
+            display: block;
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--grey-darker);
+            margin-bottom: 8px;
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            font-size: 14px;
+            color: var(--grey-darker);
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+        
+        .form-row {
+            display: flex;
+            gap: 16px;
+        }
+        
+        .form-col {
+            flex: 1;
+        }
+        
+        .file-input-container {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        
+        .file-input-label {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 10px;
+            border: 1px dashed var(--border-color);
+            border-radius: 4px;
+            color: var(--grey-dark);
+            cursor: pointer;
+            font-size: 14px;
+        }
+        
+        .file-input-label:hover {
+            background-color: var(--body-bg);
+        }
+        
+        .file-input {
+            display: none;
+        }
+        
+        .file-preview {
+            width: 100%;
+            height: 120px;
+            background-color: var(--body-bg);
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+        
+        .file-preview img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+        }
+        
+        .modal-footer {
+            padding: 16px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            gap: 10px;
+            border-top: 1px solid var(--border-color);
+        }
+        
+        .modal-button {
+            padding: 8px 16px;
+            border-radius: 4px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+        }
+        
+        .modal-button.primary {
+            background-color: var(--primary);
+            color: var(--secondary);
+            border: none;
+        }
+        
+        .modal-button.primary:hover {
+            background-color: var(--primary-dark);
+        }
+        
+        .modal-button.secondary {
+            background-color: var(--white);
+            color: var(--grey-dark);
+            border: 1px solid var(--border-color);
+        }
+        
+        .modal-button.secondary:hover {
+            background-color: var(--body-bg);
+        }
+    </style>
+</head>
+<body>
+    <div class="browser-frame">
+        <div class="browser-header">
+            <div class="browser-controls">
+                <div class="browser-control close"></div>
+                <div class="browser-control minimize"></div>
+                <div class="browser-control maximize"></div>
+            </div>
+            <div class="browser-address-bar">
+                <span>https://admin.token-services.com/banks</span>
+            </div>
+        </div>
+        <div class="browser-content">
+            <div class="sidebar">
+                <div class="sidebar-header">
+                    <img src="https://via.placeholder.com/150x40?text=Token+Admin" alt="Token Admin Logo">
+                </div>
+                <div class="sidebar-menu">
+                    <a href="#" class="menu-item">
+                        <span class="material-icons">dashboard</span>
+                        儀表板
+                    </a>
+                    <a href="#" class="menu-item">
+                        <span class="material-icons">people</span>
+                        用戶管理
+                    </a>
+                    <a href="#" class="menu-item">
+                        <span class="material-icons">shopping_cart</span>
+                        訂單管理
+                    </a>
+                    <a href="#" class="menu-item">
+                        <span class="material-icons">description</span>
+                        待處理訂單
+                    </a>
+                    <a href="#" class="menu-item active">
+                        <span class="material-icons">account_balance</span>
+                        銀行管理
+                    </a>
+                    <a href="#" class="menu-item">
+                        <span class="material-icons">admin_panel_settings</span>
+                        角色權限
+                    </a>
+                    <a href="#" class="menu-item">
+                        <span class="material-icons">settings</span>
+                        系統設置
+                    </a>
+                </div>
+                <div class="sidebar-footer">
+                    版本 1.0.0
+                </div>
+            </div>
+            <div class="main-content">
+                <div class="top-bar">
+                    <div class="page-title">銀行管理</div>
+                    <div class="user-menu">
+                        <span class="user-name">管理員</span>
+                        <div class="user-avatar">A</div>
+                    </div>
+                </div>
+                <div class="content-container">
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="card-title">銀行列表</div>
+                            <div class="filter-container">
+                                <input type="text" class="search-input" placeholder="搜索銀行名稱...">
+                                <button class="action-button">
+                                    <span class="material-icons">add</span>
+                                    新增銀行
+                                </button>
+                            </div>
+                        </div>
+                        <div class="table-container">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Logo</th>
+                                        <th>銀行名稱</th>
+                                        <th>代碼</th>
+                                        <th>支付方式</th>
+                                        <th>狀態</th>
+                                        <th>操作</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>1</td>
+                                        <td><img src="https://via.placeholder.com/40x40?text=ICBC" alt="工商銀行" class="bank-logo"></td>
+                                        <td>中國工商銀行</td>
+                                        <td>ICBC</td>
+                                        <td>銀行轉賬</td>
+                                        <td><span class="status-badge active">啟用</span></td>
+                                        <td>
+                                            <div class="table-action">
+                                                <div class="action-icon">
+                                                    <span class="material-icons">edit</span>
+                                                </div>
+                                                <div class="action-icon">
+                                                    <span class="material-icons">toggle_on</span>
+                                                </div>
+                                                <div class="action-icon">
+                                                    <span class="material-icons">delete</span>
+                                                </div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>2</td>
+                                        <td><img src="https://via.placeholder.com/40x40?text=CCB" alt="建設銀行" class="bank-logo"></td>
+                                        <td>中國建設銀行</td>
+                                        <td>CCB</td>
+                                        <td>銀行轉賬</td>
+                                        <td><span class="status-badge active">啟用</span></td>
+                                        <td>
+                                            <div class="table-action">
+                                                <div class="action-icon">
+                                                    <span class="material-icons">edit</span>
+                                                </div>
+                                                <div class="action-icon">
+                                                    <span class="material-icons">toggle_on</span>
+                                                </div>
+                                                <div class="action-icon">
+                                                    <span class="material-icons">delete</span>
+                                                </div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>3</td>
+                                        <td><img src="https://via.placeholder.com/40x40?text=BOC" alt="中國銀行" class="bank-logo"></td>
+                                        <td>中國銀行</td>
+                                        <td>BOC</td>
+                                        <td>銀行轉賬</td>
+                                        <td><span class="status-badge active">啟用</span></td>
+                                        <td>
+                                            <div class="table-action">
+                                                <div class="action-icon">
+                                                    <span class="material-icons">edit</span>
+                                                </div>
+                                                <div class="action-icon">
+                                                    <span class="material-icons">toggle_on</span>
+                                                </div>
+                                                <div class="action-icon">
+                                                    <span class="material-icons">delete</span>
+                                                </div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>4</td>
+                                        <td><img src="https://via.placeholder.com/40x40?text=ABC" alt="農業銀行" class="bank-logo"></td>
+                                        <td>中國農業銀行</td>
+                                        <td>ABC</td>
+                                        <td>銀行轉賬</td>
+                                        <td><span class="status-badge inactive">禁用</span></td>
+                                        <td>
+                                            <div class="table-action">
+                                                <div class="action-icon">
+                                                    <span class="material-icons">edit</span>
+                                                </div>
+                                                <div class="action-icon">
+                                                    <span class="material-icons">toggle_off</span>
+                                                </div>
+                                                <div class="action-icon">
+                                                    <span class="material-icons">delete</span>
+                                                </div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>5</td>
+                                        <td><img src="https://via.placeholder.com/40x40?text=WX" alt="微信支付" class="bank-logo"></td>
+                                        <td>微信支付</td>
+                                        <td>WXPAY</td>
+                                        <td>電子支付</td>
+                                        <td><span class="status-badge active">啟用</span></td>
+                                        <td>
+                                            <div class="table-action">
+                                                <div class="action-icon">
+                                                    <span class="material-icons">edit</span>
+                                                </div>
+                                                <div class="action-icon">
+                                                    <span class="material-icons">toggle_on</span>
+                                                </div>
+                                                <div class="action-icon">
+                                                    <span class="material-icons">delete</span>
+                                                </div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="pagination">
+                            <div class="pagination-info">
+                                顯示 1 到 5 共 15 條記錄
+                            </div>
+                            <div class="pagination-actions">
+                                <button class="pagination-button disabled">
+                                    <span class="material-icons">chevron_left</span>
+                                </button>
+                                <button class="pagination-button active">1</button>
+                                <button class="pagination-button">2</button>
+                                <button class="pagination-button">3</button>
+                                <button class="pagination-button">
+                                    <span class="material-icons">chevron_right</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Modal for adding/editing bank -->
+    <div class="modal-overlay" style="display: block;">
+        <div class="modal">
+            <div class="modal-header">
+                <div class="modal-title">新增銀行</div>
+                <button class="modal-close">
+                    <span class="material-icons">close</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label class="form-label">銀行名稱 *</label>
+                    <input type="text" class="form-input" placeholder="請輸入銀行名稱">
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">銀行代碼 *</label>
+                    <input type="text" class="form-input" placeholder="請輸入銀行代碼">
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-col">
+                        <div class="form-group">
+                            <label class="form-label">支付方式 *</label>
+                            <select class="form-input">
+                                <option value="">請選擇</option>
+                                <option value="bank">銀行轉賬</option>
+                                <option value="epay">電子支付</option>
+                                <option value="other">其他</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-col">
+                        <div class="form-group">
+                            <label class="form-label">狀態 *</label>
+                            <select class="form-input">
+                                <option value="active">啟用</option>
+                                <option value="inactive">禁用</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">銀行 Logo</label>
+                    <div class="file-input-container">
+                        <label class="file-input-label">
+                            <span class="material-icons">upload_file</span>
+                            <span>點擊上傳 Logo</span>
+                            <input type="file" class="file-input">
+                        </label>
+                        <div class="file-preview">
+                            <img src="https://via.placeholder.com/200x100?text=Bank+Logo" alt="Preview">
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">備註</label>
+                    <input type="text" class="form-input" placeholder="請輸入備註信息">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="modal-button secondary">取消</button>
+                <button class="modal-button primary">提交</button>
+            </div>
+        </div>
+    </div>
+</body>
+</html> 
