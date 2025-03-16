@@ -10,7 +10,6 @@ on:
       - 'apps/token-admin-api/**'
       - '.github/workflows/deploy-token-admin-api.yaml'
 
-
 env:
   REGISTRY: ghcr.io
   IMAGE_NAME: token-admin-api

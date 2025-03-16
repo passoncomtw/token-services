@@ -20,7 +20,6 @@ jobs:
   copy-file-to-server:
     if: github.event.pull_request.merged == true
     runs-on: mac-mini-build
-    # runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
     # Copy docker-compose and .env files to target server
