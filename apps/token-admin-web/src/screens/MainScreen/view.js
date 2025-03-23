@@ -20,6 +20,7 @@ import PendingScreen from '../PendingScreen';
 import BanksScreen from '../BanksScreen';
 import HomeScreen from '../HomeScreen';
 import UserDetailScreen from '../UserDetailScreen';
+import DashboardScreen from '../DashboardScreen';
 
 const MainScreen = props => {
   const { isAuth } = props;
@@ -48,6 +49,12 @@ const MainScreen = props => {
                   path='/'
                   isAuth={isAuth}
                   component={HomeScreen}
+                />
+                <PrivateRoute
+                  exact
+                  path='/dashboard'
+                  isAuth={isAuth}
+                  component={DashboardScreen}
                 />
                 <PrivateRoute
                   exact
