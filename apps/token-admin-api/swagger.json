@@ -1,0 +1,4123 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "version": "1.0.0",
+    "title": "錢包後台 API",
+    "description": "錢包後台 API Swagger",
+    "license": {
+      "name": "MIT",
+      "url": "https://opensource.org/licenses/MIT"
+    }
+  },
+  "host": "localhost:8300",
+  "basePath": "/",
+  "tags": [
+    {
+      "name": "錢包",
+      "description": "使用者用 admin"
+    }
+  ],
+  "schemes": [
+    "http",
+    "https"
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "securityDefinitions": {
+    "Bearer": {
+      "type": "apiKey",
+      "name": "Authorization",
+      "in": "header"
+    }
+  },
+  "paths": {
+    "/auth/login/password": {
+      "post": {
+        "tags": [
+          "使用者驗證"
+        ],
+        "summary": "編輯後台使用者登入密碼",
+        "description": "編輯後台使用者登入密碼",
+        "operationId": "updateBackendUserLoginPassword",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "description": "Bearer ${{token}}",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "body",
+            "type": "object",
+            "name": "data",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "password": {
+                  "type": "string",
+                  "description": "舊密碼: 6~20 英文數字組合",
+                  "required": true,
+                  "default": "a12345678"
+                },
+                "newPassword": {
+                  "type": "string",
+                  "description": "新密碼: 6~20 英文數字組合",
+                  "required": true,
+                  "default": "a123456789"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "編輯登入密碼成功",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "success": {
+                  "type": "boolean",
+                  "description": "是否成功",
+                  "default": true
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "error"
+          }
+        }
+      }
+    },
+    "/auth/logout": {
+      "post": {
+        "tags": [
+          "使用者驗證"
+        ],
+        "summary": "使用者登出",
+        "description": "使用者登出",
+        "operationId": "logout",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "description": "Bearer ${{token}}",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "登出成功",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "success": {
+                  "type": "boolean",
+                  "default": true
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/login": {
+      "post": {
+        "tags": [
+          "使用者驗證"
+        ],
+        "summary": "使用者登入",
+        "description": "使用者登入取回 JWT token",
+        "operationId": "login",
+        "parameters": [
+          {
+            "in": "body",
+            "type": "object",
+            "name": "data",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "account": {
+                  "type": "string",
+                  "default": "admin2021"
+                },
+                "password": {
+                  "type": "string",
+                  "default": "a12345678"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "success": {
+                  "type": "boolean",
+                  "default": true
+                },
+                "data": {
+                  "type": "object",
+                  "$ref": "#/definitions/LOGIN_RESPONSE"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/backendactors/permissions": {
+      "get": {
+        "tags": [
+          "後台角色"
+        ],
+        "summary": "取回所有的權限",
+        "description": "取回所有的權限",
+        "operationId": "getPermissions",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "description": "Bearer ${{token}}",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "取回成功",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "success": {
+                  "type": "boolean",
+                  "description": "是否成功",
+                  "default": true
+                },
+                "data": {
+                  "type": "object",
+                  "properties": {
+                    "functionName": {
+                      "type": "string",
+                      "description": "權限名稱",
+                      "default": "会员管理"
+                    },
+                    "functionIdentify": {
+                      "type": "number",
+                      "description": "權限 Id",
+                      "default": 1
+                    },
+                    "parentId": {
+                      "type": "number",
+                      "description": "父層權限 Id, 第一層是 null",
+                      "default": null
+                    },
+                    "children": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "functionName": {
+                            "type": "string",
+                            "description": "權限名稱",
+                            "default": "订单（检视）"
+                          },
+                          "functionIdentify": {
+                            "type": "number",
+                            "description": "權限 Id",
+                            "default": 2
+                          },
+                          "parentId": {
+                            "type": "number",
+                            "description": "父層權限 Id, 第一層是 null",
+                            "default": 1
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "後台角色"
+        ],
+        "summary": "新增後台角色",
+        "description": "新增後台角色",
+        "operationId": "createbackenduser",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "description": "Bearer ${{token}}",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "body",
+            "type": "object",
+            "name": "data",
+            "schema": {
+              "type": "object",
+              "$ref": "#/definitions/createBackendactor"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "新增成功",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "success": {
+                  "type": "boolean",
+                  "description": "是否成功",
+                  "default": true
+                },
+                "data": {
+                  "type": "object",
+                  "$ref": "#/definitions/Backendactor"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/backendactors": {
+      "get": {
+        "tags": [
+          "後台角色"
+        ],
+        "summary": "取回角色列表",
+        "description": "取回角色列表",
+        "operationId": "getBackendActors",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "description": "Bearer ${{token}}",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "取回成功",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "success": {
+                  "type": "boolean",
+                  "description": "是否成功",
+                  "default": true
+                },
+                "data": {
+                  "type": "object",
+                  "$ref": "#/definitions/Backendactor"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "後台角色"
+        ],
+        "summary": "新增後台角色",
+        "description": "新增後台角色",
+        "operationId": "createbackenduser",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "description": "Bearer ${{token}}",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "body",
+            "type": "object",
+            "name": "data",
+            "schema": {
+              "type": "object",
+              "$ref": "#/definitions/createBackendactor"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "新增成功",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "success": {
+                  "type": "boolean",
+                  "description": "是否成功",
+                  "default": true
+                },
+                "data": {
+                  "type": "object",
+                  "$ref": "#/definitions/Backendactor"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/backendactors/{backendActorId}": {
+      "put": {
+        "tags": [
+          "後台角色"
+        ],
+        "summary": "編輯後台角色",
+        "description": "編輯後台角色",
+        "operationId": "updatebackenduser",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "description": "Bearer ${{token}}",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "backendActorId",
+            "description": "角色 ID",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "default": 1
+          },
+          {
+            "in": "body",
+            "type": "object",
+            "name": "data",
+            "schema": {
+              "type": "object",
+              "$ref": "#/definitions/createBackendactor"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "編輯成功",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "success": {
+                  "type": "boolean",
+                  "description": "是否成功",
+                  "default": true
+                },
+                "data": {
+                  "type": "object",
+                  "$ref": "#/definitions/Backendactor"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "後台角色"
+        ],
+        "summary": "刪除後台角色",
+        "description": "刪除後台角色",
+        "operationId": "deletebackenduser",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "description": "Bearer ${{token}}",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "backendActorId",
+            "description": "角色 ID",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "default": 1
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "刪除成功",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "success": {
+                  "type": "boolean",
+                  "description": "是否成功",
+                  "default": true
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/backendusers/{backendUserId}": {
+      "put": {
+        "tags": [
+          "後台使用者"
+        ],
+        "summary": "編輯後台使用者",
+        "description": "編輯後台使用者",
+        "operationId": "updatebackenduser",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "description": "Bearer ${{token}}",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "backendUserId",
+            "description": "要編輯的使用者 ID",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "body",
+            "type": "object",
+            "name": "data",
+            "schema": {
+              "type": "object",
+              "$ref": "#/definitions/UpdateBackenduser"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "編輯成功",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "success": {
+                  "type": "boolean",
+                  "description": "是否成功",
+                  "default": true
+                },
+                "data": {
+                  "type": "object",
+                  "$ref": "#/definitions/Backenduser"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "後台使用者"
+        ],
+        "summary": "刪除後台使用者",
+        "description": "刪除後台使用者",
+        "operationId": "deletebackenduser",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "description": "Bearer ${{token}}",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "backendUserId",
+            "description": "要編輯的使用者 ID",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "刪除成功",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "success": {
+                  "type": "boolean",
+                  "description": "是否成功",
+                  "default": true
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/backendusers": {
+      "get": {
+        "tags": [
+          "後台使用者"
+        ],
+        "summary": "後台使用者列表",
+        "description": "後台使用者列表",
+        "operationId": "backenduserlist",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "description": "Bearer ${{token}}",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "type": "string",
+            "name": "account",
+            "require": false,
+            "example": "wendy",
+            "description": "後台使用者帳號"
+          },
+          {
+            "in": "query",
+            "type": "string",
+            "name": "name",
+            "require": false,
+            "example": "wendy",
+            "description": "後台使用者暱稱"
+          },
+          {
+            "in": "query",
+            "type": "number",
+            "name": "status",
+            "require": false,
+            "example": 1,
+            "enum": [
+              0,
+              1
+            ],
+            "description": "帳號狀態: 0: 停用, 1: 啟用"
+          },
+          {
+            "in": "query",
+            "type": "number",
+            "name": "page",
+            "require": false,
+            "default": 1,
+            "description": "頁數"
+          },
+          {
+            "in": "query",
+            "type": "number",
+            "name": "size",
+            "require": false,
+            "default": 10,
+            "description": "每頁資訊"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "新增成功",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "success": {
+                  "type": "boolean",
+                  "description": "是否成功",
+                  "default": true
+                },
+                "data": {
+                  "type": "object",
+                  "$ref": "#/definitions/Backendusers"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "後台使用者"
+        ],
+        "summary": "新增後台使用者",
+        "description": "新增後台使用者",
+        "operationId": "createbackenduser",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "description": "Bearer ${{token}}",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "body",
+            "type": "object",
+            "name": "data",
+            "schema": {
+              "type": "object",
+              "$ref": "#/definitions/CreateBackenduser"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "後台使用者列表",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "success": {
+                  "type": "boolean",
+                  "description": "是否成功",
+                  "default": true
+                },
+                "data": {
+                  "type": "object",
+                  "$ref": "#/definitions/Backendusers"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/banks/{bankId}": {
+      "put": {
+        "tags": [
+          "銀行"
+        ],
+        "delete": true,
+        "summary": "編輯銀行",
+        "description": "編輯銀行",
+        "operationId": "updateBank",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "description": "Bearer ${{token}}",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "bankId",
+            "description": "銀行的 id",
+            "required": true,
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "in": "body",
+            "name": "data",
+            "description": "銀行資訊",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "$ref": "#/definitions/createBank"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "success": {
+                  "type": "boolean",
+                  "description": "是否成功",
+                  "default": true
+                },
+                "data": {
+                  "type": "object",
+                  "$ref": "#/definitions/basicBank"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "error"
+          }
+        }
+      }
+    },
+    "/banks": {
+      "get": {
+        "tags": [
+          "銀行"
+        ],
+        "delete": true,
+        "summary": "銀行列表",
+        "description": "銀行列表",
+        "operationId": "getBanks",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "description": "Bearer ${{token}}",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "success": {
+                  "type": "boolean",
+                  "description": "是否成功",
+                  "default": true
+                },
+                "data": {
+                  "type": "array",
+                  "$ref": "#/definitions/basicBanks"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "error"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "銀行"
+        ],
+        "delete": true,
+        "summary": "新增銀行",
+        "description": "新增銀行",
+        "operationId": "createBank",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "description": "Bearer ${{token}}",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "body",
+            "name": "data",
+            "description": "銀行資訊",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "$ref": "#/definitions/createBank"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "success": {
+                  "type": "boolean",
+                  "description": "是否成功",
+                  "default": true
+                },
+                "data": {
+                  "type": "object",
+                  "$ref": "#/definitions/basicBank"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "error"
+          }
+        }
+      }
+    },
+    "/bankcards/{bankcardId}": {
+      "get": {
+        "tags": [
+          "銀行卡"
+        ],
+        "delete": true,
+        "summary": "銀行卡詳細資訊",
+        "description": "銀行卡詳細資訊",
+        "operationId": "bankcardDetail",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "description": "Bearer ${{token}}",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "bankcardId",
+            "description": "銀行卡 Id",
+            "required": true,
+            "default": 1,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "success": {
+                  "type": "boolean",
+                  "description": "是否成功",
+                  "default": true
+                },
+                "data": {
+                  "type": "object",
+                  "$ref": "#/definitions/Bankcard"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "error"
+          }
+        }
+      }
+    },
+    "/bankcards": {
+      "get": {
+        "tags": [
+          "銀行卡"
+        ],
+        "deleted": true,
+        "summary": "銀行卡列表",
+        "description": "銀行卡列表 有 query 的話要做 url encode",
+        "operationId": "getBankcards",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "description": "Bearer ${{token}}",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "cardNumber",
+            "description": "銀行卡卡號",
+            "required": false,
+            "example": "1231231231",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "bankCode",
+            "description": "銀行代碼",
+            "required": false,
+            "example": "CDC",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "branchName",
+            "description": "開戶支行",
+            "required": false,
+            "example": "民生支行",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "bankName",
+            "description": "開戶行",
+            "required": false,
+            "example": "中央銀行",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "name",
+            "description": "銀行卡 使用者姓名",
+            "required": false,
+            "example": "温蒂",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "account",
+            "description": "銀行卡 使用者帳號",
+            "required": false,
+            "example": "tomasdemo001",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "description": "頁數",
+            "required": true,
+            "example": 1,
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "description": "每頁筆數",
+            "required": true,
+            "example": 10,
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "success": {
+                  "type": "boolean",
+                  "description": "是否成功",
+                  "default": true
+                },
+                "data": {
+                  "type": "object",
+                  "properties": {
+                    "count": {
+                      "type": "number",
+                      "description": "總筆數",
+                      "default": 100
+                    },
+                    "rows": {
+                      "type": "array",
+                      "$ref": "#/definitions/BankcardsResponse"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "error"
+          }
+        }
+      }
+    },
+    "/health-check": {
+      "get": {
+        "tags": [
+          "檢查服務狀態"
+        ],
+        "summary": "檢查服務狀態",
+        "description": "檢查服務狀態",
+        "operationId": "healthCheck",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "服務狀態",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "success": {
+                  "type": "boolean",
+                  "default": true
+                },
+                "data": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string",
+                      "default": "WORKING",
+                      "enum": [
+                        "WORKING: 正常",
+                        "STOP: 停止",
+                        "MAINTAIN: 維護中"
+                      ],
+                      "description": "服務狀態"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/orders/{orderId}": {
+      "put": {
+        "tags": [
+          "訂單"
+        ],
+        "deleted": true,
+        "summary": "完成訂單",
+        "description": "完成訂單",
+        "operationId": "finishTransaction",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "description": "Bearer ${{token}}",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "orderId",
+            "description": "訂單 id",
+            "required": true,
+            "example": "59ce32c9-ae02-4355-b1dc-d66965b24d0f",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "success": {
+                  "type": "boolean",
+                  "description": "是否成功",
+                  "default": true
+                },
+                "data": {
+                  "type": "object",
+                  "$ref": "#/definitions/Order"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "error"
+          }
+        }
+      }
+    },
+    "/orders/{orderId}/cancel": {
+      "put": {
+        "tags": [
+          "訂單"
+        ],
+        "deleted": true,
+        "summary": "取消訂單",
+        "description": "取消訂單",
+        "operationId": "cancelTransaction",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "description": "Bearer ${{token}}",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "orderId",
+            "description": "訂單 id",
+            "required": true,
+            "example": "59ce32c9-ae02-4355-b1dc-d66965b24d0f",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "body",
+            "type": "object",
+            "name": "data",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "cancelReason": {
+                  "type": "string",
+                  "default": "test",
+                  "description": "取消的原因"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "success": {
+                  "type": "boolean",
+                  "description": "是否成功",
+                  "default": true
+                },
+                "data": {
+                  "type": "object",
+                  "$ref": "#/definitions/Order"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "error"
+          }
+        }
+      }
+    },
+    "/orders": {
+      "get": {
+        "tags": [
+          "訂單"
+        ],
+        "deleted": true,
+        "summary": "訂單列表",
+        "description": "訂單列表",
+        "operationId": "transactionList",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "description": "Bearer ${{token}}",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "account",
+            "description": "使用者的 帳號",
+            "required": false,
+            "example": "wendy",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "payer",
+            "description": "收款人/付款人 的暱稱",
+            "required": false,
+            "example": "wendy",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "cancelReason",
+            "description": "取消的理由",
+            "required": false,
+            "example": "test",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "startAt",
+            "description": "搜尋訂單建立的時間區段 startAt",
+            "required": false,
+            "example": "2021-04-01 09:00:00",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "endAt",
+            "description": "搜尋訂單建立的時間區段 endAt",
+            "required": false,
+            "example": "2021-12-02 19:00:00",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "type",
+            "description": "交易類型: 0: 買幣, 1: 賣幣",
+            "required": false,
+            "enum": [
+              0,
+              1
+            ],
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "orderId",
+            "description": "訂單編號",
+            "required": false,
+            "example": "ajkasjl12313",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "description": "訂單狀態: 0: 等待匯款, 1: 已匯款未放行, 2: 已放行, 3: 買家已取消, 4: 賣家已取消",
+            "required": false,
+            "example": "ajkasjl12313",
+            "enum": [
+              0,
+              1,
+              2,
+              3,
+              4
+            ],
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "in": "query",
+            "name": "minAmount",
+            "description": "最低金額的數量",
+            "required": false,
+            "example": 0,
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "in": "query",
+            "name": "maxAmount",
+            "description": "最高金額數量",
+            "required": false,
+            "example": 10,
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "in": "query",
+            "name": "userId",
+            "type": "string",
+            "require": false,
+            "default": 0,
+            "description": "建立訂單的使用者id"
+          },
+          {
+            "in": "query",
+            "name": "finishAtType",
+            "enum": [
+              "overdue",
+              "notOverdue"
+            ],
+            "description": "交易時間, 沒有值代表全部, overdue: 逾期, notOverdue: 未逾期",
+            "require": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "require": false,
+            "default": 1,
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "require": false,
+            "default": 10,
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "success": {
+                  "type": "boolean",
+                  "description": "是否成功",
+                  "default": true
+                },
+                "data": {
+                  "type": "object",
+                  "properties": {
+                    "count": {
+                      "type": "number",
+                      "description": "總筆數",
+                      "default": 10
+                    },
+                    "rows": {
+                      "type": "array",
+                      "$ref": "#/definitions/OrderResponse"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "error"
+          }
+        }
+      }
+    },
+    "/pending/orders/{pendingOrderId}": {
+      "delete": {
+        "tags": [
+          "掛單"
+        ],
+        "deleted": true,
+        "summary": "刪除掛單",
+        "description": "刪除掛單",
+        "operationId": "deleteOrder",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "description": "Bearer ${{token}}",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "pendingOrderId",
+            "description": "掛單的 id: UUID",
+            "required": true,
+            "example": "634f5e3d-f591-4cd5-87ad-aed2bc12cb5b",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "success": {
+                  "type": "boolean",
+                  "description": "是否成功",
+                  "default": true
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "error"
+          }
+        }
+      }
+    },
+    "/pending/orders/{pendingOrderId}/open": {
+      "put": {
+        "tags": [
+          "掛單"
+        ],
+        "deleted": true,
+        "summary": "開啟掛單",
+        "description": "開啟掛單",
+        "operationId": "openOrder",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "description": "Bearer ${{token}}",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "pendingOrderId",
+            "description": "掛單的 id: UUID",
+            "required": true,
+            "example": "634f5e3d-f591-4cd5-87ad-aed2bc12cb5b",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "success": {
+                  "type": "boolean",
+                  "description": "是否成功",
+                  "default": true
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "error"
+          }
+        }
+      }
+    },
+    "/pending/orders/{pendingOrderId}/cancel": {
+      "put": {
+        "tags": [
+          "掛單"
+        ],
+        "deleted": true,
+        "summary": "取消掛單",
+        "description": "取消掛單",
+        "operationId": "cancelOrder",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "description": "Bearer ${{token}}",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "pendingOrderId",
+            "description": "掛單的 id: UUID",
+            "required": true,
+            "example": "634f5e3d-f591-4cd5-87ad-aed2bc12cb5b",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "success": {
+                  "type": "boolean",
+                  "description": "是否成功",
+                  "default": true
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "error"
+          }
+        }
+      }
+    },
+    "/pending/orders/{pendingOrderId}/stop": {
+      "put": {
+        "tags": [
+          "掛單"
+        ],
+        "deleted": true,
+        "summary": "暫停掛單",
+        "description": "暫停掛單",
+        "operationId": "stopOrder",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "description": "Bearer ${{token}}",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "pendingOrderId",
+            "description": "掛單的 id: UUID",
+            "required": true,
+            "example": "634f5e3d-f591-4cd5-87ad-aed2bc12cb5b",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "success": {
+                  "type": "boolean",
+                  "description": "是否成功",
+                  "default": true
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "error"
+          }
+        }
+      }
+    },
+    "/pending/orders": {
+      "get": {
+        "tags": [
+          "掛單"
+        ],
+        "deleted": true,
+        "summary": "掛單列表",
+        "description": "掛單列表",
+        "operationId": "pendingOrders",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "description": "Bearer ${{token}}",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "pendingOrderId",
+            "description": "掛單 ID",
+            "required": false,
+            "example": "c66dc29e-fd6d-43c2-9b21-1c12a25c4226",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "startAt",
+            "description": "開始的時間",
+            "required": false,
+            "example": "2021-04-01 00:00:00",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "endAt",
+            "description": "結束的時間",
+            "required": false,
+            "example": "2021-04-02 00:00:00",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "account",
+            "description": "建立掛單的使用者 account",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "minAmount",
+            "description": "最小的數量",
+            "required": false,
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "in": "query",
+            "name": "maxAmount",
+            "description": "最大的數量",
+            "required": false,
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "in": "query",
+            "name": "minBalance",
+            "description": "最小的餘額",
+            "required": false,
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "in": "query",
+            "name": "maxBalance",
+            "description": "最大的餘額",
+            "required": false,
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "in": "query",
+            "name": "userId",
+            "type": "string",
+            "require": false,
+            "description": "建立掛單的使用者id"
+          },
+          {
+            "in": "query",
+            "name": "type",
+            "type": "integer",
+            "require": false,
+            "description": "類型: 0: 買幣, 1: 賣幣",
+            "enum": [
+              0,
+              1
+            ]
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "type": "integer",
+            "require": false,
+            "description": "掛單狀態: 0: 掛單中, 1: 暫停掛單, 2: 取消掛單, 3: 已刪除掛單",
+            "enum": [
+              0,
+              1,
+              2,
+              3
+            ]
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "description": "取為第幾頁的資料",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "default": 1
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "description": "取回幾筆資料",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "default": 1
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "success": {
+                  "type": "boolean",
+                  "description": "是否成功",
+                  "default": true
+                },
+                "data": {
+                  "type": "object",
+                  "properties": {
+                    "count": {
+                      "type": "number",
+                      "description": "總共筆數",
+                      "default": 1
+                    },
+                    "rows": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "$ref": "#/definitions/PendingOrder"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "error"
+          }
+        }
+      }
+    },
+    "/users/{userId}/unlock": {
+      "put": {
+        "tags": [
+          "使用者"
+        ],
+        "summary": "解鎖使用者",
+        "description": "解鎖使用者",
+        "operationId": "unlockUser",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "description": "Bearer ${{token}}",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "userId",
+            "description": 1,
+            "required": true,
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "解鎖成功",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "success": {
+                  "type": "boolean",
+                  "description": "是否成功",
+                  "default": true
+                },
+                "data": {
+                  "type": "object",
+                  "$ref": "#/definitions/UserDetail"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "error"
+          }
+        }
+      }
+    },
+    "/users/{userId}/transaction/password": {
+      "put": {
+        "tags": [
+          "使用者"
+        ],
+        "summary": "編輯使用者交易密碼",
+        "description": "編輯使用者交易密碼",
+        "operationId": "updateUserTransationPassword",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "description": "Bearer ${{token}}",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "userId",
+            "description": 1,
+            "required": true,
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "in": "body",
+            "type": "object",
+            "name": "data",
+            "schema": {
+              "type": "object",
+              "$ref": "#/definitions/UpdateUserTransactionCode"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "修改成功",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "success": {
+                  "type": "boolean",
+                  "description": "是否成功",
+                  "default": true
+                },
+                "data": {
+                  "type": "object",
+                  "$ref": "#/definitions/UserDetail"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "error"
+          }
+        }
+      }
+    },
+    "/users/{userId}/login/password": {
+      "put": {
+        "tags": [
+          "使用者"
+        ],
+        "summary": "編輯使用者登入密碼",
+        "description": "編輯使用者登入密碼",
+        "operationId": "updateUserLoginPassword",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "description": "Bearer ${{token}}",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "userId",
+            "description": 1,
+            "required": true,
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "in": "body",
+            "type": "object",
+            "name": "data",
+            "schema": {
+              "type": "object",
+              "$ref": "#/definitions/UpdateUserLoginPassword"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "編輯登入密碼成功",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "success": {
+                  "type": "boolean",
+                  "description": "是否成功",
+                  "default": true
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "error"
+          }
+        }
+      }
+    },
+    "/users/{userId}/bankcards": {
+      "get": {
+        "tags": [
+          "使用者"
+        ],
+        "summary": "取得使用者銀行卡列表",
+        "description": "取得使用者銀行卡列表",
+        "operationId": "getUserBankcards",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "description": "Bearer ${{token}}",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "userId",
+            "description": "使用者 Id",
+            "required": true,
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "description": "取為第幾頁的資料",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "default": 1
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "description": "取回幾筆資料",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "default": 10
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "取回列表成功",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "success": {
+                  "type": "boolean",
+                  "description": "是否成功",
+                  "default": true
+                },
+                "data": {
+                  "type": "object",
+                  "$ref": "#/definitions/Bankcards"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "error"
+          }
+        }
+      }
+    },
+    "/users/{userId}/pending/orders": {
+      "get": {
+        "tags": [
+          "使用者"
+        ],
+        "summary": "取得使用者掛單列表",
+        "description": "取得使用者掛單列表",
+        "operationId": "getUserPendingOrders",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "description": "Bearer ${{token}}",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "userId",
+            "description": "使用者 Id",
+            "required": true,
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "description": "取為第幾頁的資料",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "default": 1
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "description": "取回幾筆資料",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "default": 1
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "取回列表成功",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "success": {
+                  "type": "boolean",
+                  "description": "是否成功",
+                  "default": true
+                },
+                "data": {
+                  "type": "object",
+                  "properties": {
+                    "rows": {
+                      "type": "array",
+                      "$ref": "#/definitions/PendingOrders"
+                    },
+                    "count": {
+                      "type": "number",
+                      "description": "總筆數",
+                      "default": 10
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "error"
+          }
+        }
+      }
+    },
+    "/users/{userId}/orders": {
+      "get": {
+        "tags": [
+          "使用者"
+        ],
+        "summary": "取得使用者訂單列表",
+        "description": "取得使用者訂單列表",
+        "operationId": "getUserOrders",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "description": "Bearer ${{token}}",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "userId",
+            "description": "使用者 Id",
+            "required": true,
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "取回列表成功",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "success": {
+                  "type": "boolean",
+                  "description": "是否成功",
+                  "default": true
+                },
+                "data": {
+                  "type": "object",
+                  "$ref": "#/definitions/Orders"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "error"
+          }
+        }
+      }
+    },
+    "/users/{userId}": {
+      "get": {
+        "tags": [
+          "使用者"
+        ],
+        "summary": "取得使用者詳細資訊",
+        "description": "取得使用者詳細資訊",
+        "operationId": "getUserDetail",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "description": "Bearer ${{token}}",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "userId",
+            "description": "使用者Id",
+            "required": true,
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "取回資訊成功",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "success": {
+                  "type": "boolean",
+                  "description": "是否成功",
+                  "default": true
+                },
+                "data": {
+                  "type": "object",
+                  "$ref": "#/definitions/UserDetail"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "error"
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "使用者"
+        ],
+        "summary": "編輯使用者(商家)",
+        "description": "編輯使用者(商家)",
+        "operationId": "updateMerchant",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "description": "Bearer ${{token}}",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "description": "要編輯的使用者 Id",
+            "type": "number",
+            "name": "userId"
+          },
+          {
+            "in": "body",
+            "type": "object",
+            "name": "data",
+            "schema": {
+              "type": "object",
+              "$ref": "#/definitions/updateUserRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "success": {
+                  "type": "boolean",
+                  "description": "是否成功",
+                  "default": true
+                },
+                "data": {
+                  "type": "object",
+                  "$ref": "#/definitions/User"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "error"
+          }
+        }
+      }
+    },
+    "/users/login/password": {
+      "put": {
+        "tags": [
+          "使用者"
+        ],
+        "summary": "編輯自己的登入密碼",
+        "description": "編輯自己的登入密碼",
+        "operationId": "updateSelfLoginPassword",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "description": "Bearer ${{token}}",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "body",
+            "type": "object",
+            "name": "data",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "password": {
+                  "type": "string",
+                  "description": "舊密碼",
+                  "default": "a12345678"
+                },
+                "newPassword": {
+                  "type": "string",
+                  "description": "新密碼",
+                  "default": "a123456789"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "編輯自己登入密碼成功",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "success": {
+                  "type": "boolean",
+                  "description": "是否成功",
+                  "default": true
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "error"
+          }
+        }
+      }
+    },
+    "/users": {
+      "get": {
+        "tags": [
+          "使用者"
+        ],
+        "delete": true,
+        "summary": "使用者列表",
+        "description": "使用者列表",
+        "operationId": "getusers",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "description": "Bearer ${{token}}",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "type": "string",
+            "name": "account",
+            "description": "使用者帳號",
+            "require": false,
+            "example": "edmond"
+          },
+          {
+            "in": "query",
+            "type": "string",
+            "name": "email",
+            "description": "使用者信箱",
+            "require": false,
+            "example": "aaa@bbb.cc"
+          },
+          {
+            "in": "query",
+            "type": "string",
+            "name": "name",
+            "description": "使用者暱稱",
+            "require": false,
+            "example": "edmond"
+          },
+          {
+            "in": "query",
+            "type": "number",
+            "name": "status",
+            "description": "會員狀態: 0: 停用, 1: 啟用",
+            "require": false,
+            "enum": [
+              0,
+              1
+            ]
+          },
+          {
+            "in": "query",
+            "type": "number",
+            "name": "orderStatus",
+            "description": "掛單狀態: 0: 凍結, 1: 啟用",
+            "require": false,
+            "enum": [
+              0,
+              1
+            ]
+          },
+          {
+            "in": "query",
+            "type": "number",
+            "name": "transactionStatus",
+            "description": "交易狀態: 0: 凍結, 1: 啟用",
+            "require": false,
+            "enum": [
+              0,
+              1
+            ]
+          },
+          {
+            "in": "query",
+            "type": "boolean",
+            "name": "isMerchant",
+            "description": "是否為商家",
+            "require": false
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "description": "取為第幾頁的資料",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "default": 1
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "description": "取回幾筆資料",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "default": 10
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "success": {
+                  "type": "boolean",
+                  "description": "是否成功",
+                  "default": true
+                },
+                "data": {
+                  "type": "object",
+                  "$ref": "#/definitions/Users"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "error"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "使用者"
+        ],
+        "summary": "新增使用者(商家)",
+        "description": "新增使用者(商家)",
+        "operationId": "registerMerchant",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "description": "Bearer ${{token}}",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "body",
+            "type": "object",
+            "name": "data",
+            "schema": {
+              "type": "object",
+              "$ref": "#/definitions/REGISTER_USER"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "success": {
+                  "type": "boolean",
+                  "description": "是否成功",
+                  "default": true
+                },
+                "data": {
+                  "type": "object",
+                  "$ref": "#/definitions/User"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "error"
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "LOGIN_RESPONSE": {
+      "required": [],
+      "properties": {
+        "access_token": {
+          "type": "string",
+          "default": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MCwiYWNjb3VudCI6Im1vY2tVc2VyIiwiaWF0IjoxNjIyMTE5NTE0fQ.BHI-z8S1ETsbHbbhCiwQ4yMrxdKcnrL7E-srJ5VK-w4",
+          "description": "jwt 前面需要加上 Berare 使用"
+        },
+        "expireIn": {
+          "type": "integer",
+          "default": 1000000,
+          "description": "到期的時間戳"
+        },
+        "user": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "integer",
+              "description": "使用者 Id",
+              "uniqueItems": true,
+              "default": 1
+            },
+            "type": {
+              "type": "integer",
+              "description": "使用者類型",
+              "default": 0,
+              "enum": [
+                "0: 一般使用者",
+                "1: 平台使用者"
+              ]
+            },
+            "account": {
+              "type": "string",
+              "description": "使用者帳號",
+              "default": "simon"
+            },
+            "name": {
+              "type": "string",
+              "description": "使用者名稱",
+              "default": "simon"
+            },
+            "createAt": {
+              "type": "number",
+              "description": "建立時間",
+              "default": 1131231311322
+            },
+            "permissions": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "$ref": "#/definitions/backendActorPermissions"
+              }
+            }
+          }
+        }
+      }
+    },
+    "backendActorPermissions": {
+      "type": "array",
+      "description": "全像陣列",
+      "items": {
+        "type": "string",
+        "description": "permission Id",
+        "default": "1"
+      }
+    },
+    "createBackendactor": {
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "後台角色名稱",
+          "default": "admin"
+        },
+        "markup": {
+          "type": "string",
+          "description": "後台角色 說明",
+          "required": true,
+          "default": "testadmin"
+        },
+        "permissions": {
+          "type": "array",
+          "description": "全像陣列",
+          "items": {
+            "type": "string",
+            "description": "permission Id",
+            "default": "1"
+          }
+        }
+      }
+    },
+    "Backendactor": {
+      "properties": {
+        "id": {
+          "type": "integer",
+          "description": "後台使用者 Id",
+          "uniqueItems": true,
+          "default": 1
+        },
+        "name": {
+          "type": "string",
+          "description": "後台角色名稱",
+          "default": "admin"
+        },
+        "markup": {
+          "type": "string",
+          "description": "後台角色 說明",
+          "required": true,
+          "default": "testadmin"
+        },
+        "permissions": {
+          "type": "object",
+          "$ref": "#/definitions/backendActorPermissions"
+        }
+      }
+    },
+    "UpdateBackenduser": {
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "後台使用者名稱",
+          "default": "admin001"
+        },
+        "account": {
+          "type": "string",
+          "description": "後台使用者 帳號",
+          "required": true,
+          "default": "testadmin"
+        },
+        "status": {
+          "type": "number",
+          "description": "帳號狀態: 0: 停用, 1: 啟用",
+          "default": 0,
+          "enum": [
+            0,
+            1
+          ],
+          "require": true
+        }
+      }
+    },
+    "CreateBackenduser": {
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "後台使用者名稱",
+          "default": "admin001"
+        },
+        "account": {
+          "type": "string",
+          "description": "後台使用者 帳號",
+          "required": true,
+          "default": "testadmin"
+        },
+        "permissions": {
+          "type": "array",
+          "description": "全像陣列",
+          "items": {
+            "type": "string",
+            "description": "permission Id",
+            "default": "1"
+          }
+        },
+        "actors": {
+          "type": "array",
+          "items": {
+            "description": "後台角色的 Id",
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer",
+                "description": "後台使用者 Id",
+                "uniqueItems": true,
+                "default": 1
+              },
+              "name": {
+                "type": "string",
+                "description": "後台角色名稱",
+                "default": "admin"
+              },
+              "markup": {
+                "type": "string",
+                "description": "後台角色名稱",
+                "default": "admin"
+              }
+            }
+          }
+        },
+        "password": {
+          "type": "string",
+          "description": "後台使用者 密碼",
+          "required": true,
+          "default": "a12345678"
+        }
+      }
+    },
+    "Backenduser": {
+      "properties": {
+        "id": {
+          "type": "integer",
+          "description": "後台使用者 Id",
+          "uniqueItems": true,
+          "default": 1
+        },
+        "name": {
+          "type": "string",
+          "description": "後台使用者名稱",
+          "default": "admin001"
+        },
+        "account": {
+          "type": "string",
+          "description": "後台使用者 帳號",
+          "required": true,
+          "default": "testadmin"
+        },
+        "status": {
+          "type": "number",
+          "description": "帳號狀態: 0: 停用, 1: 啟用",
+          "default": 0,
+          "enum": [
+            0,
+            1
+          ],
+          "require": true
+        },
+        "permissions": {
+          "type": "array",
+          "description": "全像陣列",
+          "items": {
+            "type": "string",
+            "description": "permission Id",
+            "default": "1"
+          }
+        },
+        "actors": {
+          "type": "array",
+          "items": {
+            "description": "後台角色的 Id",
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer",
+                "description": "後台使用者 Id",
+                "uniqueItems": true,
+                "default": 1
+              },
+              "name": {
+                "type": "string",
+                "description": "後台角色名稱",
+                "default": "admin"
+              },
+              "markup": {
+                "type": "string",
+                "description": "後台角色名稱",
+                "default": "admin"
+              }
+            }
+          }
+        }
+      }
+    },
+    "Backendusers": {
+      "type": "array",
+      "$ref": "#/definitions/Backenduser"
+    },
+    "createBank": {
+      "properties": {
+        "bankName": {
+          "type": "string",
+          "description": "銀行名稱",
+          "default": "中國農業銀行"
+        },
+        "bankCode": {
+          "type": "string",
+          "description": "銀行代碼",
+          "default": "CDC"
+        }
+      }
+    },
+    "basicBank": {
+      "properties": {
+        "id": {
+          "type": "integer",
+          "description": "銀行 Id",
+          "uniqueItems": true,
+          "default": 1
+        },
+        "bankName": {
+          "type": "string",
+          "description": "銀行名稱",
+          "default": "中國農業銀行"
+        },
+        "bankCode": {
+          "type": "string",
+          "description": "銀行代碼",
+          "default": "CDC"
+        },
+        "status": {
+          "type": "number",
+          "description": "銀行狀態: 0: 凍結, 1: 啟用",
+          "enum": [
+            0,
+            1
+          ],
+          "default": 1
+        }
+      }
+    },
+    "basicBanks": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "$ref": "#/definitions/basicBank"
+      }
+    },
+    "CreateBankcard": {
+      "required": [],
+      "properties": {
+        "name": {
+          "type": "string",
+          "default": "溫蒂",
+          "description": "銀行卡使用者名稱"
+        },
+        "cardNumber": {
+          "type": "string",
+          "default": "1234567890123456789",
+          "description": "銀行卡號"
+        },
+        "branchName": {
+          "type": "string",
+          "default": "分行名稱",
+          "description": "開戶支行"
+        },
+        "status": {
+          "type": "integer",
+          "default": 0,
+          "description": "銀行卡狀態",
+          "enum": [
+            "0: 凍結",
+            "1: 啟用"
+          ]
+        },
+        "bankId": {
+          "type": "number",
+          "default": 1,
+          "description": "銀行 id"
+        },
+        "bankName": {
+          "type": "string",
+          "default": "中國銀行",
+          "description": "銀行名稱"
+        },
+        "bankCode": {
+          "type": "string",
+          "default": "CDD",
+          "description": "銀行代碼"
+        }
+      }
+    },
+    "OrderBankcardResponse": {
+      "properties": {
+        "id": {
+          "type": "integer",
+          "default": 0,
+          "description": "銀行卡 Id"
+        },
+        "createAt": {
+          "type": "date",
+          "default": "12312312312",
+          "description": "建立時間"
+        },
+        "name": {
+          "type": "string",
+          "default": "溫蒂",
+          "description": "銀行卡使用者名稱"
+        },
+        "cardNumber": {
+          "type": "string",
+          "default": "1234567890123456789",
+          "description": "銀行卡號"
+        },
+        "branchName": {
+          "type": "string",
+          "default": "分行名稱",
+          "description": "開戶支行"
+        },
+        "status": {
+          "type": "integer",
+          "default": 0,
+          "description": "銀行卡狀態",
+          "enum": [
+            "0: 凍結",
+            "1: 啟用"
+          ]
+        },
+        "bank": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "integer",
+              "default": 0,
+              "description": "銀行 Id"
+            },
+            "bankName": {
+              "type": "string",
+              "default": "中國銀行",
+              "description": "銀行名稱"
+            },
+            "bankCode": {
+              "type": "string",
+              "default": "CDD",
+              "description": "銀行代碼"
+            }
+          }
+        }
+      }
+    },
+    "BankcardResponse": {
+      "properties": {
+        "id": {
+          "type": "integer",
+          "default": 0,
+          "description": "銀行卡 Id"
+        },
+        "createAt": {
+          "type": "date",
+          "default": "12312312312",
+          "description": "建立時間"
+        },
+        "name": {
+          "type": "string",
+          "default": "溫蒂",
+          "description": "銀行卡使用者名稱"
+        },
+        "cardNumber": {
+          "type": "string",
+          "default": "1234567890123456789",
+          "description": "銀行卡號"
+        },
+        "branchName": {
+          "type": "string",
+          "default": "分行名稱",
+          "description": "開戶支行"
+        },
+        "status": {
+          "type": "integer",
+          "default": 0,
+          "description": "銀行卡狀態",
+          "enum": [
+            "0: 凍結",
+            "1: 啟用"
+          ]
+        },
+        "bankId": {
+          "type": "number",
+          "default": 1,
+          "description": "銀行 id"
+        },
+        "bankName": {
+          "type": "string",
+          "default": "中國銀行",
+          "description": "銀行名稱"
+        },
+        "bankCode": {
+          "type": "string",
+          "default": "CDD",
+          "description": "銀行代碼"
+        },
+        "account": {
+          "type": "string",
+          "description": "使用者的帳號",
+          "default": "wendy"
+        }
+      }
+    },
+    "BankcardsResponse": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "$ref": "#/definitions/BankcardResponse"
+      }
+    },
+    "Bankcard": {
+      "properties": {
+        "id": {
+          "type": "integer",
+          "default": 0,
+          "description": "銀行卡 Id"
+        },
+        "createAt": {
+          "type": "date",
+          "default": "12312312312",
+          "description": "建立時間"
+        },
+        "name": {
+          "type": "string",
+          "default": "溫蒂",
+          "description": "銀行卡使用者名稱"
+        },
+        "cardNumber": {
+          "type": "string",
+          "default": "1234567890123456789",
+          "description": "銀行卡號"
+        },
+        "branchName": {
+          "type": "string",
+          "default": "分行名稱",
+          "description": "開戶支行"
+        },
+        "status": {
+          "type": "integer",
+          "default": 0,
+          "description": "銀行卡狀態",
+          "enum": [
+            "0: 凍結",
+            "1: 啟用"
+          ]
+        },
+        "bankId": {
+          "type": "number",
+          "default": 1,
+          "description": "銀行 id"
+        },
+        "bankName": {
+          "type": "string",
+          "default": "中國銀行",
+          "description": "銀行名稱"
+        },
+        "bankCode": {
+          "type": "string",
+          "default": "CDD",
+          "description": "銀行代碼"
+        }
+      }
+    },
+    "Bankcards": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "$ref": "#/definitions/Bankcard"
+      }
+    },
+    "Pagenation": {
+      "page": {
+        "type": "integer",
+        "default": 0,
+        "description": "頁數"
+      },
+      "limit": {
+        "type": "integer",
+        "default": 10,
+        "description": "每頁數量"
+      }
+    },
+    "CreateOrder": {
+      "properties": {
+        "beneficiaryBankcardId": {
+          "type": "integer",
+          "description": "買家 銀行卡 Id",
+          "default": 1
+        },
+        "orderId": {
+          "type": "integer",
+          "description": "掛單 Id",
+          "uniqueItems": true,
+          "default": 1
+        },
+        "cancelReason": {
+          "type": "string",
+          "default": null,
+          "description": "取消理由"
+        },
+        "amount": {
+          "type": "number",
+          "default": 100,
+          "description": "交易額度"
+        },
+        "finishAt": {
+          "type": "number",
+          "default": "12312313",
+          "description": "交易完成時間"
+        },
+        "transactionCode": {
+          "type": "string",
+          "description": "交易密碼: 4個數字",
+          "require": true,
+          "default": "a12345678"
+        }
+      }
+    },
+    "OrderResponse": {
+      "properties": {
+        "id": {
+          "type": "integer",
+          "description": "交易 Id",
+          "uniqueItems": true,
+          "default": 1
+        },
+        "createdAt": {
+          "type": "date",
+          "default": "12312312312",
+          "description": "建立時間"
+        },
+        "status": {
+          "type": "integer",
+          "default": 0,
+          "description": "交易狀態",
+          "enum": [
+            "0: 等待匯款",
+            "1: 已匯款未放行",
+            "2: 已放行",
+            "3: 買家已取消",
+            "4: 賣家已取消"
+          ]
+        },
+        "cancelReason": {
+          "type": "string",
+          "default": null,
+          "description": "取消理由"
+        },
+        "amount": {
+          "type": "number",
+          "default": 100,
+          "description": "交易額度"
+        },
+        "finishAt": {
+          "type": "number",
+          "default": "12312313",
+          "description": "交易完成時間"
+        },
+        "sender": {
+          "type": "object",
+          "$ref": "#/definitions/User"
+        },
+        "senderBankcard": {
+          "type": "object",
+          "$ref": "#/definitions/OrderBankcardResponse"
+        },
+        "beneficiaryBankcard": {
+          "type": "object",
+          "$ref": "#/definitions/OrderBankcardResponse"
+        },
+        "beneficiary": {
+          "properties": {
+            "id": {
+              "type": "integer",
+              "description": "使用者 Id",
+              "uniqueItems": true,
+              "default": 1
+            },
+            "name": {
+              "type": "string",
+              "description": "使用者 名稱",
+              "default": 1
+            },
+            "account": {
+              "type": "string",
+              "description": "使用者 帳號",
+              "default": 1
+            }
+          }
+        }
+      }
+    },
+    "Order": {
+      "properties": {
+        "id": {
+          "type": "integer",
+          "description": "交易 Id",
+          "uniqueItems": true,
+          "default": 1
+        },
+        "status": {
+          "type": "integer",
+          "default": 0,
+          "description": "交易狀態",
+          "enum": [
+            "0: 等待匯款",
+            "1: 已匯款未放行",
+            "2: 已放行",
+            "3: 買家已取消",
+            "4: 賣家已取消"
+          ]
+        },
+        "cancelReason": {
+          "type": "string",
+          "default": null,
+          "description": "取消理由"
+        },
+        "amount": {
+          "type": "number",
+          "default": 100,
+          "description": "交易額度"
+        },
+        "finishAt": {
+          "type": "number",
+          "default": "12312313",
+          "description": "交易完成時間"
+        },
+        "pendingOrder": {
+          "type": "object",
+          "$ref": "#/definitions/PendingOrder"
+        },
+        "user": {
+          "type": "object",
+          "description": "要與掛單交易的使用者",
+          "properties": {
+            "id": {
+              "type": "number",
+              "description": "使用者 id",
+              "default": 1
+            },
+            "name": {
+              "type": "string",
+              "description": "使用者名稱",
+              "default": "tomasdemo001"
+            },
+            "account": {
+              "type": "string",
+              "description": "使用者帳號",
+              "default": "tomasdemo001"
+            }
+          }
+        },
+        "bankcard": {
+          "type": "object",
+          "description": "要與掛單交易的使用者使用的銀行卡",
+          "$ref": "#/definitions/Bankcard"
+        },
+        "createAt": {
+          "type": "date",
+          "default": "123132131231",
+          "description": "建立時間"
+        }
+      }
+    },
+    "Orders": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "$ref": "#/definitions/Order"
+      }
+    },
+    "BasicOrderStatistics": {
+      "properties": {
+        "id": {
+          "type": "integer",
+          "default": 0,
+          "description": "銀行卡 Id"
+        },
+        "createdAt": {
+          "type": "date",
+          "default": "12312312312",
+          "description": "建立時間"
+        },
+        "successfulOrderCount": {
+          "type": "integer",
+          "default": 0,
+          "description": "成功的訂單數量"
+        },
+        "successfulCommentCount": {
+          "type": "integer",
+          "default": 0,
+          "description": "成功的評語數量"
+        },
+        "failCommentCount": {
+          "type": "integer",
+          "default": 0,
+          "description": "失敗的評語數量"
+        },
+        "averageOrderTime": {
+          "type": "date",
+          "default": 0,
+          "description": "平均的訂單交易時間"
+        }
+      }
+    },
+    "BasicOrderStatisticses": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "$ref": "#/definitions/BasicOrderStatistics"
+      }
+    },
+    "PendingOrder": {
+      "properties": {
+        "id": {
+          "type": "string",
+          "default": "30dae9a8-a9ee-43f2-8df5-3b5d2110f04b",
+          "description": "訂單 Id"
+        },
+        "type": {
+          "type": "integer",
+          "require": true,
+          "default": 0,
+          "description": "類型: 0: 買幣, 1: 賣幣",
+          "enum": [
+            0,
+            1
+          ]
+        },
+        "status": {
+          "type": "integer",
+          "require": true,
+          "default": 0,
+          "description": "訂單狀態: 0: 等待匯款, 1: 已匯款未放行, 2: 已放行, 3: 買家已取消, 4: 賣家已取消",
+          "enum": [
+            0,
+            1,
+            2,
+            3,
+            4
+          ]
+        },
+        "amount": {
+          "type": "number",
+          "require": true,
+          "default": 100,
+          "description": "這筆訂單的販賣(購買)數量e"
+        },
+        "minAmount": {
+          "type": "number",
+          "require": true,
+          "default": 100,
+          "description": "交易最小額度"
+        },
+        "balance": {
+          "type": "number",
+          "require": true,
+          "default": 100,
+          "description": "此交易剩餘額度"
+        },
+        "transactionMinutes": {
+          "type": "number",
+          "require": true,
+          "default": 15,
+          "description": "每筆交易的限制時間"
+        },
+        "user": {
+          "type": "object",
+          "$ref": "#/definitions/User"
+        },
+        "bankcard": {
+          "type": "object",
+          "$ref": "#/definitions/Bankcard"
+        },
+        "createAt": {
+          "type": "date",
+          "default": "2312131312",
+          "description": "建立時間"
+        },
+        "cancelAmount": {
+          "type": "number",
+          "description": "取消的數量"
+        },
+        "processAmount": {
+          "type": "number",
+          "description": "進行中的數量"
+        },
+        "doneAmount": {
+          "type": "number",
+          "description": "完成的數量"
+        },
+        "cancelCount": {
+          "type": "number",
+          "description": "取消的次數"
+        },
+        "doneCount": {
+          "type": "number",
+          "description": "完成的次數"
+        },
+        "processCount": {
+          "type": "number",
+          "description": "進行中的次數"
+        }
+      }
+    },
+    "PendingOrders": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "$ref": "#/definitions/PendingOrder"
+      }
+    },
+    "updateUserRequest": {
+      "required": [],
+      "properties": {
+        "phone": {
+          "type": "string",
+          "default": "0987654321",
+          "description": "商家電話"
+        },
+        "status": {
+          "type": "number",
+          "default": 1,
+          "description": "帳號狀態: 0: 停用, 1: 啟用"
+        },
+        "orderStatus": {
+          "type": "number",
+          "default": 1,
+          "description": "掛單狀態: 0: 停用, 1: 啟用"
+        },
+        "transactionStatus": {
+          "type": "number",
+          "default": 1,
+          "description": "交易狀態: 0: 停用, 1: 啟用"
+        },
+        "type": {
+          "type": "integer",
+          "description": "使用者類型",
+          "default": 0,
+          "enum": [
+            "0: 一般使用者",
+            "1: 平台使用者"
+          ]
+        },
+        "name": {
+          "type": "string",
+          "description": "使用者名稱",
+          "default": "simon"
+        },
+        "contactor": {
+          "type": "string",
+          "description": "聯絡人姓名",
+          "default": "溫蒂s"
+        },
+        "telegram": {
+          "type": "string",
+          "description": "Telegram id",
+          "default": "abcccccc"
+        },
+        "buyFeeType": {
+          "type": "number",
+          "description": "購買手續費類型: 0: 百分比手續費, 1: 階梯式手續費",
+          "default": 0
+        },
+        "sellFeeType": {
+          "type": "number",
+          "description": "販售手續費類型: 0: 百分比手續費, 1: 階梯式手續費",
+          "default": 0
+        },
+        "buyPercentageFee": {
+          "type": "object",
+          "description": "購買手續費 百分比 級距",
+          "default": {
+            "feePercent": 0.6,
+            "minFee": 0,
+            "maxFee": 1000
+          }
+        },
+        "sellPercentageFee": {
+          "type": "object",
+          "description": "販售手續費 百分比 級距",
+          "default": {
+            "feePercent": 0.6,
+            "minFee": 0,
+            "maxFee": 1000
+          }
+        },
+        "buyLadderFee": {
+          "type": "array",
+          "description": "購買手續費 階梯式 級距",
+          "default": [
+            {
+              "amount": 100,
+              "feePercent": 0.1
+            },
+            {
+              "amount": 1000,
+              "feePercent": 0.5
+            }
+          ]
+        },
+        "sellLadderFee": {
+          "type": "array",
+          "description": "販售手續費 階梯式 級距",
+          "default": [
+            {
+              "amount": 100,
+              "feePercent": 0.1
+            },
+            {
+              "amount": 1000,
+              "feePercent": 0.5
+            }
+          ]
+        }
+      }
+    },
+    "UserDetail": {
+      "properties": {
+        "id": {
+          "type": "integer",
+          "description": "使用者 Id",
+          "uniqueItems": true,
+          "default": 1
+        },
+        "type": {
+          "type": "integer",
+          "description": "使用者類型",
+          "default": 0,
+          "enum": [
+            "0: 一般使用者",
+            "1: 平台使用者"
+          ]
+        },
+        "account": {
+          "type": "string",
+          "description": "使用者帳號",
+          "default": "simon"
+        },
+        "name": {
+          "type": "string",
+          "description": "使用者名稱",
+          "default": "simon"
+        },
+        "createAt": {
+          "type": "number",
+          "description": "建立時間",
+          "default": 1131231311322
+        },
+        "status": {
+          "type": "number",
+          "default": 1,
+          "description": "帳號狀態: 0: 停用, 1: 啟用"
+        },
+        "orderStatus": {
+          "type": "number",
+          "default": 1,
+          "description": "掛單狀態: 0: 停用, 1: 啟用"
+        },
+        "transactionStatus": {
+          "type": "number",
+          "default": 1,
+          "description": "交易狀態: 0: 停用, 1: 啟用"
+        },
+        "phone": {
+          "type": "string",
+          "default": "0987654321",
+          "description": "商家電話"
+        },
+        "markup": {
+          "type": "string",
+          "default": "test mark up",
+          "description": "備註"
+        },
+        "merchant": {
+          "type": "object",
+          "require": false,
+          "default": null,
+          "$ref": "#/definitions/Merchant"
+        },
+        "wallet": {
+          "type": "object",
+          "require": false,
+          "default": null,
+          "$ref": "#/definitions/Wallet"
+        }
+      }
+    },
+    "User": {
+      "required": [],
+      "properties": {
+        "id": {
+          "type": "integer",
+          "description": "使用者 Id",
+          "uniqueItems": true,
+          "default": 1
+        },
+        "type": {
+          "type": "integer",
+          "description": "使用者類型",
+          "default": 0,
+          "enum": [
+            "0: 一般使用者",
+            "1: 平台使用者"
+          ]
+        },
+        "account": {
+          "type": "string",
+          "description": "使用者帳號",
+          "default": "simon"
+        },
+        "name": {
+          "type": "string",
+          "description": "使用者名稱",
+          "default": "simon"
+        },
+        "createAt": {
+          "type": "number",
+          "description": "建立時間",
+          "default": 1131231311322
+        },
+        "merchant": {
+          "type": "object",
+          "require": false,
+          "default": null,
+          "$ref": "#/definitions/Merchant"
+        }
+      }
+    },
+    "Merchant": {
+      "properties": {
+        "createAt": {
+          "type": "number",
+          "description": "建立時間",
+          "default": 1131231311322
+        },
+        "contactor": {
+          "type": "string",
+          "description": "聯絡人姓名",
+          "default": "溫蒂s"
+        },
+        "telegram": {
+          "type": "string",
+          "description": "Telegram id",
+          "default": "abcccccc"
+        },
+        "buyFeeType": {
+          "type": "number",
+          "description": "購買手續費類型: 0: 百分比手續費, 1: 階梯式手續費",
+          "default": 0
+        },
+        "sellFeeType": {
+          "type": "number",
+          "description": "販售手續費類型: 0: 百分比手續費, 1: 階梯式手續費",
+          "default": 0
+        },
+        "buyPercentageFee": {
+          "type": "object",
+          "description": "購買手續費 百分比 級距",
+          "default": {
+            "feePercent": 0.6,
+            "minFee": 0,
+            "maxFee": 1000
+          }
+        },
+        "sellPercentageFee": {
+          "type": "object",
+          "description": "販售手續費 百分比 級距",
+          "default": {
+            "feePercent": 0.6,
+            "minFee": 0,
+            "maxFee": 1000
+          }
+        },
+        "buyLadderFee": {
+          "type": "array",
+          "description": "購買手續費 階梯式 級距",
+          "default": [
+            {
+              "amount": 100,
+              "feePercent": 0.1
+            },
+            {
+              "amount": 1000,
+              "feePercent": 0.5
+            }
+          ]
+        },
+        "sellLadderFee": {
+          "type": "array",
+          "description": "販售手續費 階梯式 級距",
+          "default": [
+            {
+              "amount": 100,
+              "feePercent": 0.1
+            },
+            {
+              "amount": 1000,
+              "feePercent": 0.5
+            }
+          ]
+        }
+      }
+    },
+    "UpdateUserLoginPassword": {
+      "properties": {
+        "password": {
+          "type": "string",
+          "description": "新密碼: 6~20 英文數字組合",
+          "required": true,
+          "default": "a12345678"
+        }
+      }
+    },
+    "UpdateUserTransactionCode": {
+      "properties": {
+        "password": {
+          "type": "string",
+          "description": "新交易密碼: 4個數字",
+          "required": true,
+          "default": "a12345678"
+        }
+      }
+    },
+    "REGISTER_USER": {
+      "required": [],
+      "properties": {
+        "type": {
+          "type": "integer",
+          "description": "使用者類型",
+          "default": 0,
+          "enum": [
+            "0: 一般使用者",
+            "1: 平台使用者"
+          ]
+        },
+        "account": {
+          "type": "string",
+          "description": "使用者帳號",
+          "default": "simon"
+        },
+        "name": {
+          "type": "string",
+          "description": "使用者名稱",
+          "default": "simon"
+        },
+        "password": {
+          "type": "string",
+          "description": "密碼: 6~20 英文數字組合",
+          "required": true,
+          "default": "a12345678"
+        },
+        "transactionCode": {
+          "type": "string",
+          "description": "交易密碼: 4個數字",
+          "require": true,
+          "default": "a12345678"
+        },
+        "referrer": {
+          "type": "string",
+          "description": "推薦人 id",
+          "require": true,
+          "default": "a3e4e373"
+        },
+        "contactor": {
+          "type": "string",
+          "description": "聯絡人姓名",
+          "default": "溫蒂s"
+        },
+        "telegram": {
+          "type": "string",
+          "description": "Telegram id",
+          "default": "abcccccc"
+        },
+        "buyFeeType": {
+          "type": "number",
+          "description": "購買手續費類型: 0: 百分比手續費, 1: 階梯式手續費",
+          "default": 0
+        },
+        "sellFeeType": {
+          "type": "number",
+          "description": "販售手續費類型: 0: 百分比手續費, 1: 階梯式手續費",
+          "default": 0
+        },
+        "buyPercentageFee": {
+          "type": "object",
+          "description": "購買手續費 百分比 級距",
+          "default": {
+            "feePercent": 0.6,
+            "minFee": 0,
+            "maxFee": 1000
+          }
+        },
+        "sellPercentageFee": {
+          "type": "object",
+          "description": "販售手續費 百分比 級距",
+          "default": {
+            "feePercent": 0.6,
+            "minFee": 0,
+            "maxFee": 1000
+          }
+        },
+        "buyLadderFee": {
+          "type": "array",
+          "description": "購買手續費 階梯式 級距",
+          "default": [
+            {
+              "amount": 100,
+              "feePercent": 0.1
+            },
+            {
+              "amount": 1000,
+              "feePercent": 0.5
+            }
+          ]
+        },
+        "sellLadderFee": {
+          "type": "array",
+          "description": "販售手續費 階梯式 級距",
+          "default": [
+            {
+              "amount": 100,
+              "feePercent": 0.1
+            },
+            {
+              "amount": 1000,
+              "feePercent": 0.5
+            }
+          ]
+        }
+      }
+    },
+    "Users": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "$ref": "#/definitions/User"
+      }
+    },
+    "Wallet": {
+      "required": [],
+      "properties": {
+        "id": {
+          "type": "integer",
+          "description": "錢包 Id",
+          "uniqueItems": true,
+          "default": 1
+        },
+        "status": {
+          "type": "integer",
+          "description": "錢包狀態",
+          "default": 1,
+          "enum": [
+            "0: 凍結",
+            "1: 啟用"
+          ]
+        },
+        "usefulBalance": {
+          "type": "number",
+          "description": "可用額度",
+          "default": 100
+        },
+        "guaranteedBalance": {
+          "type": "number",
+          "description": "保證金額度",
+          "default": 90
+        },
+        "freezeBalance": {
+          "type": "number",
+          "description": "凍結額度",
+          "default": 30
+        },
+        "createAt": {
+          "type": "string",
+          "description": "建立時間",
+          "default": 1131231311322
+        }
+      }
+    },
+    "Wallets": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "$ref": "#/definitions/Wallet"
+      }
+    }
+  }
+}
