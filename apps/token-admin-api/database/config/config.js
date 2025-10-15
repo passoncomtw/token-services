@@ -1,12 +1,12 @@
-require("dotenv").config({path: "../.env"})
+require("dotenv").config({path: require("path").join(__dirname, "../../.env")})
 const isEmpty = require("lodash/isEmpty");
 
 const {
   DB_USERNAME,
-  DB_DATABASE,
+  DB_DATABASE = 'token_admin',
   DB_PASSWORD,
   DB_HOST,
-  DB_DIALECT,
+  DB_DIALECT = 'postgres',
   DB_PORT,
 } = process.env;
 

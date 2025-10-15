@@ -11,5 +11,8 @@
   },
   "name": "token-services",
   "version": "0.1.0",
-  "license": "GPL-3.0-only"
+  "license": "GPL-3.0-only",
+  "resolutions": {
+    "zero-padding": "npm:pad-left@^2.1.0"
+  }
 }
