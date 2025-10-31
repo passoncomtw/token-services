@@ -50,10 +50,23 @@ expressApp.get('/health-check', (req, res) => {
   });
 });
 
+// Swagger JSON 端點 - 提供 JSON 格式的 API 文檔
+// 訪問 http://localhost:8300/api-docs.json 可取得完整的 Swagger 規格 JSON
+expressApp.get("/api-docs.json", (req, res) => {
+  res.setHeader("Content-Type", "application/json");
+  res.json(specs);
+});
+
+// Swagger UI - 視覺化 API 文檔
 expressApp.use(
   '/api-docs',
   swaggerUi.serve,
-  swaggerUi.setup(specs)
+  swaggerUi.setup(specs, {
+    swaggerOptions: {
+      url: "/api-docs.json", // 告訴 Swagger UI 從這個 URL 載入 JSON
+      persistAuthorization: true, // 保持授權狀態，重新載入頁面後仍保留 token
+    },
+  })
 );
 
 module.exports = expressApp;
