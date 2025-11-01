@@ -1,0 +1,265 @@
+basePath: /
+definitions:
+  cmd_token-admin-api_internal_handlers.CreateOrderRequest:
+    properties:
+      user_id:
+        example: user_Alice
+        type: string
+    required:
+    - user_id
+    type: object
+  cmd_token-admin-api_internal_handlers.CreateUserRequest:
+    properties:
+      name:
+        example: Alice
+        type: string
+    required:
+    - name
+    type: object
+  token-admin-api_cmd_token-admin-api_internal_interfaces.LoginResponse:
+    properties:
+      account:
+        type: string
+      name:
+        type: string
+      token:
+        type: string
+      user_id:
+        type: integer
+    type: object
+  token-admin-api_cmd_token-admin-api_internal_services.LoginRequest:
+    properties:
+      account:
+        example: admin
+        type: string
+      password:
+        example: a12345678
+        type: string
+    required:
+    - account
+    - password
+    type: object
+  token-admin-api_pkg_response.ErrorResponse:
+    properties:
+      code:
+        example: ERROR
+        type: string
+      error:
+        example: 詳細錯誤訊息
+        type: string
+      message:
+        example: 操作失敗
+        type: string
+      success:
+        example: false
+        type: boolean
+    type: object
+  token-admin-api_pkg_response.Response:
+    properties:
+      code:
+        example: SUCCESS
+        type: string
+      data: {}
+      message:
+        example: 操作成功
+        type: string
+      success:
+        example: true
+        type: boolean
+    type: object
+host: localhost:8080
+info:
+  contact:
+    email: support@swagger.io
+    name: API Support
+    url: http://www.swagger.io/support
+  description: 這是一個使用 Gin 和 FX 的範例 API
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  termsOfService: http://swagger.io/terms/
+  title: FX Demo API
+  version: "1.0"
+paths:
+  /api/v1/auth/login:
+    post:
+      consumes:
+      - application/json
+      description: 使用帳號密碼登入，成功後返回 JWT token
+      parameters:
+      - description: 登入資訊
+        in: body
+        name: credentials
+        required: true
+        schema:
+          $ref: '#/definitions/token-admin-api_cmd_token-admin-api_internal_services.LoginRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/token-admin-api_pkg_response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/token-admin-api_cmd_token-admin-api_internal_interfaces.LoginResponse'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/token-admin-api_pkg_response.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/token-admin-api_pkg_response.ErrorResponse'
+      summary: 使用者登入
+      tags:
+      - auth
+  /api/v1/auth/logout:
+    post:
+      consumes:
+      - application/json
+      description: 登出當前使用者（客戶端需自行刪除 token）
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/token-admin-api_pkg_response.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/token-admin-api_pkg_response.ErrorResponse'
+      security:
+      - Bearer: []
+      summary: 使用者登出
+      tags:
+      - auth
+  /api/v1/orders:
+    post:
+      consumes:
+      - application/json
+      description: 為使用者建立新訂單
+      parameters:
+      - description: 訂單資訊
+        in: body
+        name: order
+        required: true
+        schema:
+          $ref: '#/definitions/cmd_token-admin-api_internal_handlers.CreateOrderRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/token-admin-api_pkg_response.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/token-admin-api_pkg_response.ErrorResponse'
+      security:
+      - Bearer: []
+      summary: 建立訂單
+      tags:
+      - orders
+  /api/v1/orders/{id}:
+    get:
+      consumes:
+      - application/json
+      description: 根據訂單 ID 取得訂單資訊
+      parameters:
+      - description: 訂單 ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/token-admin-api_pkg_response.Response'
+      security:
+      - Bearer: []
+      summary: 取得訂單
+      tags:
+      - orders
+  /api/v1/users:
+    post:
+      consumes:
+      - application/json
+      description: 建立新的使用者
+      parameters:
+      - description: 使用者資訊
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/cmd_token-admin-api_internal_handlers.CreateUserRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/token-admin-api_pkg_response.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/token-admin-api_pkg_response.ErrorResponse'
+      security:
+      - Bearer: []
+      summary: 建立使用者
+      tags:
+      - users
+  /api/v1/users/{id}:
+    get:
+      consumes:
+      - application/json
+      description: 根據使用者 ID 取得使用者資訊
+      parameters:
+      - description: 使用者 ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/token-admin-api_pkg_response.Response'
+      security:
+      - Bearer: []
+      summary: 取得使用者
+      tags:
+      - users
+  /health:
+    get:
+      consumes:
+      - application/json
+      description: 檢查服務是否正常運行
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/token-admin-api_pkg_response.Response'
+      summary: 健康檢查
+      tags:
+      - health
+schemes:
+- http
+securityDefinitions:
+  Bearer:
+    description: '在 value 欄位輸入: Bearer {token}'
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"
