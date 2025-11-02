@@ -6,10 +6,8 @@ import (
 	"token-admin-api/cmd/token-admin-api/internal/initializers"
 	"token-admin-api/cmd/token-admin-api/internal/server"
 	"token-admin-api/cmd/token-admin-api/internal/services"
-	"token-admin-api/pkg/cache"
 	"token-admin-api/pkg/config"
 	"token-admin-api/pkg/database"
-	"token-admin-api/pkg/snowflake"
 
 	"go.uber.org/fx"
 )
@@ -39,12 +37,8 @@ import (
 func main() {
 	fx.New(
 		config.ConfigModule,
-		snowflake.SnowflakeModule,
 		database.DatabaseModule,
-		cache.RedisModule,
 		initializers.InitializerModule,
-		services.UserModule,
-		services.OrderModule,
 		services.AuthModule,
 		handlers.HandlerModule,
 		server.ServerModule,

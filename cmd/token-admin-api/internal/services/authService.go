@@ -35,9 +35,9 @@ type LoginRequest struct {
 
 // Login 使用者登入（後台管理員）
 func (s *AuthService) Login(account, password string) (*interfaces.LoginResponse, error) {
-	// 查詢後台使用者
+	// 查詢後台使用者並預載入角色
 	var user models.BackendUser
-	err := s.db.Where("account = ?", account).First(&user).Error
+	err := s.db.Preload("Actor").Where("account = ?", account).First(&user).Error
 
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
@@ -46,7 +46,7 @@ func (s *AuthService) Login(account, password string) (*interfaces.LoginResponse
 		return nil, err
 	}
 
-	// 檢查帳號狀態
+	// 檢查帳號狀態 (0 = 啟用)
 	if user.Status != 0 {
 		return nil, errors.New("帳號已被停用")
 	}
@@ -57,17 +57,34 @@ func (s *AuthService) Login(account, password string) (*interfaces.LoginResponse
 		return nil, errors.New("帳號或密碼錯誤")
 	}
 
-	// 生成 JWT token
+	// 取得 permissions（從關聯的 actor）
+	var permissions []string
+	if user.Actor != nil {
+		permissions = user.Actor.Permissions
+	} else {
+		permissions = []string{}
+	}
+
+	// 生成 JWT token 和過期時間
 	token, err := auth.GenerateToken(s.jwtConfig, user.ID, user.Account)
 	if err != nil {
 		return nil, err
 	}
 
+	// 計算過期時間（秒）
+	expireIn := int64(s.jwtConfig.ExpirationTime.Seconds())
+
 	return &interfaces.LoginResponse{
-		Token:   token,
-		UserID:  user.ID,
-		Account: user.Account,
-		Name:    user.Name,
+		AccessToken: token,
+		ExpireIn:    expireIn,
+		User: interfaces.LoginUser{
+			ID:          user.ID,
+			Type:        0, // 後台使用者統一設為 0
+			Account:     user.Account,
+			Name:        user.Name,
+			CreateAt:    user.CreatedAt.Unix(),
+			Permissions: permissions,
+		},
 	}, nil
 }
 

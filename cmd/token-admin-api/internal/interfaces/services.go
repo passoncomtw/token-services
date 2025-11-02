@@ -1,25 +1,26 @@
 package interfaces
 
 // ==================== 介面定義 ====================
-type LoginResponse struct {
-	Token   string `json:"token"`
-	UserID  int    `json:"user_id"`
-	Account string `json:"account"`
-	Name    string `json:"name"`
+
+// LoginUser 登入使用者資訊
+type LoginUser struct {
+	ID          int      `json:"id"`
+	Type        int      `json:"type"`
+	Account     string   `json:"account"`
+	Name        string   `json:"name"`
+	CreateAt    int64    `json:"createAt"`
+	Permissions []string `json:"permissions"`
 }
 
-// 認證服務介面
+// LoginResponse 登入回應
+type LoginResponse struct {
+	AccessToken string    `json:"access_token"`
+	ExpireIn    int64     `json:"expireIn"`
+	User        LoginUser `json:"user"`
+}
+
+// AuthServiceInterface 認證服務介面
 type AuthServiceInterface interface {
 	Login(account, password string) (*LoginResponse, error)
 	Logout() error
-}
-
-type UserServiceInterface interface {
-	CreateUser(name string) string
-	GetOrderCount(userId string) int
-}
-
-type OrderServiceInterface interface {
-	CreateOrder(userId string) (string, error)
-	GetUserName(userId string) string
 }

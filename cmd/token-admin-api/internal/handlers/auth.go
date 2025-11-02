@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"token-admin-api/cmd/token-admin-api/internal/interfaces"
-	"token-admin-api/cmd/token-admin-api/internal/services"
 	"token-admin-api/pkg/response"
 
 	"github.com/gin-gonic/gin"
@@ -18,19 +17,25 @@ func NewAuthHandlers(authService interfaces.AuthServiceInterface) *AuthHandlers 
 
 // ==================== Auth Handlers ====================
 
+// LoginRequest 登入請求
+type LoginRequest struct {
+	Account  string `json:"account" binding:"required" example:"admin"`
+	Password string `json:"password" binding:"required" example:"a12345678"`
+}
+
 // Login godoc
 // @Summary 使用者登入
 // @Description 使用帳號密碼登入，成功後返回 JWT token
-// @Tags auth
+// @Tags 使用者驗證
 // @Accept json
 // @Produce json
-// @Param credentials body services.LoginRequest true "登入資訊"
+// @Param credentials body LoginRequest true "登入資訊"
 // @Success 200 {object} response.Response{data=interfaces.LoginResponse}
 // @Failure 400 {object} response.ErrorResponse
 // @Failure 401 {object} response.ErrorResponse
-// @Router /api/v1/auth/login [post]
+// @Router /auth/login [post]
 func (r *AuthHandlers) Login(c *gin.Context) {
-	var req services.LoginRequest
+	var req LoginRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		response.BadRequest(c, "請求參數錯誤")
 		return
@@ -42,26 +47,27 @@ func (r *AuthHandlers) Login(c *gin.Context) {
 		return
 	}
 
-	response.SuccessWithMessage(c, "登入成功", loginResponse)
+	response.Success(c, loginResponse)
 }
 
 // Logout godoc
 // @Summary 使用者登出
 // @Description 登出當前使用者（客戶端需自行刪除 token）
-// @Tags auth
+// @Tags 使用者驗證
 // @Accept json
 // @Produce json
 // @Security Bearer
 // @Success 200 {object} response.Response
 // @Failure 500 {object} response.ErrorResponse
-// @Router /api/v1/auth/logout [post]
+// @Router /auth/logout [post]
 func (r *AuthHandlers) Logout(c *gin.Context) {
 	if err := r.authService.Logout(); err != nil {
 		response.InternalError(c, "登出失敗")
 		return
 	}
 
-	response.SuccessWithMessage(c, "登出成功", nil)
+	// 只返回 success: true
+	response.Success(c, nil)
 }
 
 // JWTAuthMiddleware JWT 認證中間件

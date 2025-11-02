@@ -12,29 +12,21 @@ import (
 type Router struct {
 	healthHandlers interfaces.HealthHandlersInterface
 	authHandlers   interfaces.AuthHandlersInterface
-	userHandlers   interfaces.UserHandlersInterface
-	orderHandlers  interfaces.OrderHandlersInterface
 }
 
 /**
  * @brief 建立新的 Router 實例
  * @param healthHandlers 健康檢查處理器
  * @param authHandlers 認證處理器
- * @param userHandlers 使用者處理器
- * @param orderHandlers 訂單處理器
  * @return Router 指標
  */
 func NewRouter(
 	healthHandlers interfaces.HealthHandlersInterface,
 	authHandlers interfaces.AuthHandlersInterface,
-	userHandlers interfaces.UserHandlersInterface,
-	orderHandlers interfaces.OrderHandlersInterface,
 ) *Router {
 	return &Router{
 		healthHandlers: healthHandlers,
 		authHandlers:   authHandlers,
-		userHandlers:   userHandlers,
-		orderHandlers:  orderHandlers,
 	}
 }
 
@@ -44,38 +36,12 @@ func NewRouter(
  */
 func (r *Router) SetupRoutes(engine *gin.Engine) {
 	// Health check
-	engine.GET("/health", r.healthHandlers.HealthCheck)
+	engine.GET("/health-check", r.healthHandlers.HealthCheck)
 
 	// Swagger UI
 	engine.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
-	// API v1
-	v1 := engine.Group("/api/v1")
-	{
-		// Auth routes (無需驗證)
-		auth := v1.Group("/auth")
-		{
-			auth.POST("/login", r.authHandlers.Login)
-			auth.POST("/logout", r.authHandlers.Logout)
-		}
-
-		// 需要 JWT 驗證的路由
-		authorized := v1.Group("")
-		authorized.Use(r.authHandlers.JWTAuthMiddleware())
-		{
-			// User routes
-			users := authorized.Group("/users")
-			{
-				users.POST("", r.userHandlers.CreateUser)
-				users.GET("/:id", r.userHandlers.GetUser)
-			}
-
-			// Order routes
-			orders := authorized.Group("/orders")
-			{
-				orders.POST("", r.orderHandlers.CreateOrder)
-				orders.GET("/:id", r.orderHandlers.GetOrder)
-			}
-		}
-	}
+	// Auth routes (無需驗證)
+	engine.POST("/auth/login", r.authHandlers.Login)
+	engine.POST("/auth/logout", r.authHandlers.Logout)
 }
