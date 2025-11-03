@@ -45,6 +45,7 @@ func main() {
 		services.UserModule,
 		services.BankModule,
 		services.BankCardModule,
+		services.OrderModule,
 		handlers.HandlerModule,
 		server.ServerModule,
 	).Run()

@@ -17,6 +17,7 @@ type Router struct {
 	userHandlers         interfaces.UserHandlersInterface
 	bankHandlers         interfaces.BankHandlersInterface
 	bankCardHandlers     interfaces.BankCardHandlersInterface
+	orderHandlers        interfaces.OrderHandlersInterface
 }
 
 /**
@@ -28,6 +29,7 @@ type Router struct {
  * @param userHandlers 使用者處理器
  * @param bankHandlers 銀行處理器
  * @param bankCardHandlers 銀行卡處理器
+ * @param orderHandlers 訂單處理器
  * @return Router 指標
  */
 func NewRouter(
@@ -38,6 +40,7 @@ func NewRouter(
 	userHandlers interfaces.UserHandlersInterface,
 	bankHandlers interfaces.BankHandlersInterface,
 	bankCardHandlers interfaces.BankCardHandlersInterface,
+	orderHandlers interfaces.OrderHandlersInterface,
 ) *Router {
 	return &Router{
 		healthHandlers:       healthHandlers,
@@ -47,6 +50,7 @@ func NewRouter(
 		userHandlers:         userHandlers,
 		bankHandlers:         bankHandlers,
 		bankCardHandlers:     bankCardHandlers,
+		orderHandlers:        orderHandlers,
 	}
 }
 
@@ -102,4 +106,10 @@ func (r *Router) SetupRoutes(engine *gin.Engine) {
 	// TODO: 添加 JWT 驗證中間件
 	engine.GET("/bankcards", r.bankCardHandlers.GetList)
 	engine.GET("/bankcards/:bankcardId", r.bankCardHandlers.GetDetail)
+
+	// Order routes (需要驗證)
+	// TODO: 添加 JWT 驗證中間件
+	engine.GET("/orders", r.orderHandlers.GetList)
+	engine.PUT("/orders/:orderId", r.orderHandlers.Complete)
+	engine.PUT("/orders/:orderId/cancel", r.orderHandlers.Cancel)
 }
