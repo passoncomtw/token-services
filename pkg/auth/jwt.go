@@ -34,6 +34,14 @@ func NewConfigFromAppConfig(cfg *config.Config) *Config {
 	}
 }
 
+/**
+ * @brief 取得 Token 過期時間（秒）
+ * @return int64 過期時間戳
+ */
+func (c *Config) GetExpireTime() int64 {
+	return time.Now().Add(c.ExpirationTime).Unix()
+}
+
 // GenerateToken 生成 JWT token
 func GenerateToken(config *Config, userID int, account string) (string, error) {
 	claims := &Claims{

@@ -13,3 +13,13 @@ type AuthHandlersInterface interface {
 	Logout(c *gin.Context)
 	JWTAuthMiddleware() gin.HandlerFunc
 }
+
+// UserHandlersInterface 使用者處理器介面
+type UserHandlersInterface interface {
+	Register(c *gin.Context)
+	GetUser(c *gin.Context)
+	UpdateUser(c *gin.Context)
+	UpdateLoginPassword(c *gin.Context)
+	UpdateTransactionCode(c *gin.Context)
+	StoreValue(c *gin.Context)
+}

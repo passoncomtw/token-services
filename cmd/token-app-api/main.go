@@ -41,6 +41,7 @@ func main() {
 		middleware.MiddlewareModule,
 		database.DatabaseModule,
 		services.AuthModule,
+		services.UserModule,
 		handlers.HandlerModule,
 		server.ServerModule,
 	).Run()
