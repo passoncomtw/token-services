@@ -52,9 +52,29 @@ func (a *AdminInitializer) Initialize() error {
 	return a.db.Transaction(func(tx *gorm.DB) error {
 		// 1. Create admin actor (role) with full permissions
 		actor := models.BackendActor{
-			Name:        "管理員",
-			Markup:      "系統預設管理員角色",
-			Permissions: models.JSONStringArray{"all"},
+			Name:   "管理員",
+			Markup: "系統預設管理員角色",
+			Permissions: models.PermissionsJSON{
+				"user": map[string]interface{}{
+					"manager":     map[string]interface{}{"read": true},
+					"list":        map[string]interface{}{"read": true},
+					"order":       map[string]interface{}{"read": true, "update": true},
+					"transaction": map[string]interface{}{"read": true, "cancel": true},
+					"account":     map[string]interface{}{"read": true, "delete": true},
+					"user": map[string]interface{}{
+						"read": true, "update": true, "updateLoginPassword": true,
+						"updateTransactionPassword": true, "unlock": true, "buyFee": true, "sellFee": true,
+					},
+					"bankcard": map[string]interface{}{"read": true, "delete": true},
+					"merchant": map[string]interface{}{"create": true},
+				},
+				"transaction": map[string]interface{}{"read": true, "cancel": true},
+				"order":       map[string]interface{}{"read": true, "update": true},
+				"system": map[string]interface{}{
+					"backenduser":  map[string]interface{}{"read": true, "create": true, "delete": true},
+					"backendactor": map[string]interface{}{"read": true, "create": true, "delete": true},
+				},
+			},
 		}
 
 		if err := tx.Create(&actor).Error; err != nil {

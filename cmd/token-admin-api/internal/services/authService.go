@@ -58,11 +58,11 @@ func (s *AuthService) Login(account, password string) (*interfaces.LoginResponse
 	}
 
 	// 取得 permissions（從關聯的 actor）
-	var permissions []string
+	var permissions map[string]interface{}
 	if user.Actor != nil {
 		permissions = user.Actor.Permissions
 	} else {
-		permissions = []string{}
+		permissions = make(map[string]interface{})
 	}
 
 	// 生成 JWT token 和過期時間

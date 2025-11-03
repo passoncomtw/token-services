@@ -30,18 +30,42 @@ func (j JSONStringArray) Value() (driver.Value, error) {
 	return json.Marshal(j)
 }
 
+// PermissionsJSON 用於處理巢狀的 permissions JSON 物件
+type PermissionsJSON map[string]interface{}
+
+// Scan implements sql.Scanner interface
+func (p *PermissionsJSON) Scan(value interface{}) error {
+	if value == nil {
+		*p = make(PermissionsJSON)
+		return nil
+	}
+	bytes, ok := value.([]byte)
+	if !ok {
+		return nil
+	}
+	return json.Unmarshal(bytes, p)
+}
+
+// Value implements driver.Valuer interface
+func (p PermissionsJSON) Value() (driver.Value, error) {
+	if len(p) == 0 {
+		return json.Marshal(map[string]interface{}{})
+	}
+	return json.Marshal(p)
+}
+
 /**
  * @brief BackendActor 後台角色資料模型
  * @description 對應資料庫 backend_actors 表
  */
 type BackendActor struct {
 	ID          int             `gorm:"column:id;primaryKey;autoIncrement" json:"id"`
-	CreatedAt   time.Time       `gorm:"column:created_at;type:timestamptz;not null" json:"created_at"`
-	UpdatedAt   time.Time       `gorm:"column:updated_at;type:timestamptz;not null" json:"updated_at"`
-	DeletedAt   *time.Time      `gorm:"column:deleted_at;type:timestamptz" json:"deleted_at,omitempty"`
+	CreatedAt   time.Time       `gorm:"column:created_at;type:timestamptz;not null" json:"-"`
+	UpdatedAt   time.Time       `gorm:"column:updated_at;type:timestamptz;not null" json:"-"`
+	DeletedAt   *time.Time      `gorm:"column:deleted_at;type:timestamptz" json:"-"`
 	Name        string          `gorm:"column:name;type:varchar(255);not null" json:"name"`
 	Markup      string          `gorm:"column:markup;type:varchar(255);not null" json:"markup"`
-	Permissions JSONStringArray `gorm:"column:permissions;type:json;not null" json:"permissions"`
+	Permissions PermissionsJSON `gorm:"column:permissions;type:json;not null" json:"permissions"`
 }
 
 /**

@@ -80,13 +80,23 @@ Authorization: Bearer {token}
       "account": "simon",
       "name": "simon",
       "createAt": 1131231311322,
-      "permissions": ["1"]
+      "permissions": {
+        "user": {
+          "manager": {"read": true},
+          "list": {"read": true}
+        },
+        "system": {
+          "backenduser": {"read": true, "create": true},
+          "backendactor": {"read": true, "create": true}
+        }
+      }
     }
   }
 }
 ```
 - **備註**: 
   - `user.type`: 0 = 一般使用者, 1 = 平台使用者
+  - `permissions`: 巢狀 JSON 物件，包含所有權限設定
   - JWT token 使用時需要在前面加上 "Bearer "
 
 #### POST /auth/logout
@@ -142,12 +152,24 @@ Authorization: Bearer {token}
 ```json
 {
   "success": true,
-  "data": {
-    "id": 1,
-    "name": "admin",
-    "markup": "testadmin",
-    "permissions": ["1"]
-  }
+  "data": [
+    {
+      "id": 1,
+      "name": "admin",
+      "markup": "testadmin",
+      "permissions": {
+        "user": {
+          "manager": {"read": true},
+          "list": {"read": true},
+          "order": {"read": true, "update": true}
+        },
+        "system": {
+          "backenduser": {"read": true, "create": true, "delete": true},
+          "backendactor": {"read": true, "create": true, "delete": true}
+        }
+      }
+    }
+  ]
 }
 ```
 
@@ -162,7 +184,16 @@ Authorization: Bearer {token}
 {
   "name": "admin",
   "markup": "testadmin",
-  "permissions": ["1"]
+  "permissions": {
+    "user": {
+      "manager": {"read": true},
+      "list": {"read": true}
+    },
+    "system": {
+      "backenduser": {"read": true, "create": true},
+      "backendactor": {"read": true, "create": true}
+    }
+  }
 }
 ```
 - **Response 200**:
@@ -173,7 +204,16 @@ Authorization: Bearer {token}
     "id": 1,
     "name": "admin",
     "markup": "testadmin",
-    "permissions": ["1"]
+    "permissions": {
+      "user": {
+        "manager": {"read": true},
+        "list": {"read": true}
+      },
+      "system": {
+        "backenduser": {"read": true, "create": true},
+        "backendactor": {"read": true, "create": true}
+      }
+    }
   }
 }
 ```
@@ -191,7 +231,16 @@ Authorization: Bearer {token}
 {
   "name": "admin",
   "markup": "testadmin",
-  "permissions": ["1"]
+  "permissions": {
+    "user": {
+      "manager": {"read": true},
+      "list": {"read": true}
+    },
+    "system": {
+      "backenduser": {"read": true, "create": true},
+      "backendactor": {"read": true, "create": true}
+    }
+  }
 }
 ```
 - **Response 200**:
@@ -202,7 +251,16 @@ Authorization: Bearer {token}
     "id": 1,
     "name": "admin",
     "markup": "testadmin",
-    "permissions": ["1"]
+    "permissions": {
+      "user": {
+        "manager": {"read": true},
+        "list": {"read": true}
+      },
+      "system": {
+        "backenduser": {"read": true, "create": true},
+        "backendactor": {"read": true, "create": true}
+      }
+    }
   }
 }
 ```
@@ -225,7 +283,7 @@ Authorization: Bearer {token}
 
 #### GET /backendactors/permissions
 - **Tags**: `後台角色`
-- **描述**: 取回所有的權限
+- **描述**: 取回所有的權限樹狀結構
 - **認證**: 需要 (Bearer Token)
 - **Headers**:
   - `Authorization`: Bearer {token}
@@ -235,14 +293,53 @@ Authorization: Bearer {token}
 {
   "success": true,
   "data": {
-    "functionName": "会员管理",
-    "functionIdentify": 1,
+    "functionName": "系統管理",
+    "functionIdentify": "system",
     "parentId": null,
     "children": [
       {
-        "functionName": "订单（检视）",
-        "functionIdentify": 2,
-        "parentId": 1
+        "functionName": "後台使用者管理",
+        "functionIdentify": "system.backenduser",
+        "parentId": "system",
+        "children": [
+          {
+            "functionName": "檢視",
+            "functionIdentify": "system.backenduser.read",
+            "parentId": "system.backenduser"
+          },
+          {
+            "functionName": "新增",
+            "functionIdentify": "system.backenduser.create",
+            "parentId": "system.backenduser"
+          },
+          {
+            "functionName": "刪除",
+            "functionIdentify": "system.backenduser.delete",
+            "parentId": "system.backenduser"
+          }
+        ]
+      },
+      {
+        "functionName": "後台角色管理",
+        "functionIdentify": "system.backendactor",
+        "parentId": "system",
+        "children": [
+          {
+            "functionName": "檢視",
+            "functionIdentify": "system.backendactor.read",
+            "parentId": "system.backendactor"
+          },
+          {
+            "functionName": "新增",
+            "functionIdentify": "system.backendactor.create",
+            "parentId": "system.backendactor"
+          },
+          {
+            "functionName": "刪除",
+            "functionIdentify": "system.backendactor.delete",
+            "parentId": "system.backendactor"
+          }
+        ]
       }
     ]
   }
@@ -271,7 +368,7 @@ Authorization: Bearer {token}
 - **Query Parameters**:
   - `account` (string, optional): 後台使用者帳號，範例: "wendy"
   - `name` (string, optional): 後台使用者暱稱，範例: "wendy"
-  - `status` (number, optional): 帳號狀態，0 = 停用, 1 = 啟用
+  - `status` (number, optional): 帳號狀態，0 = 啟用, 1 = 停用
   - `page` (number, optional, default: 1): 頁數
   - `size` (number, optional, default: 10): 每頁資訊
 - **Request Body**: 無
@@ -285,18 +382,28 @@ Authorization: Bearer {token}
       "name": "admin001",
       "account": "testadmin",
       "status": 0,
-      "permissions": ["1"],
-      "actors": [
-        {
-          "id": 1,
-          "name": "admin",
-          "markup": "admin"
+      "permissions": {
+        "user": {
+          "manager": {"read": true},
+          "list": {"read": true}
+        },
+        "system": {
+          "backenduser": {"read": true, "create": true},
+          "backendactor": {"read": true, "create": true}
         }
-      ]
+      },
+      "actor": {
+        "id": 1,
+        "name": "admin",
+        "markup": "admin"
+      }
     }
   ]
 }
 ```
+- **備註**: 
+  - `permissions`: 從關聯的 actor 複製過來，方便前端顯示
+  - `actor`: 單一角色物件（一個使用者只能有一個角色）
 
 #### POST /backendusers
 - **Tags**: `後台使用者`
@@ -310,38 +417,39 @@ Authorization: Bearer {token}
   "name": "admin001",
   "account": "testadmin",
   "password": "a12345678",
-  "permissions": ["1"],
-  "actors": [
-    {
-      "id": 1,
-      "name": "admin",
-      "markup": "admin"
-    }
-  ]
+  "actorId": 1
 }
 ```
 - **Response 200**:
 ```json
 {
   "success": true,
-  "data": [
-    {
+  "data": {
+    "id": 1,
+    "name": "admin001",
+    "account": "testadmin",
+    "status": 0,
+    "permissions": {
+      "user": {
+        "manager": {"read": true},
+        "list": {"read": true}
+      },
+      "system": {
+        "backenduser": {"read": true, "create": true},
+        "backendactor": {"read": true, "create": true}
+      }
+    },
+    "actor": {
       "id": 1,
-      "name": "admin001",
-      "account": "testadmin",
-      "status": 0,
-      "permissions": ["1"],
-      "actors": [
-        {
-          "id": 1,
-          "name": "admin",
-          "markup": "admin"
-        }
-      ]
+      "name": "admin",
+      "markup": "admin"
     }
-  ]
+  }
 }
 ```
+- **備註**: 
+  - `actorId`: 指定角色 ID（必填）
+  - `password`: 6~20 英文數字組合
 
 #### PUT /backendusers/{backendUserId}
 - **Tags**: `後台使用者`
@@ -356,10 +464,13 @@ Authorization: Bearer {token}
 {
   "name": "admin001",
   "account": "testadmin",
-  "status": 0
+  "status": 0,
+  "actorId": 1
 }
 ```
-- **備註**: `status`: 0 = 停用, 1 = 啟用
+- **備註**: 
+  - `status`: 0 = 啟用, 1 = 停用
+  - `actorId`: 可選，更換角色時提供
 - **Response 200**:
 ```json
 {
@@ -369,14 +480,21 @@ Authorization: Bearer {token}
     "name": "admin001",
     "account": "testadmin",
     "status": 0,
-    "permissions": ["1"],
-    "actors": [
-      {
-        "id": 1,
-        "name": "admin",
-        "markup": "admin"
+    "permissions": {
+      "user": {
+        "manager": {"read": true},
+        "list": {"read": true}
+      },
+      "system": {
+        "backenduser": {"read": true, "create": true},
+        "backendactor": {"read": true, "create": true}
       }
-    ]
+    },
+    "actor": {
+      "id": 1,
+      "name": "admin",
+      "markup": "admin"
+    }
   }
 }
 ```
@@ -1211,7 +1329,16 @@ Authorization: Bearer {token}
     "account": "simon",
     "name": "simon",
     "createAt": 1131231311322,
-    "permissions": ["1"]
+    "permissions": {
+      "user": {
+        "manager": {"read": true},
+        "list": {"read": true}
+      },
+      "system": {
+        "backenduser": {"read": true, "create": true},
+        "backendactor": {"read": true, "create": true}
+      }
+    }
   }
 }
 ```
@@ -1222,7 +1349,17 @@ Authorization: Bearer {token}
   "id": 1,
   "name": "admin",
   "markup": "testadmin",
-  "permissions": ["1"]
+  "permissions": {
+    "user": {
+      "manager": {"read": true},
+      "list": {"read": true},
+      "order": {"read": true, "update": true}
+    },
+    "system": {
+      "backenduser": {"read": true, "create": true, "delete": true},
+      "backendactor": {"read": true, "create": true, "delete": true}
+    }
+  }
 }
 ```
 
@@ -1231,7 +1368,16 @@ Authorization: Bearer {token}
 {
   "name": "admin",
   "markup": "testadmin",
-  "permissions": ["1"]
+  "permissions": {
+    "user": {
+      "manager": {"read": true},
+      "list": {"read": true}
+    },
+    "system": {
+      "backenduser": {"read": true, "create": true},
+      "backendactor": {"read": true, "create": true}
+    }
+  }
 }
 ```
 
@@ -1242,14 +1388,21 @@ Authorization: Bearer {token}
   "name": "admin001",
   "account": "testadmin",
   "status": 0,
-  "permissions": ["1"],
-  "actors": [
-    {
-      "id": 1,
-      "name": "admin",
-      "markup": "admin"
+  "permissions": {
+    "user": {
+      "manager": {"read": true},
+      "list": {"read": true}
+    },
+    "system": {
+      "backenduser": {"read": true, "create": true},
+      "backendactor": {"read": true, "create": true}
     }
-  ]
+  },
+  "actor": {
+    "id": 1,
+    "name": "admin",
+    "markup": "admin"
+  }
 }
 ```
 
@@ -1259,14 +1412,7 @@ Authorization: Bearer {token}
   "name": "admin001",
   "account": "testadmin",
   "password": "a12345678",
-  "permissions": ["1"],
-  "actors": [
-    {
-      "id": 1,
-      "name": "admin",
-      "markup": "admin"
-    }
-  ]
+  "actorId": 1
 }
 ```
 
@@ -1275,7 +1421,8 @@ Authorization: Bearer {token}
 {
   "name": "admin001",
   "account": "testadmin",
-  "status": 0
+  "status": 0,
+  "actorId": 1
 }
 ```
 

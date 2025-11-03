@@ -40,6 +40,7 @@ func main() {
 		database.DatabaseModule,
 		initializers.InitializerModule,
 		services.AuthModule,
+		services.BackendActorModule,
 		handlers.HandlerModule,
 		server.ServerModule,
 	).Run()
