@@ -29,6 +29,10 @@ type User struct {
 	TransactionCode   string         `gorm:"column:transaction_code;type:varchar(255);not null" json:"-"`
 	Markup            sql.NullString `gorm:"column:markup;type:varchar(255)" json:"markup,omitempty"`
 	NotificationToken sql.NullString `gorm:"column:notification_token;type:varchar(255)" json:"notification_token,omitempty"`
+
+	// 關聯
+	Merchant *Merchant `gorm:"foreignKey:UserID;references:ID" json:"merchant,omitempty"`
+	Wallet   *Wallet   `gorm:"foreignKey:UserID;references:ID" json:"wallet,omitempty"`
 }
 
 /**

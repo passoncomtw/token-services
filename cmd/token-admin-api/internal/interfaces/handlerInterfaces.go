@@ -13,15 +13,3 @@ type AuthHandlersInterface interface {
 	Logout(c *gin.Context)
 	JWTAuthMiddleware() gin.HandlerFunc
 }
-
-// UserHandlersInterface 使用者處理器介面
-type UserHandlersInterface interface {
-	CreateUser(c *gin.Context)
-	GetUser(c *gin.Context)
-}
-
-// OrderHandlersInterface 訂單處理器介面
-type OrderHandlersInterface interface {
-	CreateOrder(c *gin.Context)
-	GetOrder(c *gin.Context)
-}
