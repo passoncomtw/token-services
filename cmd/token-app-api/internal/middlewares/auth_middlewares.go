@@ -4,8 +4,8 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/yourusername/project/pkg/auth"
-	"github.com/yourusername/project/pkg/config"
+	"token-services/pkg/auth"
+	"token-services/pkg/config"
 
 	"github.com/gin-gonic/gin"
 )

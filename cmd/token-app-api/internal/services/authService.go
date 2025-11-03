@@ -1,25 +1,26 @@
 package services
 
 import (
-	"database/sql"
 	"errors"
 
-	"github.com/yourusername/project/cmd/github.com/yourusername/project/internal/interfaces"
-	"github.com/yourusername/project/pkg/auth"
-	"github.com/yourusername/project/pkg/config"
+	"token-services/cmd/token-app-api/internal/interfaces"
+	"token-services/pkg/auth"
+	"token-services/pkg/config"
+	"token-services/pkg/models"
 
 	"go.uber.org/fx"
 	"golang.org/x/crypto/bcrypt"
+	"gorm.io/gorm"
 )
 
 // AuthService 認證服務
 type AuthService struct {
-	db        *sql.DB
+	db        *gorm.DB
 	jwtConfig *auth.Config
 }
 
 // NewAuthService 建立新的認證服務
-func NewAuthService(db *sql.DB, cfg *config.Config) *AuthService {
+func NewAuthService(db *gorm.DB, cfg *config.Config) *AuthService {
 	return &AuthService{
 		db:        db,
 		jwtConfig: auth.NewConfigFromAppConfig(cfg),
@@ -35,39 +36,38 @@ type LoginRequest struct {
 // Login 使用者登入
 func (s *AuthService) Login(account, password string) (*interfaces.LoginResponse, error) {
 	// 查詢使用者
-	var userID int
-	var name string
-	var hashedPassword string
+	var user models.User
+	err := s.db.Where("account = ? AND deleted_at IS NULL", account).First(&user).Error
 
-	err := s.db.QueryRow(
-		"SELECT id, name, password FROM users WHERE account = $1",
-		account,
-	).Scan(&userID, &name, &hashedPassword)
-
-	if err == sql.ErrNoRows {
+	if err == gorm.ErrRecordNotFound {
 		return nil, errors.New("帳號或密碼錯誤")
 	}
 	if err != nil {
 		return nil, err
 	}
 
+	// 檢查使用者狀態
+	if user.Status != 0 {
+		return nil, errors.New("帳號已被凍結")
+	}
+
 	// 驗證密碼
-	err = bcrypt.CompareHashAndPassword([]byte(hashedPassword), []byte(password))
+	err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password))
 	if err != nil {
 		return nil, errors.New("帳號或密碼錯誤")
 	}
 
 	// 生成 JWT token
-	token, err := auth.GenerateToken(s.jwtConfig, userID, account)
+	token, err := auth.GenerateToken(s.jwtConfig, user.ID, user.Account)
 	if err != nil {
 		return nil, err
 	}
 
 	return &interfaces.LoginResponse{
 		Token:   token,
-		UserID:  userID,
-		Account: account,
-		Name:    name,
+		UserID:  user.ID,
+		Account: user.Account,
+		Name:    user.Name,
 	}, nil
 }
 

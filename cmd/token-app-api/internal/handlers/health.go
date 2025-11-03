@@ -1,7 +1,7 @@
 package handlers
 
 import (
-	"github.com/yourusername/project/pkg/response"
+	"token-services/pkg/response"
 
 	"github.com/gin-gonic/gin"
 )

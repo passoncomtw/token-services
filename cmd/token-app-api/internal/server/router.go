@@ -1,7 +1,7 @@
 package server
 
 import (
-	"github.com/yourusername/project/cmd/github.com/yourusername/project/internal/interfaces"
+	"token-services/cmd/token-app-api/internal/interfaces"
 
 	"github.com/gin-gonic/gin"
 	swaggerFiles "github.com/swaggo/files"
@@ -12,29 +12,21 @@ import (
 type Router struct {
 	healthHandlers interfaces.HealthHandlersInterface
 	authHandlers   interfaces.AuthHandlersInterface
-	userHandlers   interfaces.UserHandlersInterface
-	orderHandlers  interfaces.OrderHandlersInterface
 }
 
 /**
  * @brief 建立新的 Router 實例
  * @param healthHandlers 健康檢查處理器
  * @param authHandlers 認證處理器
- * @param userHandlers 使用者處理器
- * @param orderHandlers 訂單處理器
  * @return Router 指標
  */
 func NewRouter(
 	healthHandlers interfaces.HealthHandlersInterface,
 	authHandlers interfaces.AuthHandlersInterface,
-	userHandlers interfaces.UserHandlersInterface,
-	orderHandlers interfaces.OrderHandlersInterface,
 ) *Router {
 	return &Router{
 		healthHandlers: healthHandlers,
 		authHandlers:   authHandlers,
-		userHandlers:   userHandlers,
-		orderHandlers:  orderHandlers,
 	}
 }
 
@@ -57,25 +49,6 @@ func (r *Router) SetupRoutes(engine *gin.Engine) {
 		{
 			auth.POST("/login", r.authHandlers.Login)
 			auth.POST("/logout", r.authHandlers.Logout)
-		}
-
-		// 需要 JWT 驗證的路由
-		authorized := v1.Group("")
-		authorized.Use(r.authHandlers.JWTAuthMiddleware())
-		{
-			// User routes
-			users := authorized.Group("/users")
-			{
-				users.POST("", r.userHandlers.CreateUser)
-				users.GET("/:id", r.userHandlers.GetUser)
-			}
-
-			// Order routes
-			orders := authorized.Group("/orders")
-			{
-				orders.POST("", r.orderHandlers.CreateOrder)
-				orders.GET("/:id", r.orderHandlers.GetOrder)
-			}
 		}
 	}
 }

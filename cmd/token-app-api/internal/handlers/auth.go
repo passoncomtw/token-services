@@ -1,9 +1,10 @@
 package handlers
 
 import (
-	"github.com/yourusername/project/cmd/github.com/yourusername/project/internal/interfaces"
-	"github.com/yourusername/project/cmd/github.com/yourusername/project/internal/services"
-	"github.com/yourusername/project/pkg/response"
+	"token-services/cmd/token-app-api/internal/interfaces"
+	"token-services/cmd/token-app-api/internal/services"
+
+	"token-services/pkg/response"
 
 	"github.com/gin-gonic/gin"
 )
