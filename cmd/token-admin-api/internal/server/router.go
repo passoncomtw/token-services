@@ -2,6 +2,7 @@ package server
 
 import (
 	"token-admin-api/cmd/token-admin-api/internal/interfaces"
+	"token-admin-api/pkg/middleware"
 
 	"github.com/gin-gonic/gin"
 	swaggerFiles "github.com/swaggo/files"
@@ -18,6 +19,7 @@ type Router struct {
 	bankHandlers         interfaces.BankHandlersInterface
 	bankCardHandlers     interfaces.BankCardHandlersInterface
 	orderHandlers        interfaces.OrderHandlersInterface
+	authMiddleware       *middleware.AuthMiddleware
 }
 
 /**
@@ -30,6 +32,7 @@ type Router struct {
  * @param bankHandlers 銀行處理器
  * @param bankCardHandlers 銀行卡處理器
  * @param orderHandlers 訂單處理器
+ * @param authMiddleware 認證中間件
  * @return Router 指標
  */
 func NewRouter(
@@ -41,6 +44,7 @@ func NewRouter(
 	bankHandlers interfaces.BankHandlersInterface,
 	bankCardHandlers interfaces.BankCardHandlersInterface,
 	orderHandlers interfaces.OrderHandlersInterface,
+	authMiddleware *middleware.AuthMiddleware,
 ) *Router {
 	return &Router{
 		healthHandlers:       healthHandlers,
@@ -51,6 +55,7 @@ func NewRouter(
 		bankHandlers:         bankHandlers,
 		bankCardHandlers:     bankCardHandlers,
 		orderHandlers:        orderHandlers,
+		authMiddleware:       authMiddleware,
 	}
 }
 
@@ -69,47 +74,46 @@ func (r *Router) SetupRoutes(engine *gin.Engine) {
 	engine.POST("/auth/login", r.authHandlers.Login)
 	engine.POST("/auth/logout", r.authHandlers.Logout)
 
-	// Backend Actor routes (需要驗證)
-	// TODO: 添加 JWT 驗證中間件
-	engine.GET("/backendactors", r.backendActorHandlers.GetAll)
-	engine.POST("/backendactors", r.backendActorHandlers.Create)
-	engine.GET("/backendactors/permissions", r.backendActorHandlers.GetPermissions)
+	// 建立需要認證的路由組
+	authenticated := engine.Group("")
+	authenticated.Use(r.authMiddleware.Authenticate())
+	{
+		// Backend Actor routes
+		authenticated.GET("/backendactors", r.backendActorHandlers.GetAll)
+		authenticated.POST("/backendactors", r.backendActorHandlers.Create)
+		authenticated.GET("/backendactors/permissions", r.backendActorHandlers.GetPermissions)
 
-	// Backend User routes (需要驗證)
-	// TODO: 添加 JWT 驗證中間件
-	engine.GET("/backendusers", r.backendUserHandlers.GetList)
-	engine.POST("/backendusers", r.backendUserHandlers.Create)
-	engine.PUT("/backendusers/:backendUserId", r.backendUserHandlers.Update)
-	engine.DELETE("/backendusers/:backendUserId", r.backendUserHandlers.Delete)
+		// Backend User routes
+		authenticated.GET("/backendusers", r.backendUserHandlers.GetList)
+		authenticated.POST("/backendusers", r.backendUserHandlers.Create)
+		authenticated.PUT("/backendusers/:backendUserId", r.backendUserHandlers.Update)
+		authenticated.DELETE("/backendusers/:backendUserId", r.backendUserHandlers.Delete)
 
-	// User routes (需要驗證)
-	// TODO: 添加 JWT 驗證中間件
-	engine.GET("/users", r.userHandlers.GetList)
-	engine.POST("/users", r.userHandlers.Create)
-	engine.GET("/users/:userId", r.userHandlers.GetDetail)
-	engine.PUT("/users/:userId", r.userHandlers.Update)
-	engine.PUT("/users/:userId/unlock", r.userHandlers.Unlock)
-	engine.PUT("/users/:userId/login/password", r.userHandlers.UpdateLoginPassword)
-	engine.PUT("/users/:userId/transaction/password", r.userHandlers.UpdateTransactionPassword)
-	engine.PUT("/users/login/password", r.userHandlers.UpdateOwnLoginPassword)
-	engine.GET("/users/:userId/bankcards", r.userHandlers.GetBankCards)
-	engine.GET("/users/:userId/orders", r.userHandlers.GetOrders)
-	engine.GET("/users/:userId/pending/orders", r.userHandlers.GetPendingOrders)
+		// User routes
+		authenticated.GET("/users", r.userHandlers.GetList)
+		authenticated.POST("/users", r.userHandlers.Create)
+		authenticated.GET("/users/:userId", r.userHandlers.GetDetail)
+		authenticated.PUT("/users/:userId", r.userHandlers.Update)
+		authenticated.PUT("/users/:userId/unlock", r.userHandlers.Unlock)
+		authenticated.PUT("/users/:userId/login/password", r.userHandlers.UpdateLoginPassword)
+		authenticated.PUT("/users/:userId/transaction/password", r.userHandlers.UpdateTransactionPassword)
+		authenticated.PUT("/users/login/password", r.userHandlers.UpdateOwnLoginPassword)
+		authenticated.GET("/users/:userId/bankcards", r.userHandlers.GetBankCards)
+		authenticated.GET("/users/:userId/orders", r.userHandlers.GetOrders)
+		authenticated.GET("/users/:userId/pending/orders", r.userHandlers.GetPendingOrders)
 
-	// Bank routes (需要驗證)
-	// TODO: 添加 JWT 驗證中間件
-	engine.GET("/banks", r.bankHandlers.GetList)
-	engine.POST("/banks", r.bankHandlers.Create)
-	engine.PUT("/banks/:bankId", r.bankHandlers.Update)
+		// Bank routes
+		authenticated.GET("/banks", r.bankHandlers.GetList)
+		authenticated.POST("/banks", r.bankHandlers.Create)
+		authenticated.PUT("/banks/:bankId", r.bankHandlers.Update)
 
-	// BankCard routes (需要驗證)
-	// TODO: 添加 JWT 驗證中間件
-	engine.GET("/bankcards", r.bankCardHandlers.GetList)
-	engine.GET("/bankcards/:bankcardId", r.bankCardHandlers.GetDetail)
+		// BankCard routes
+		authenticated.GET("/bankcards", r.bankCardHandlers.GetList)
+		authenticated.GET("/bankcards/:bankcardId", r.bankCardHandlers.GetDetail)
 
-	// Order routes (需要驗證)
-	// TODO: 添加 JWT 驗證中間件
-	engine.GET("/orders", r.orderHandlers.GetList)
-	engine.PUT("/orders/:orderId", r.orderHandlers.Complete)
-	engine.PUT("/orders/:orderId/cancel", r.orderHandlers.Cancel)
+		// Order routes
+		authenticated.GET("/orders", r.orderHandlers.GetList)
+		authenticated.PUT("/orders/:orderId", r.orderHandlers.Complete)
+		authenticated.PUT("/orders/:orderId/cancel", r.orderHandlers.Cancel)
+	}
 }

@@ -8,6 +8,7 @@ import (
 	"token-admin-api/cmd/token-admin-api/internal/services"
 	"token-admin-api/pkg/config"
 	"token-admin-api/pkg/database"
+	"token-admin-api/pkg/middleware"
 
 	"go.uber.org/fx"
 )
@@ -38,6 +39,7 @@ func main() {
 	fx.New(
 		config.ConfigModule,
 		database.DatabaseModule,
+		middleware.MiddlewareModule,
 		initializers.InitializerModule,
 		services.AuthModule,
 		services.BackendActorModule,
