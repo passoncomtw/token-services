@@ -1,16 +1,20 @@
 package handlers
 
 import (
+	"token-services/pkg/logger"
 	"token-services/pkg/response"
 
 	"github.com/gin-gonic/gin"
 )
 
 type HealthHandlers struct {
+	logger logger.Logger
 }
 
-func NewHealthHandlers() *HealthHandlers {
-	return &HealthHandlers{}
+func NewHealthHandlers(logger logger.Logger) *HealthHandlers {
+	return &HealthHandlers{
+		logger: logger,
+	}
 }
 
 // ==================== Health Handlers ====================

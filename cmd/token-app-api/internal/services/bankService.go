@@ -2,6 +2,7 @@ package services
 
 import (
 	"token-services/cmd/token-app-api/internal/interfaces"
+	"token-services/pkg/logger"
 	"token-services/pkg/models"
 
 	"go.uber.org/fx"
@@ -10,13 +11,15 @@ import (
 
 // BankService 銀行服務
 type BankService struct {
-	db *gorm.DB
+	db     *gorm.DB
+	logger logger.Logger
 }
 
 // NewBankService 建立新的銀行服務
-func NewBankService(db *gorm.DB) *BankService {
+func NewBankService(db *gorm.DB, logger logger.Logger) *BankService {
 	return &BankService{
-		db: db,
+		db:     db,
+		logger: logger,
 	}
 }
 

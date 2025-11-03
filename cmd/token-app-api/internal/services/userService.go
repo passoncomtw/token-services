@@ -6,6 +6,7 @@ import (
 	"fmt"
 
 	"token-services/cmd/token-app-api/internal/interfaces"
+	"token-services/pkg/logger"
 	"token-services/pkg/models"
 
 	"go.uber.org/fx"
@@ -15,13 +16,15 @@ import (
 
 // UserService 使用者服務
 type UserService struct {
-	db *gorm.DB
+	db     *gorm.DB
+	logger logger.Logger
 }
 
 // NewUserService 建立新的使用者服務
-func NewUserService(db *gorm.DB) *UserService {
+func NewUserService(db *gorm.DB, logger logger.Logger) *UserService {
 	return &UserService{
-		db: db,
+		db:     db,
+		logger: logger,
 	}
 }
 

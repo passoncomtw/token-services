@@ -2,7 +2,7 @@ package handlers
 
 import (
 	"token-services/cmd/token-app-api/internal/interfaces"
-
+	"token-services/pkg/logger"
 	"token-services/pkg/response"
 
 	"github.com/gin-gonic/gin"
@@ -10,10 +10,14 @@ import (
 
 type AuthHandlers struct {
 	authService interfaces.AuthServiceInterface
+	logger      logger.Logger
 }
 
-func NewAuthHandlers(authService interfaces.AuthServiceInterface) *AuthHandlers {
-	return &AuthHandlers{authService: authService}
+func NewAuthHandlers(authService interfaces.AuthServiceInterface, logger logger.Logger) *AuthHandlers {
+	return &AuthHandlers{
+		authService: authService,
+		logger:      logger,
+	}
 }
 
 // ==================== Auth Handlers ====================

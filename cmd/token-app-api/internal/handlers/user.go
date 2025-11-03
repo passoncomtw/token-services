@@ -4,6 +4,7 @@ import (
 	"strconv"
 
 	"token-services/cmd/token-app-api/internal/interfaces"
+	"token-services/pkg/logger"
 	"token-services/pkg/response"
 
 	"github.com/gin-gonic/gin"
@@ -11,10 +12,14 @@ import (
 
 type UserHandlers struct {
 	userService interfaces.UserServiceInterface
+	logger      logger.Logger
 }
 
-func NewUserHandlers(userService interfaces.UserServiceInterface) *UserHandlers {
-	return &UserHandlers{userService: userService}
+func NewUserHandlers(userService interfaces.UserServiceInterface, logger logger.Logger) *UserHandlers {
+	return &UserHandlers{
+		userService: userService,
+		logger:      logger,
+	}
 }
 
 // ==================== User Handlers ====================

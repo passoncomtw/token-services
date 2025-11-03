@@ -36,3 +36,21 @@ type BankCardHandlersInterface interface {
 	UpdateBankCard(c *gin.Context)
 	DeleteBankCard(c *gin.Context)
 }
+
+type PendingOrderHandlersInterface interface {
+	GetPendingOrders(c *gin.Context)
+	GetPendingOrder(c *gin.Context)
+	CreatePendingOrder(c *gin.Context)
+	DeletePendingOrder(c *gin.Context)
+	LockPendingOrder(c *gin.Context)
+	UnlockPendingOrder(c *gin.Context)
+	GetUserPendingOrders(c *gin.Context)
+}
+
+type OrderHandlersInterface interface {
+	GetOrders(c *gin.Context)
+	CreateOrder(c *gin.Context)
+	MarkAsPaid(c *gin.Context)
+	ApplyOrder(c *gin.Context)
+	RejectOrder(c *gin.Context)
+}

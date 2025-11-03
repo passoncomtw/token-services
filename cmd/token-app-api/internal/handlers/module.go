@@ -12,4 +12,6 @@ var HandlerModule = fx.Module("handlers",
 	fx.Provide(fx.Annotate(NewUserHandlers, fx.As(new(interfaces.UserHandlersInterface)))),
 	fx.Provide(fx.Annotate(NewBankHandlers, fx.As(new(interfaces.BankHandlersInterface)))),
 	fx.Provide(fx.Annotate(NewBankCardHandlers, fx.As(new(interfaces.BankCardHandlersInterface)))),
+	fx.Provide(fx.Annotate(NewPendingOrderHandlers, fx.As(new(interfaces.PendingOrderHandlersInterface)))),
+	fx.Provide(fx.Annotate(NewOrderHandlers, fx.As(new(interfaces.OrderHandlersInterface)))),
 )

@@ -4,6 +4,7 @@ import (
 	"strconv"
 
 	"token-services/cmd/token-app-api/internal/interfaces"
+	"token-services/pkg/logger"
 	"token-services/pkg/response"
 
 	"github.com/gin-gonic/gin"
@@ -11,10 +12,14 @@ import (
 
 type BankCardHandlers struct {
 	bankCardService interfaces.BankCardServiceInterface
+	logger          logger.Logger
 }
 
-func NewBankCardHandlers(bankCardService interfaces.BankCardServiceInterface) *BankCardHandlers {
-	return &BankCardHandlers{bankCardService: bankCardService}
+func NewBankCardHandlers(bankCardService interfaces.BankCardServiceInterface, logger logger.Logger) *BankCardHandlers {
+	return &BankCardHandlers{
+		bankCardService: bankCardService,
+		logger:          logger,
+	}
 }
 
 // ==================== BankCard Handlers ====================

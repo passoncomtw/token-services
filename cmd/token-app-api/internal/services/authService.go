@@ -6,6 +6,7 @@ import (
 	"token-services/cmd/token-app-api/internal/interfaces"
 	"token-services/pkg/auth"
 	"token-services/pkg/config"
+	"token-services/pkg/logger"
 	"token-services/pkg/models"
 
 	"go.uber.org/fx"
@@ -17,13 +18,15 @@ import (
 type AuthService struct {
 	db        *gorm.DB
 	jwtConfig *auth.Config
+	logger    logger.Logger
 }
 
 // NewAuthService 建立新的認證服務
-func NewAuthService(db *gorm.DB, cfg *config.Config) *AuthService {
+func NewAuthService(db *gorm.DB, cfg *config.Config, logger logger.Logger) *AuthService {
 	return &AuthService{
 		db:        db,
 		jwtConfig: auth.NewConfigFromAppConfig(cfg),
+		logger:    logger,
 	}
 }
 

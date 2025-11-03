@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"token-services/cmd/token-app-api/internal/interfaces"
+	"token-services/pkg/logger"
 	"token-services/pkg/response"
 
 	"github.com/gin-gonic/gin"
@@ -9,10 +10,14 @@ import (
 
 type BankHandlers struct {
 	bankService interfaces.BankServiceInterface
+	logger      logger.Logger
 }
 
-func NewBankHandlers(bankService interfaces.BankServiceInterface) *BankHandlers {
-	return &BankHandlers{bankService: bankService}
+func NewBankHandlers(bankService interfaces.BankServiceInterface, logger logger.Logger) *BankHandlers {
+	return &BankHandlers{
+		bankService: bankService,
+		logger:      logger,
+	}
 }
 
 // ==================== Bank Handlers ====================
