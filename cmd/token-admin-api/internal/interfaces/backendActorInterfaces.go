@@ -1,7 +1,7 @@
 package interfaces
 
 import (
-	"token-admin-api/pkg/models"
+	"token-services/pkg/models"
 
 	"github.com/gin-gonic/gin"
 )

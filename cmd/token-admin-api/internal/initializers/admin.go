@@ -4,7 +4,7 @@ import (
 	"context"
 	"log"
 
-	"token-admin-api/pkg/models"
+	"token-services/pkg/models"
 
 	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"

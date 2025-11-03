@@ -26,10 +26,10 @@ LOG_MODE=development
 package main
 
 import (
-    "token-admin-api/pkg/config"
-    "token-admin-api/pkg/database"
-    "token-admin-api/pkg/logger"        // 導入 logger 模組
-    "token-admin-api/pkg/middleware"
+    "token-services/pkg/config"
+    "token-services/pkg/database"
+    "token-services/pkg/logger"        // 導入 logger 模組
+    "token-services/pkg/middleware"
     // ... 其他導入
     
     "go.uber.org/fx"
@@ -55,8 +55,8 @@ func main() {
 package services
 
 import (
-    "token-admin-api/pkg/logger"
-    "token-admin-api/pkg/models"
+    "token-services/pkg/logger"
+    "token-services/pkg/models"
     "go.uber.org/zap"
     "gorm.io/gorm"
 )
@@ -127,9 +127,9 @@ func (s *UserService) Create(req *interfaces.CreateUserRequest) (*interfaces.Use
 package handlers
 
 import (
-    "token-admin-api/cmd/token-admin-api/internal/interfaces"
-    "token-admin-api/pkg/logger"
-    "token-admin-api/pkg/response"
+    "token-services/cmd/token-admin-api/internal/interfaces"
+    "token-services/pkg/logger"
+    "token-services/pkg/response"
     "github.com/gin-gonic/gin"
     "go.uber.org/zap"
 )

@@ -4,7 +4,7 @@ import (
 	"context"
 	"log"
 
-	"token-admin-api/pkg/config"
+	"token-services/pkg/config"
 
 	"go.uber.org/fx"
 )
@@ -76,4 +76,3 @@ var LoggerModule = fx.Module("logger",
 		NewLogger,       // 提供 Logger 實例
 	),
 )
-

@@ -3,9 +3,9 @@ package services
 import (
 	"errors"
 
-	"token-admin-api/cmd/token-admin-api/internal/interfaces"
-	"token-admin-api/pkg/logger"
-	"token-admin-api/pkg/models"
+	"token-services/cmd/token-admin-api/internal/interfaces"
+	"token-services/pkg/logger"
+	"token-services/pkg/models"
 
 	"go.uber.org/fx"
 	"go.uber.org/zap"
@@ -186,5 +186,3 @@ func (s *BackendUserService) Delete(id int) error {
 var BackendUserModule = fx.Module("backendUser",
 	fx.Provide(fx.Annotate(NewBackendUserService, fx.As(new(interfaces.BackendUserServiceInterface)))),
 )
-
-

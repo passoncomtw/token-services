@@ -1,7 +1,7 @@
 package interfaces
 
 import (
-	"token-admin-api/pkg/models"
+	"token-services/pkg/models"
 
 	"github.com/gin-gonic/gin"
 )
@@ -10,16 +10,16 @@ import (
 
 // OrderListItemResponse 訂單列表項目回應
 type OrderListItemResponse struct {
-	ID                   string                 `json:"id"`
-	CreatedAt            string                 `json:"createdAt"`
-	Status               int                    `json:"status"`
-	CancelReason         *string                `json:"cancelReason"`
-	Amount               float64                `json:"amount"`
-	FinishAt             *int64                 `json:"finishAt"`
-	Sender               map[string]interface{} `json:"sender"`
-	SenderBankcard       map[string]interface{} `json:"senderBankcard"`
-	BeneficiaryBankcard  map[string]interface{} `json:"beneficiaryBankcard"`
-	Beneficiary          OrderUserInfo          `json:"beneficiary"`
+	ID                  string                 `json:"id"`
+	CreatedAt           string                 `json:"createdAt"`
+	Status              int                    `json:"status"`
+	CancelReason        *string                `json:"cancelReason"`
+	Amount              float64                `json:"amount"`
+	FinishAt            *int64                 `json:"finishAt"`
+	Sender              map[string]interface{} `json:"sender"`
+	SenderBankcard      map[string]interface{} `json:"senderBankcard"`
+	BeneficiaryBankcard map[string]interface{} `json:"beneficiaryBankcard"`
+	Beneficiary         OrderUserInfo          `json:"beneficiary"`
 }
 
 // OrderDetailResponse 訂單詳細回應
@@ -43,20 +43,20 @@ type OrderListResponse struct {
 
 // OrderListQuery 訂單列表查詢參數
 type OrderListQuery struct {
-	Account      string  `form:"account"`
-	Payer        string  `form:"payer"`
-	CancelReason string  `form:"cancelReason"`
-	StartAt      string  `form:"startAt"`
-	EndAt        string  `form:"endAt"`
-	Type         *int    `form:"type"`
-	OrderID      string  `form:"orderId"`
-	Status       *int    `form:"status"`
+	Account      string   `form:"account"`
+	Payer        string   `form:"payer"`
+	CancelReason string   `form:"cancelReason"`
+	StartAt      string   `form:"startAt"`
+	EndAt        string   `form:"endAt"`
+	Type         *int     `form:"type"`
+	OrderID      string   `form:"orderId"`
+	Status       *int     `form:"status"`
 	MinAmount    *float64 `form:"minAmount"`
 	MaxAmount    *float64 `form:"maxAmount"`
-	UserID       *int    `form:"userId"`
-	FinishAtType string  `form:"finishAtType"` // overdue, notOverdue
-	Page         int     `form:"page" binding:"omitempty,min=1"`
-	Size         int     `form:"size" binding:"omitempty,min=1,max=100"`
+	UserID       *int     `form:"userId"`
+	FinishAtType string   `form:"finishAtType"` // overdue, notOverdue
+	Page         int      `form:"page" binding:"omitempty,min=1"`
+	Size         int      `form:"size" binding:"omitempty,min=1,max=100"`
 }
 
 // CancelOrderRequest 取消訂單請求
@@ -130,4 +130,3 @@ func ConvertToOrderDetailResponse(order *models.Order) *OrderDetailResponse {
 
 	return resp
 }
-

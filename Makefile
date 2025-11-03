@@ -34,4 +34,4 @@ run-token-admin-api: ## 使用 air 執行 token-admin-api
 		echo "⚠️  air 未安裝，正在安裝..."; \
 		go install github.com/air-verse/air@latest; \
 	fi
-	$(GOPATH)/bin/air
+	@cd cmd/token-admin-api && $(GOPATH)/bin/air

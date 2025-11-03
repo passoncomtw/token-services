@@ -3,7 +3,7 @@ package middleware
 import (
 	"time"
 
-	"token-admin-api/pkg/logger"
+	"token-services/pkg/logger"
 
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
@@ -66,4 +66,3 @@ func (m *LoggerMiddleware) Handler() gin.HandlerFunc {
 		}
 	}
 }
-

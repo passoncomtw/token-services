@@ -58,7 +58,7 @@ LOG_MODE=production
 package main
 
 import (
-    "token-admin-api/pkg/logger"
+    "token-services/pkg/logger"
     "go.uber.org/fx"
 )
 
@@ -77,7 +77,7 @@ func main() {
 package services
 
 import (
-    "token-admin-api/pkg/logger"
+    "token-services/pkg/logger"
     "go.uber.org/zap"
 )
 
@@ -132,8 +132,8 @@ func (s *UserService) CreateUser(req *CreateUserRequest) error {
 package handlers
 
 import (
-    "token-admin-api/pkg/logger"
-    "token-admin-api/pkg/response"
+    "token-services/pkg/logger"
+    "token-services/pkg/response"
     "github.com/gin-gonic/gin"
     "go.uber.org/zap"
 )

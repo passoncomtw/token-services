@@ -1,7 +1,7 @@
 package handlers
 
 import (
-	"token-admin-api/cmd/token-admin-api/internal/interfaces"
+	"token-services/cmd/token-admin-api/internal/interfaces"
 
 	"go.uber.org/fx"
 )

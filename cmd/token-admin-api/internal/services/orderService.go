@@ -4,9 +4,9 @@ import (
 	"errors"
 	"time"
 
-	"token-admin-api/cmd/token-admin-api/internal/interfaces"
-	"token-admin-api/pkg/logger"
-	"token-admin-api/pkg/models"
+	"token-services/cmd/token-admin-api/internal/interfaces"
+	"token-services/pkg/logger"
+	"token-services/pkg/models"
 
 	"github.com/google/uuid"
 	"go.uber.org/fx"

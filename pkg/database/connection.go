@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"log"
 
-	"token-admin-api/pkg/config"
+	"token-services/pkg/config"
 
 	_ "github.com/lib/pq"
 )

@@ -3,9 +3,9 @@ package services
 import (
 	"errors"
 
-	"token-admin-api/cmd/token-admin-api/internal/interfaces"
-	"token-admin-api/pkg/logger"
-	"token-admin-api/pkg/models"
+	"token-services/cmd/token-admin-api/internal/interfaces"
+	"token-services/pkg/logger"
+	"token-services/pkg/models"
 
 	"go.uber.org/fx"
 	"go.uber.org/zap"
@@ -69,7 +69,7 @@ func (s *BankCardService) GetList(query *interfaces.BankCardListQuery) (*interfa
 
 	// 分頁查詢
 	offset := (query.Page - 1) * query.Size
-	
+
 	// 執行查詢並使用 Preload 載入關聯資料
 	var bankCards []models.BankCard
 	if err := db.Preload("Bank").Preload("User").
@@ -107,4 +107,3 @@ func (s *BankCardService) GetDetail(id int) (*interfaces.BankCardDetailResponse,
 var BankCardModule = fx.Module("bankcard",
 	fx.Provide(fx.Annotate(NewBankCardService, fx.As(new(interfaces.BankCardServiceInterface)))),
 )
-

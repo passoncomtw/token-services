@@ -6,9 +6,9 @@ import (
 	"net/http"
 	"time"
 
-	"token-admin-api/pkg/config"
-	"token-admin-api/pkg/logger"
-	"token-admin-api/pkg/middleware"
+	"token-services/pkg/config"
+	"token-services/pkg/logger"
+	"token-services/pkg/middleware"
 
 	"github.com/gin-gonic/gin"
 	"go.uber.org/fx"
@@ -44,7 +44,7 @@ func NewServer(router *Router, cfg *config.Config, log logger.Logger, loggerMw *
 	// 取得本機 IP 和 Swagger host
 	localIP := cfg.GetLocalIP()
 	swagHost := cfg.GetSwaggerHost()
-	
+
 	log.Info("Server configuration",
 		zap.String("localIP", localIP),
 		zap.String("swaggerHost", swagHost),
@@ -91,7 +91,7 @@ func (s *Server) Start(lc fx.Lifecycle) {
 					zap.String("url", fmt.Sprintf("http://%s/health-check", s.swagHost)),
 				)
 				s.logger.Info("========================================")
-				
+
 				if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 					s.logger.Fatal("Failed to start server", zap.Error(err))
 				}

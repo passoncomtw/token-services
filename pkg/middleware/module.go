@@ -1,8 +1,8 @@
 package middleware
 
 import (
-	"token-admin-api/pkg/auth"
-	"token-admin-api/pkg/config"
+	"token-services/pkg/auth"
+	"token-services/pkg/config"
 
 	"go.uber.org/fx"
 )

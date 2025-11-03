@@ -3,7 +3,7 @@ package database
 import (
 	"database/sql"
 
-	"token-admin-api/pkg/config"
+	"token-services/pkg/config"
 
 	"go.uber.org/fx"
 	"gorm.io/gorm"

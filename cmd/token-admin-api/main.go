@@ -1,15 +1,15 @@
 package main
 
 import (
-	_ "token-admin-api/cmd/token-admin-api/internal/docs"
-	"token-admin-api/cmd/token-admin-api/internal/handlers"
-	"token-admin-api/cmd/token-admin-api/internal/initializers"
-	"token-admin-api/cmd/token-admin-api/internal/server"
-	"token-admin-api/cmd/token-admin-api/internal/services"
-	"token-admin-api/pkg/config"
-	"token-admin-api/pkg/database"
-	"token-admin-api/pkg/logger"
-	"token-admin-api/pkg/middleware"
+	_ "token-services/cmd/token-admin-api/internal/docs"
+	"token-services/cmd/token-admin-api/internal/handlers"
+	"token-services/cmd/token-admin-api/internal/initializers"
+	"token-services/cmd/token-admin-api/internal/server"
+	"token-services/cmd/token-admin-api/internal/services"
+	"token-services/pkg/config"
+	"token-services/pkg/database"
+	"token-services/pkg/logger"
+	"token-services/pkg/middleware"
 
 	"go.uber.org/fx"
 )

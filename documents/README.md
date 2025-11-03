@@ -430,8 +430,8 @@ type ExampleHandlersInterface interface {
 package services
 
 import (
-    "token-admin-api/cmd/token-admin-api/internal/interfaces"
-    "token-admin-api/pkg/models"
+    "token-services/cmd/token-admin-api/internal/interfaces"
+    "token-services/pkg/models"
     "go.uber.org/fx"
     "gorm.io/gorm"
 )
@@ -496,8 +496,8 @@ var ExampleModule = fx.Module("example",
 package handlers
 
 import (
-    "token-admin-api/cmd/token-admin-api/internal/interfaces"
-    "token-admin-api/pkg/response"
+    "token-services/cmd/token-admin-api/internal/interfaces"
+    "token-services/pkg/response"
     "github.com/gin-gonic/gin"
     "strconv"
 )

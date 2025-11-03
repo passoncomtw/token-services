@@ -1,7 +1,7 @@
 package handlers
 
 import (
-	"token-admin-api/pkg/response"
+	"token-services/pkg/response"
 
 	"github.com/gin-gonic/gin"
 )

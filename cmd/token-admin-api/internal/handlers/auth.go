@@ -1,9 +1,9 @@
 package handlers
 
 import (
-	"token-admin-api/cmd/token-admin-api/internal/interfaces"
-	"token-admin-api/pkg/logger"
-	"token-admin-api/pkg/response"
+	"token-services/cmd/token-admin-api/internal/interfaces"
+	"token-services/pkg/logger"
+	"token-services/pkg/response"
 
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"

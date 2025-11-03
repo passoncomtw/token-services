@@ -1,8 +1,8 @@
 package server
 
 import (
-	"token-admin-api/cmd/token-admin-api/internal/interfaces"
-	"token-admin-api/pkg/middleware"
+	"token-services/cmd/token-admin-api/internal/interfaces"
+	"token-services/pkg/middleware"
 
 	"github.com/gin-gonic/gin"
 	swaggerFiles "github.com/swaggo/files"
