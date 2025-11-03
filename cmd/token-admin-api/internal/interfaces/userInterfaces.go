@@ -164,12 +164,18 @@ type PendingOrderResponse struct {
 	User               map[string]interface{} `json:"user"`
 	BankCard           map[string]interface{} `json:"bankcard"`
 	CreateAt           string                 `json:"createAt"`
+	CancelAmount       int64                  `json:"cancelAmount"`
+	ProcessAmount      int64                  `json:"processAmount"`
+	DoneAmount         int64                  `json:"doneAmount"`
+	CancelCount        int                    `json:"cancelCount"`
+	DoneCount          int                    `json:"doneCount"`
+	ProcessCount       int                    `json:"processCount"`
 }
 
 // PendingOrderListResponse 掛單列表回應
 type PendingOrderListResponse struct {
-	Rows  []PendingOrderResponse `json:"rows"`
-	Count int64                  `json:"count"`
+	Count int64                   `json:"count"`
+	Rows  []*PendingOrderResponse `json:"rows"`
 }
 
 // PaginationQuery 分頁查詢參數

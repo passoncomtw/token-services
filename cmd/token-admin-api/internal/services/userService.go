@@ -135,9 +135,9 @@ func (s *UserService) Create(req *interfaces.CreateUserRequest) (*interfaces.Use
 			ReferralCode:      referralCode,
 			TransactionCode:   string(hashedTransactionCode),
 			ReferralID:        referralID,
-			Status:            1,              // 預設啟用
-			TransactionStatus: 1,              // 預設可交易
-			OrderStatus:       1,              // 預設可掛單
+			Status:            1, // 預設啟用
+			TransactionStatus: 1, // 預設可交易
+			OrderStatus:       1, // 預設可掛單
 		}
 
 		if err := tx.Create(&user).Error; err != nil {
@@ -248,14 +248,14 @@ func (s *UserService) Update(id int, req *interfaces.UpdateUserRequest) (*interf
 			sellLadderFee, _ := json.Marshal(req.SellLadderFee)
 
 			merchantUpdates := map[string]interface{}{
-				"contactor":            req.Contactor,
-				"telegram":             req.Telegram,
-				"buy_fee_type":         req.BuyFeeType,
-				"sell_fee_type":        req.SellFeeType,
-				"buy_percentage_fee":   buyPercentageFee,
-				"sell_percentage_fee":  sellPercentageFee,
-				"buy_ladder_fee":       buyLadderFee,
-				"sell_ladder_fee":      sellLadderFee,
+				"contactor":           req.Contactor,
+				"telegram":            req.Telegram,
+				"buy_fee_type":        req.BuyFeeType,
+				"sell_fee_type":       req.SellFeeType,
+				"buy_percentage_fee":  buyPercentageFee,
+				"sell_percentage_fee": sellPercentageFee,
+				"buy_ladder_fee":      buyLadderFee,
+				"sell_ladder_fee":     sellLadderFee,
 			}
 
 			if user.Merchant != nil {
@@ -529,9 +529,9 @@ func (s *UserService) GetPendingOrders(userID int, query *interfaces.PaginationQ
 	}
 
 	// 轉換為回應格式
-	var rows []interfaces.PendingOrderResponse
+	var rows []*interfaces.PendingOrderResponse
 	for _, po := range pendingOrders {
-		resp := interfaces.PendingOrderResponse{
+		resp := &interfaces.PendingOrderResponse{
 			ID:                 po.ID.String(),
 			Type:               po.Type,
 			Status:             po.Status,
@@ -542,14 +542,20 @@ func (s *UserService) GetPendingOrders(userID int, query *interfaces.PaginationQ
 			User:               make(map[string]interface{}),
 			BankCard:           make(map[string]interface{}),
 			CreateAt:           po.CreatedAt.Format("2006-01-02 15:04:05"),
+			CancelAmount:       po.CancelAmount,
+			ProcessAmount:      po.ProcessAmount,
+			DoneAmount:         po.DoneAmount,
+			CancelCount:        po.CancelCount,
+			DoneCount:          po.DoneCount,
+			ProcessCount:       po.ProcessCount,
 		}
 
 		rows = append(rows, resp)
 	}
 
 	return &interfaces.PendingOrderListResponse{
-		Rows:  rows,
 		Count: count,
+		Rows:  rows,
 	}, nil
 }
 
@@ -557,4 +563,3 @@ func (s *UserService) GetPendingOrders(userID int, query *interfaces.PaginationQ
 var UserModule = fx.Module("user",
 	fx.Provide(fx.Annotate(NewUserService, fx.As(new(interfaces.UserServiceInterface)))),
 )
-

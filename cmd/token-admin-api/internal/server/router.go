@@ -19,6 +19,7 @@ type Router struct {
 	bankHandlers         interfaces.BankHandlersInterface
 	bankCardHandlers     interfaces.BankCardHandlersInterface
 	orderHandlers        interfaces.OrderHandlersInterface
+	pendingOrderHandlers interfaces.PendingOrderHandlersInterface
 	authMiddleware       *middleware.AuthMiddleware
 }
 
@@ -32,6 +33,7 @@ type Router struct {
  * @param bankHandlers 銀行處理器
  * @param bankCardHandlers 銀行卡處理器
  * @param orderHandlers 訂單處理器
+ * @param pendingOrderHandlers 掛單處理器
  * @param authMiddleware 認證中間件
  * @return Router 指標
  */
@@ -44,6 +46,7 @@ func NewRouter(
 	bankHandlers interfaces.BankHandlersInterface,
 	bankCardHandlers interfaces.BankCardHandlersInterface,
 	orderHandlers interfaces.OrderHandlersInterface,
+	pendingOrderHandlers interfaces.PendingOrderHandlersInterface,
 	authMiddleware *middleware.AuthMiddleware,
 ) *Router {
 	return &Router{
@@ -55,6 +58,7 @@ func NewRouter(
 		bankHandlers:         bankHandlers,
 		bankCardHandlers:     bankCardHandlers,
 		orderHandlers:        orderHandlers,
+		pendingOrderHandlers: pendingOrderHandlers,
 		authMiddleware:       authMiddleware,
 	}
 }
@@ -115,5 +119,12 @@ func (r *Router) SetupRoutes(engine *gin.Engine) {
 		authenticated.GET("/orders", r.orderHandlers.GetList)
 		authenticated.PUT("/orders/:orderId", r.orderHandlers.Complete)
 		authenticated.PUT("/orders/:orderId/cancel", r.orderHandlers.Cancel)
+
+		// Pending Order routes
+		authenticated.GET("/pending/orders", r.pendingOrderHandlers.GetList)
+		authenticated.PUT("/pending/orders/:pendingOrderId/stop", r.pendingOrderHandlers.Stop)
+		authenticated.PUT("/pending/orders/:pendingOrderId/open", r.pendingOrderHandlers.Open)
+		authenticated.PUT("/pending/orders/:pendingOrderId/cancel", r.pendingOrderHandlers.Cancel)
+		authenticated.DELETE("/pending/orders/:pendingOrderId", r.pendingOrderHandlers.Delete)
 	}
 }
