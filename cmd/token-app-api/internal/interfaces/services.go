@@ -92,3 +92,57 @@ type UserServiceInterface interface {
 	// 自動儲值（測試用）
 	StoreValue(userID int) (*UserDetail, error)
 }
+
+// ==================== 銀行相關 ====================
+type BankDetail struct {
+	ID       int    `json:"id"`
+	BankName string `json:"bankName"`
+	BankCode string `json:"bankCode"`
+}
+
+// 銀行服務介面
+type BankServiceInterface interface {
+	// 取回銀行列表
+	GetBanks() ([]*BankDetail, error)
+}
+
+// ==================== 銀行卡相關 ====================
+type CreateBankCardRequest struct {
+	Name       string `json:"name" binding:"required"`
+	CardNumber string `json:"cardNumber" binding:"required"`
+	BankID     int    `json:"bankId" binding:"required"`
+	BranchName string `json:"branchName"`
+	Status     int    `json:"status"` // 0: 正常, 1: 停用, 2: 凍結
+}
+
+type UpdateBankCardRequest struct {
+	CardNumber string `json:"cardNumber"`
+	BankID     int    `json:"bankId"`
+	BranchName string `json:"branchName"`
+}
+
+type BankCardDetail struct {
+	ID         int         `json:"id"`
+	CreatedAt  string      `json:"createdAt"`
+	Name       string      `json:"name"`
+	CardNumber string      `json:"cardNumber"`
+	BankID     int         `json:"bankId"`
+	BranchName string      `json:"branchName"`
+	Status     int         `json:"status"` // 0: 正常, 1: 停用, 2: 凍結
+	Bank       *BankDetail `json:"bank,omitempty"`
+}
+
+// 銀行卡服務介面
+type BankCardServiceInterface interface {
+	// 取回使用者的銀行卡列表
+	GetBankCards(userID int) ([]*BankCardDetail, error)
+	
+	// 新增銀行卡
+	CreateBankCard(userID int, req *CreateBankCardRequest) (*BankCardDetail, error)
+	
+	// 更新銀行卡
+	UpdateBankCard(userID int, bankcardID int, req *UpdateBankCardRequest) (*BankCardDetail, error)
+	
+	// 刪除銀行卡
+	DeleteBankCard(userID int, bankcardID int) error
+}
