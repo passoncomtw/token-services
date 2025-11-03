@@ -1,7 +1,7 @@
 # ===================================
 # 第一階段：建置 Go 應用程式
 # ===================================
-FROM golang:1.24.1-alpine AS builder
+FROM golang:1.23-alpine AS builder
 
 # 設定平台參數（自動檢測）
 ARG TARGETARCH
@@ -13,18 +13,26 @@ WORKDIR /app
 ENV CGO_ENABLED=0 \
     GOOS=linux \
     GOARCH=${TARGETARCH} \
-    GO111MODULE=on
+    GO111MODULE=on \
+    GOPROXY=https://proxy.golang.org,direct \
+    GOSUMDB=sum.golang.org
 
-# 安裝必要的建置工具
+# 安裝必要的建置工具和 CA 憑證
 RUN apk add --no-cache \
     bash \
     curl \
     git \
-    make
+    make \
+    ca-certificates \
+    tzdata
 
 # 複製依賴檔案並下載模組（利用 Docker 快取）
 COPY go.mod go.sum ./
-RUN go mod download && go mod verify
+
+# 下載模組（增加重試和錯誤處理）
+RUN --mount=type=cache,target=/go/pkg/mod \
+    go mod download -x && \
+    go mod verify
 
 # 複製所有原始碼
 COPY . .
@@ -35,18 +43,19 @@ RUN go env GOMOD && go list -m
 # 設定正確的 Go 工具路徑
 ENV PATH="/go/bin:$PATH"
 
-# 整理模組依賴
-RUN go mod tidy
-
 # 安裝 swag 工具並生成 swagger 文檔
-RUN GOOS=linux GOARCH=${TARGETARCH} go install github.com/swaggo/swag/cmd/swag@latest && \
+RUN --mount=type=cache,target=/go/pkg/mod \
+    --mount=type=cache,target=/root/.cache/go-build \
+    go install github.com/swaggo/swag/cmd/swag@latest && \
     swag init -g cmd/token-app-api/main.go \
       -o cmd/token-app-api/internal/docs \
       --parseDependency --parseInternal \
       --exclude cmd/token-admin-api,internal/token-admin-api
 
 # 建置 Go 應用程式
-RUN go build -installsuffix cgo \
+RUN --mount=type=cache,target=/go/pkg/mod \
+    --mount=type=cache,target=/root/.cache/go-build \
+    go build -installsuffix cgo \
     -ldflags='-w -s -extldflags "-static"' \
     -o token-app-api \
     ./cmd/token-app-api
