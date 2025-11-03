@@ -6,21 +6,27 @@ import (
 	"errors"
 
 	"token-admin-api/cmd/token-admin-api/internal/interfaces"
+	"token-admin-api/pkg/logger"
 	"token-admin-api/pkg/models"
 
 	"go.uber.org/fx"
+	"go.uber.org/zap"
 	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
 )
 
 // UserService 使用者服務
 type UserService struct {
-	db *gorm.DB
+	db     *gorm.DB
+	logger logger.Logger
 }
 
 // NewUserService 建立新的使用者服務
-func NewUserService(db *gorm.DB) *UserService {
-	return &UserService{db: db}
+func NewUserService(db *gorm.DB, log logger.Logger) *UserService {
+	return &UserService{
+		db:     db,
+		logger: log.With(zap.String("service", "UserService")),
+	}
 }
 
 // GetList 取得使用者列表

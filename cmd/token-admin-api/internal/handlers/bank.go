@@ -4,19 +4,25 @@ import (
 	"strconv"
 
 	"token-admin-api/cmd/token-admin-api/internal/interfaces"
+	"token-admin-api/pkg/logger"
 	"token-admin-api/pkg/response"
 
 	"github.com/gin-gonic/gin"
+	"go.uber.org/zap"
 )
 
 // BankHandlers 銀行處理器
 type BankHandlers struct {
 	service interfaces.BankServiceInterface
+	logger  logger.Logger
 }
 
 // NewBankHandlers 建立新的銀行處理器
-func NewBankHandlers(service interfaces.BankServiceInterface) *BankHandlers {
-	return &BankHandlers{service: service}
+func NewBankHandlers(service interfaces.BankServiceInterface, log logger.Logger) *BankHandlers {
+	return &BankHandlers{
+		service: service,
+		logger:  log.With(zap.String("handler", "BankHandlers")),
+	}
 }
 
 // GetList godoc

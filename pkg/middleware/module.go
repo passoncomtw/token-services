@@ -16,5 +16,7 @@ var MiddlewareModule = fx.Module("middleware",
 		},
 		// 提供認證中間件
 		NewAuthMiddleware,
+		// 提供日誌中間件
+		NewLoggerMiddleware,
 	),
 )

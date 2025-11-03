@@ -2,20 +2,26 @@ package services
 
 import (
 	"token-admin-api/cmd/token-admin-api/internal/interfaces"
+	"token-admin-api/pkg/logger"
 	"token-admin-api/pkg/models"
 
 	"go.uber.org/fx"
+	"go.uber.org/zap"
 	"gorm.io/gorm"
 )
 
 // BackendActorService 後台角色服務
 type BackendActorService struct {
-	db *gorm.DB
+	db     *gorm.DB
+	logger logger.Logger
 }
 
 // NewBackendActorService 建立新的後台角色服務
-func NewBackendActorService(db *gorm.DB) *BackendActorService {
-	return &BackendActorService{db: db}
+func NewBackendActorService(db *gorm.DB, log logger.Logger) *BackendActorService {
+	return &BackendActorService{
+		db:     db,
+		logger: log.With(zap.String("service", "BackendActorService")),
+	}
 }
 
 // GetAll 取得所有後台角色

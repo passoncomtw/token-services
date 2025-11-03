@@ -5,21 +5,27 @@ import (
 	"time"
 
 	"token-admin-api/cmd/token-admin-api/internal/interfaces"
+	"token-admin-api/pkg/logger"
 	"token-admin-api/pkg/models"
 
 	"github.com/google/uuid"
 	"go.uber.org/fx"
+	"go.uber.org/zap"
 	"gorm.io/gorm"
 )
 
 // OrderService 訂單服務
 type OrderService struct {
-	db *gorm.DB
+	db     *gorm.DB
+	logger logger.Logger
 }
 
 // NewOrderService 建立新的訂單服務
-func NewOrderService(db *gorm.DB) *OrderService {
-	return &OrderService{db: db}
+func NewOrderService(db *gorm.DB, log logger.Logger) *OrderService {
+	return &OrderService{
+		db:     db,
+		logger: log.With(zap.String("service", "OrderService")),
+	}
 }
 
 // GetList 取得訂單列表

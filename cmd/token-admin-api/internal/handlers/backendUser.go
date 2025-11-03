@@ -4,19 +4,25 @@ import (
 	"strconv"
 
 	"token-admin-api/cmd/token-admin-api/internal/interfaces"
+	"token-admin-api/pkg/logger"
 	"token-admin-api/pkg/response"
 
 	"github.com/gin-gonic/gin"
+	"go.uber.org/zap"
 )
 
 // BackendUserHandlers 後台使用者處理器
 type BackendUserHandlers struct {
 	service interfaces.BackendUserServiceInterface
+	logger  logger.Logger
 }
 
 // NewBackendUserHandlers 建立新的後台使用者處理器
-func NewBackendUserHandlers(service interfaces.BackendUserServiceInterface) *BackendUserHandlers {
-	return &BackendUserHandlers{service: service}
+func NewBackendUserHandlers(service interfaces.BackendUserServiceInterface, log logger.Logger) *BackendUserHandlers {
+	return &BackendUserHandlers{
+		service: service,
+		logger:  log.With(zap.String("handler", "BackendUserHandlers")),
+	}
 }
 
 // GetList godoc

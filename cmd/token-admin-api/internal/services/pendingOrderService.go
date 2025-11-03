@@ -5,21 +5,27 @@ import (
 	"time"
 
 	"token-admin-api/cmd/token-admin-api/internal/interfaces"
+	"token-admin-api/pkg/logger"
 	"token-admin-api/pkg/models"
 
 	"github.com/google/uuid"
 	"go.uber.org/fx"
+	"go.uber.org/zap"
 	"gorm.io/gorm"
 )
 
 // PendingOrderService 掛單服務
 type PendingOrderService struct {
-	db *gorm.DB
+	db     *gorm.DB
+	logger logger.Logger
 }
 
 // NewPendingOrderService 建立新的掛單服務
-func NewPendingOrderService(db *gorm.DB) *PendingOrderService {
-	return &PendingOrderService{db: db}
+func NewPendingOrderService(db *gorm.DB, log logger.Logger) *PendingOrderService {
+	return &PendingOrderService{
+		db:     db,
+		logger: log.With(zap.String("service", "PendingOrderService")),
+	}
 }
 
 // GetList 取得掛單列表

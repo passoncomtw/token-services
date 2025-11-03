@@ -4,20 +4,26 @@ import (
 	"errors"
 
 	"token-admin-api/cmd/token-admin-api/internal/interfaces"
+	"token-admin-api/pkg/logger"
 	"token-admin-api/pkg/models"
 
 	"go.uber.org/fx"
+	"go.uber.org/zap"
 	"gorm.io/gorm"
 )
 
 // BankService 銀行服務
 type BankService struct {
-	db *gorm.DB
+	db     *gorm.DB
+	logger logger.Logger
 }
 
 // NewBankService 建立新的銀行服務
-func NewBankService(db *gorm.DB) *BankService {
-	return &BankService{db: db}
+func NewBankService(db *gorm.DB, log logger.Logger) *BankService {
+	return &BankService{
+		db:     db,
+		logger: log.With(zap.String("service", "BankService")),
+	}
 }
 
 // GetList 取得銀行列表

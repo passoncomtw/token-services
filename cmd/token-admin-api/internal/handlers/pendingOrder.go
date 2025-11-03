@@ -2,19 +2,25 @@ package handlers
 
 import (
 	"token-admin-api/cmd/token-admin-api/internal/interfaces"
+	"token-admin-api/pkg/logger"
 	"token-admin-api/pkg/response"
 
 	"github.com/gin-gonic/gin"
+	"go.uber.org/zap"
 )
 
 // PendingOrderHandlers 掛單處理器
 type PendingOrderHandlers struct {
 	service interfaces.PendingOrderServiceInterface
+	logger  logger.Logger
 }
 
 // NewPendingOrderHandlers 建立新的掛單處理器
-func NewPendingOrderHandlers(service interfaces.PendingOrderServiceInterface) *PendingOrderHandlers {
-	return &PendingOrderHandlers{service: service}
+func NewPendingOrderHandlers(service interfaces.PendingOrderServiceInterface, log logger.Logger) *PendingOrderHandlers {
+	return &PendingOrderHandlers{
+		service: service,
+		logger:  log.With(zap.String("handler", "PendingOrderHandlers")),
+	}
 }
 
 // GetList godoc

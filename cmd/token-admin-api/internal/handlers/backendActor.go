@@ -2,19 +2,25 @@ package handlers
 
 import (
 	"token-admin-api/cmd/token-admin-api/internal/interfaces"
+	"token-admin-api/pkg/logger"
 	"token-admin-api/pkg/response"
 
 	"github.com/gin-gonic/gin"
+	"go.uber.org/zap"
 )
 
 // BackendActorHandlers 後台角色處理器
 type BackendActorHandlers struct {
 	service interfaces.BackendActorServiceInterface
+	logger  logger.Logger
 }
 
 // NewBackendActorHandlers 建立新的後台角色處理器
-func NewBackendActorHandlers(service interfaces.BackendActorServiceInterface) *BackendActorHandlers {
-	return &BackendActorHandlers{service: service}
+func NewBackendActorHandlers(service interfaces.BackendActorServiceInterface, log logger.Logger) *BackendActorHandlers {
+	return &BackendActorHandlers{
+		service: service,
+		logger:  log.With(zap.String("handler", "BackendActorHandlers")),
+	}
 }
 
 // GetAll godoc

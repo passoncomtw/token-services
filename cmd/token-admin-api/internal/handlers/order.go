@@ -2,19 +2,25 @@ package handlers
 
 import (
 	"token-admin-api/cmd/token-admin-api/internal/interfaces"
+	"token-admin-api/pkg/logger"
 	"token-admin-api/pkg/response"
 
 	"github.com/gin-gonic/gin"
+	"go.uber.org/zap"
 )
 
 // OrderHandlers 訂單處理器
 type OrderHandlers struct {
 	service interfaces.OrderServiceInterface
+	logger  logger.Logger
 }
 
 // NewOrderHandlers 建立新的訂單處理器
-func NewOrderHandlers(service interfaces.OrderServiceInterface) *OrderHandlers {
-	return &OrderHandlers{service: service}
+func NewOrderHandlers(service interfaces.OrderServiceInterface, log logger.Logger) *OrderHandlers {
+	return &OrderHandlers{
+		service: service,
+		logger:  log.With(zap.String("handler", "OrderHandlers")),
+	}
 }
 
 // GetList godoc

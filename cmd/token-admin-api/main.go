@@ -8,19 +8,20 @@ import (
 	"token-admin-api/cmd/token-admin-api/internal/services"
 	"token-admin-api/pkg/config"
 	"token-admin-api/pkg/database"
+	"token-admin-api/pkg/logger"
 	"token-admin-api/pkg/middleware"
 
 	"go.uber.org/fx"
 )
 
-// @title FX Demo API
+// @title token-admin-api
 // @version 1.0
-// @description 這是一個使用 Gin 和 FX 的範例 API
+// @description token-admin-api 是一個使用 Gin 和 FX 的範例 API
 // @termsOfService http://swagger.io/terms/
 
-// @contact.name API Support
+// @contact.name token-admin-api Support
 // @contact.url http://www.swagger.io/support
-// @contact.email support@swagger.io
+// @contact.email passon.com.tw@gmail.com
 
 // @license.name Apache 2.0
 // @license.url http://www.apache.org/licenses/LICENSE-2.0.html
@@ -38,6 +39,7 @@ import (
 func main() {
 	fx.New(
 		config.ConfigModule,
+		logger.LoggerModule,
 		database.DatabaseModule,
 		middleware.MiddlewareModule,
 		initializers.InitializerModule,

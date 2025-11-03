@@ -1,7 +1,9 @@
 package config
 
 import (
+	"fmt"
 	"log"
+	"net"
 	"os"
 	"strconv"
 	"sync"
@@ -103,6 +105,31 @@ func getEnvInt(key string, defaultValue int) int {
 }
 
 /**
+ * @brief 取得本機 IP 地址（優先取得非 loopback 的 IPv4 地址）
+ * @return string 本機 IP 地址，若無法取得則返回 "localhost"
+ */
+func getLocalIP() string {
+	addrs, err := net.InterfaceAddrs()
+	if err != nil {
+		log.Printf("⚠️  Failed to get local IP: %v, using localhost", err)
+		return "localhost"
+	}
+
+	for _, addr := range addrs {
+		// 檢查是否為 IP 地址（排除網路遮罩等）
+		if ipNet, ok := addr.(*net.IPNet); ok && !ipNet.IP.IsLoopback() {
+			// 只取 IPv4 地址
+			if ipNet.IP.To4() != nil {
+				return ipNet.IP.String()
+			}
+		}
+	}
+
+	log.Println("⚠️  No non-loopback IPv4 address found, using localhost")
+	return "localhost"
+}
+
+/**
  * @brief 載入應用程式配置（單例模式）
  * @return *Config
  */
@@ -159,4 +186,21 @@ func Get() *Config {
 		return Load()
 	}
 	return instance
+}
+
+/**
+ * @brief 取得 Swagger Host（用於 Swagger UI）
+ * @return string 格式: "ip:port"
+ */
+func (c *Config) GetSwaggerHost() string {
+	localIP := getLocalIP()
+	return fmt.Sprintf("%s:%d", localIP, c.HTTPPort)
+}
+
+/**
+ * @brief 取得本機 IP 地址
+ * @return string
+ */
+func (c *Config) GetLocalIP() string {
+	return getLocalIP()
 }

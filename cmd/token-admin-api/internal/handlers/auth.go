@@ -2,17 +2,23 @@ package handlers
 
 import (
 	"token-admin-api/cmd/token-admin-api/internal/interfaces"
+	"token-admin-api/pkg/logger"
 	"token-admin-api/pkg/response"
 
 	"github.com/gin-gonic/gin"
+	"go.uber.org/zap"
 )
 
 type AuthHandlers struct {
 	authService interfaces.AuthServiceInterface
+	logger      logger.Logger
 }
 
-func NewAuthHandlers(authService interfaces.AuthServiceInterface) *AuthHandlers {
-	return &AuthHandlers{authService: authService}
+func NewAuthHandlers(authService interfaces.AuthServiceInterface, log logger.Logger) *AuthHandlers {
+	return &AuthHandlers{
+		authService: authService,
+		logger:      log.With(zap.String("handler", "AuthHandlers")),
+	}
 }
 
 // ==================== Auth Handlers ====================

@@ -4,21 +4,27 @@ import (
 	"errors"
 
 	"token-admin-api/cmd/token-admin-api/internal/interfaces"
+	"token-admin-api/pkg/logger"
 	"token-admin-api/pkg/models"
 
 	"go.uber.org/fx"
+	"go.uber.org/zap"
 	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
 )
 
 // BackendUserService 後台使用者服務
 type BackendUserService struct {
-	db *gorm.DB
+	db     *gorm.DB
+	logger logger.Logger
 }
 
 // NewBackendUserService 建立新的後台使用者服務
-func NewBackendUserService(db *gorm.DB) *BackendUserService {
-	return &BackendUserService{db: db}
+func NewBackendUserService(db *gorm.DB, log logger.Logger) *BackendUserService {
+	return &BackendUserService{
+		db:     db,
+		logger: log.With(zap.String("service", "BackendUserService")),
+	}
 }
 
 // GetList 取得後台使用者列表
