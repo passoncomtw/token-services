@@ -20,7 +20,7 @@ deploy/
 專案已配置 GitHub Actions 自動建置流程，當推送程式碼到 `develop` 或 `main` 分支時，會自動：
 
 1. 建置 Docker 映像
-2. 推送到 GitHub Container Registry (ghcr.io)
+2. 推送到 Docker Hub (docker.io/passon)
 3. 支援多平台 (linux/amd64, linux/arm64)
 4. 執行安全性掃描 (Trivy)
 
@@ -75,28 +75,28 @@ docker run -d \
   token-app-api:latest
 ```
 
-## 📦 從 GitHub Container Registry 拉取
+## 📦 從 Docker Hub 拉取
 
 ### Token Admin API
 
 ```bash
 # 拉取最新版本
-docker pull ghcr.io/[username]/token-admin-api:develop
+docker pull passon/token-admin-api:develop
 
 # 拉取特定版本
-docker pull ghcr.io/[username]/token-admin-api:main
-docker pull ghcr.io/[username]/token-admin-api:v1.0.0
+docker pull passon/token-admin-api:main
+docker pull passon/token-admin-api:v1.0.0
 ```
 
 ### Token App API
 
 ```bash
 # 拉取最新版本
-docker pull ghcr.io/[username]/token-app-api:develop
+docker pull passon/token-app-api:develop
 
 # 拉取特定版本
-docker pull ghcr.io/[username]/token-app-api:main
-docker pull ghcr.io/[username]/token-app-api:v1.0.0
+docker pull passon/token-app-api:main
+docker pull passon/token-app-api:v1.0.0
 ```
 
 ## 🐳 Docker Compose 部署
@@ -122,7 +122,7 @@ services:
       - token-network
 
   token-admin-api:
-    image: ghcr.io/[username]/token-admin-api:develop
+    image: passon/token-admin-api:develop
     container_name: token-admin-api
     depends_on:
       - postgres
@@ -142,7 +142,7 @@ services:
     restart: unless-stopped
 
   token-app-api:
-    image: ghcr.io/[username]/token-app-api:develop
+    image: passon/token-app-api:develop
     container_name: token-app-api
     depends_on:
       - postgres
@@ -296,8 +296,8 @@ GitHub Actions 會自動產生以下標籤：
 
 ```bash
 # 1. 拉取最新映像
-docker pull ghcr.io/[username]/token-admin-api:develop
-docker pull ghcr.io/[username]/token-app-api:develop
+docker pull passon/token-admin-api:develop
+docker pull passon/token-app-api:develop
 
 # 2. 停止舊容器
 docker stop token-admin-api token-app-api
@@ -322,10 +322,11 @@ Watchtower 會每 5 分鐘檢查一次映像更新並自動重新部署。
 
 ## 🔗 相關連結
 
-- [GitHub Container Registry](https://ghcr.io)
+- [Docker Hub - passon 組織](https://hub.docker.com/u/passon)
 - [Docker Documentation](https://docs.docker.com)
 - [Docker Compose](https://docs.docker.com/compose/)
 - [Trivy Scanner](https://github.com/aquasecurity/trivy)
+- [Docker Hub 部署說明](../DOCKERHUB_DEPLOYMENT.md)
 
 ## 📞 支援
 

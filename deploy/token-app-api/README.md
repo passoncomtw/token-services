@@ -21,7 +21,7 @@ Token App API 是前台應用的核心服務，提供：
 
 ```bash
 # 拉取映像
-docker pull ghcr.io/[username]/token-app-api:develop
+docker pull passon/token-app-api:develop
 
 # 執行容器
 docker run -d \
@@ -33,7 +33,7 @@ docker run -d \
   -e DB_USER=postgres \
   -e DB_PASSWORD=your_password \
   -e JWT_SECRET=your_jwt_secret \
-  ghcr.io/[username]/token-app-api:develop
+  passon/token-app-api:develop
 ```
 
 ### 本地建置
