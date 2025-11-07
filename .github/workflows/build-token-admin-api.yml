@@ -12,19 +12,32 @@ on:
       - 'go.sum'
 
 env:
-  REGISTRY: docker.io
-  IMAGE_NAME: passon/token-admin-api
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository_owner }}/token-admin-api
 
 permissions:
   contents: read
+  packages: write
 
 jobs:
-  test-docker-login:
+  build-and-push:
     runs-on: mac-mini-build
     
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+
+      - name: Configure Docker for CI (macOS)
+        run: |
+          # 移除 credential helper，改用文件存儲
+          mkdir -p ~/.docker
+          cat > ~/.docker/config.json <<EOF
+          {
+            "auths": {},
+            "credsStore": ""
+          }
+          EOF
+          echo "✅ Docker 配置已更新為 CI 模式"
 
       - name: Log in to GitHub Container Registry
         uses: docker/login-action@v3
@@ -33,18 +46,62 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Legacy Docker Build (last resort)
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Extract metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          tags: |
+            type=ref,event=branch
+            type=sha,prefix={{branch}}-
+            type=sha
+
+      - name: Build and push Docker image
+        id: build
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./deploy/token-admin-api/Dockerfile
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          platforms: linux/amd64,linux/arm64
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          build-args: |
+            BUILD_DATE=${{ github.event.head_commit.timestamp }}
+            VCS_REF=${{ github.sha }}
+            VERSION=${{ github.ref_name }}
+
+      - name: Generate build summary
         run: |
-            echo "=== Legacy Docker Build ==="
-            
-            # 設定變數
-            IMAGE_NAME="${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}"
-            TAG="develop"
-            SHORT_SHA=$(echo ${{ github.sha }} | cut -c1-7)
-            
-            echo "Building image with legacy docker build: $IMAGE_NAME:$TAG"
-            
-            echo "Building image with legacy docker build: $IMAGE_NAME:$TAG"
-            # 移除舊的建構器（如果存在）
-            docker buildx rm multiplatform || true
-            
+          echo "## 🐳 Token Admin API 建置完成" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### 映像資訊" >> $GITHUB_STEP_SUMMARY
+          echo "- **Registry**: ${{ env.REGISTRY }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Image**: ${{ env.IMAGE_NAME }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Tags**:" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          echo "${{ steps.meta.outputs.tags }}" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          echo "- **Digest**: \`${{ steps.build.outputs.digest }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "- **Platforms**: linux/amd64, linux/arm64" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### 拉取命令" >> $GITHUB_STEP_SUMMARY
+          echo '```bash' >> $GITHUB_STEP_SUMMARY
+          echo "docker pull ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.ref_name }}" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### 運行命令" >> $GITHUB_STEP_SUMMARY
+          echo '```bash' >> $GITHUB_STEP_SUMMARY
+          echo "docker run -d \\" >> $GITHUB_STEP_SUMMARY
+          echo "  --name token-admin-api \\" >> $GITHUB_STEP_SUMMARY
+          echo "  -p 8080:8080 \\" >> $GITHUB_STEP_SUMMARY
+          echo "  -e DB_HOST=your-db-host \\" >> $GITHUB_STEP_SUMMARY
+          echo "  -e DB_PASSWORD=your-password \\" >> $GITHUB_STEP_SUMMARY
+          echo "  -e JWT_SECRET=your-secret \\" >> $GITHUB_STEP_SUMMARY
+          echo "  ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.ref_name }}" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
