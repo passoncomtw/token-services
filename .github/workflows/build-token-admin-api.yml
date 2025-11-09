@@ -107,6 +107,7 @@ jobs:
       - name: Generate build summary
         if: success()
         run: |
+          source /Users/admin/.zshrc
           echo ${{ secrets.GHCR_TOKEN }} | docker login ${{ env.REGISTRY }} -u ${{ secrets.GHCR_USERNAME }} --password-stdin
           echo "## ✅ Token Admin API 編譯測試成功" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
