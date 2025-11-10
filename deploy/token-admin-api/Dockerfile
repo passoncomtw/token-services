@@ -29,12 +29,13 @@ RUN --mount=type=cache,target=/go/pkg/mod \
 # 複製原始碼
 COPY . .
 
-# 安裝 swag 並生成文檔
+# 安裝 swag 並生成文檔（只掃描當前服務和共用程式碼）
 RUN --mount=type=cache,target=/go/pkg/mod \
     --mount=type=cache,target=/root/.cache/go-build \
     go install github.com/swaggo/swag/cmd/swag@latest && \
     swag init -g cmd/token-admin-api/main.go \
       -o cmd/token-admin-api/internal/docs \
+      --dir cmd/token-admin-api,pkg \
       --parseDependency --parseInternal
 
 # 編譯應用程式（使用更積極的優化參數）
