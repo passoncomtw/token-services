@@ -104,6 +104,56 @@ jobs:
           
           echo "✅ 清理完成"
 
+      - name: Configure Docker (macOS 鑰匙圈修復)
+        if: success()
+        run: |
+          echo "🔧 配置 Docker 不使用 macOS 鑰匙圈..."
+          
+          # 備份原始配置（如果存在）
+          if [ -f ~/.docker/config.json ]; then
+            cp ~/.docker/config.json ~/.docker/config.json.backup
+            echo "已備份現有配置"
+          fi
+          
+          # 建立 Docker 配置目錄
+          mkdir -p ~/.docker
+          
+          # 使用 Python 移除 credsStore 配置
+          python3 << 'EOF'
+          import json
+          import os
+          
+          config_path = os.path.expanduser('~/.docker/config.json')
+          
+          # 讀取或建立配置
+          if os.path.exists(config_path):
+              with open(config_path, 'r') as f:
+                  try:
+                      config = json.load(f)
+                  except:
+                      config = {}
+          else:
+              config = {}
+          
+          # 移除 credsStore（macOS 鑰匙圈）
+          if 'credsStore' in config:
+              del config['credsStore']
+              print("已移除 credsStore 設定")
+          
+          # 移除 credHelpers（特定 registry 的憑證助手）
+          if 'credHelpers' in config:
+              del config['credHelpers']
+              print("已移除 credHelpers 設定")
+          
+          # 寫回配置
+          with open(config_path, 'w') as f:
+              json.dump(config, f, indent=2)
+          
+          print("配置已更新")
+          EOF
+          
+          echo "✅ Docker 配置完成"
+
       - name: Login to GitHub Container Registry
         if: success()
         uses: docker/login-action@v3
@@ -135,3 +185,45 @@ jobs:
           echo '```' >> $GITHUB_STEP_SUMMARY
           echo "${{ steps.meta.outputs.tags }}" >> $GITHUB_STEP_SUMMARY
           echo '```' >> $GITHUB_STEP_SUMMARY
+
+      - name: Cleanup Docker credentials
+        if: always()
+        run: |
+          echo "🧹 清理 Docker 憑證並恢復配置..."
+          
+          # 登出 Docker
+          docker logout ${{ env.REGISTRY }} 2>/dev/null || true
+          
+          # 恢復原始配置（如果存在備份）
+          if [ -f ~/.docker/config.json.backup ]; then
+            mv ~/.docker/config.json.backup ~/.docker/config.json
+            echo "✅ 已恢復原始 Docker 配置"
+          else
+            # 如果沒有備份，使用 Python 清除憑證
+            if [ -f ~/.docker/config.json ]; then
+              python3 << 'EOF'
+          import json
+          import os
+          
+          config_path = os.path.expanduser('~/.docker/config.json')
+          
+          if os.path.exists(config_path):
+              try:
+                  with open(config_path, 'r') as f:
+                      config = json.load(f)
+                  
+                  # 清除所有儲存的憑證
+                  if 'auths' in config:
+                      config['auths'] = {}
+                  
+                  with open(config_path, 'w') as f:
+                      json.dump(config, f, indent=2)
+                  
+                  print("已清除 Docker 憑證")
+              except Exception as e:
+                  print(f"清理憑證時發生錯誤: {e}")
+          EOF
+            fi
+          fi
+          
+          echo "✅ 清理完成"
