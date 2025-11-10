@@ -82,66 +82,49 @@ jobs:
             exit 1
           fi
 
-      - name: Cleanup - Remove built images
-        if: always()
-        run: |
-          echo "🧹 清理建置的映像..."
-          
-          # 刪除所有建置的映像
-          TAGS="${{ steps.meta.outputs.tags }}"
-          
-          for TAG in $TAGS; do
-            if docker image inspect "$TAG" > /dev/null 2>&1; then
-              echo "刪除: $TAG"
-              docker rmi "$TAG" || true
-            fi
-          done
-          
-          # 清理懸掛的映像
-          echo ""
-          echo "清理懸掛映像..."
-          docker image prune -f
-          
-          echo "✅ 清理完成"
-
       - name: Configure Docker & Login (macOS 鑰匙圈修復)
         if: success()
-        env:
-          DOCKER_CONFIG: ${{ runner.temp }}/.docker
         run: |
-          echo "🔧 配置 Docker 並登入 Registry..."
+          echo "🔧 配置 Docker 並手動建立認證..."
           
-          # 使用臨時目錄作為 Docker 配置目錄，完全避開系統配置
+          # 使用臨時目錄作為 Docker 配置目錄
           export DOCKER_CONFIG="${{ runner.temp }}/.docker"
           mkdir -p "$DOCKER_CONFIG"
           
           echo "Docker 配置目錄: $DOCKER_CONFIG"
           
-          # 建立一個乾淨的配置文件（不使用任何憑證存儲）
-          cat > "$DOCKER_CONFIG/config.json" << 'EOF'
+          # 手動建立 Base64 編碼的認證資訊（繞過 Docker login）
+          # 格式: username:password -> base64
+          AUTH_STRING="${{ secrets.GHCR_USERNAME }}:${{ secrets.GHCR_TOKEN }}"
+          AUTH_BASE64=$(echo -n "$AUTH_STRING" | base64)
+          
+          # 直接寫入認證資訊到 config.json（完全繞過 credential helpers）
+          cat > "$DOCKER_CONFIG/config.json" << EOF
           {
-            "auths": {}
+            "auths": {
+              "${{ env.REGISTRY }}": {
+                "auth": "$AUTH_BASE64"
+              }
+            }
           }
           EOF
           
-          echo "✅ 已建立乾淨的 Docker 配置"
+          echo "✅ 已建立 Docker 認證配置"
           
-          # 使用 --password-stdin 安全地登入
-          echo "🔐 登入到 ${{ env.REGISTRY }}..."
-          echo "${{ secrets.GHCR_TOKEN }}" | docker --config "$DOCKER_CONFIG" login ${{ env.REGISTRY }} -u ${{ secrets.GHCR_USERNAME }} --password-stdin
-          
-          # 驗證登入狀態
-          if docker --config "$DOCKER_CONFIG" info > /dev/null 2>&1; then
-            echo "✅ Docker 登入成功"
+          # 驗證配置
+          if [ -f "$DOCKER_CONFIG/config.json" ]; then
+            echo "配置文件已建立"
+            # 顯示配置結構（不顯示實際 token）
+            echo "認證配置 registry: ${{ env.REGISTRY }}"
           else
-            echo "❌ Docker 登入可能失敗"
+            echo "❌ 配置文件建立失敗"
             exit 1
           fi
           
           # 將 DOCKER_CONFIG 環境變數保存到 GITHUB_ENV，供後續步驟使用
           echo "DOCKER_CONFIG=$DOCKER_CONFIG" >> $GITHUB_ENV
           
-          echo "✅ 配置與登入完成"
+          echo "✅ Docker 認證配置完成"
 
       - name: Push Docker image
         if: success()
@@ -174,6 +157,28 @@ jobs:
           echo '```' >> $GITHUB_STEP_SUMMARY
           echo "${{ steps.meta.outputs.tags }}" >> $GITHUB_STEP_SUMMARY
           echo '```' >> $GITHUB_STEP_SUMMARY
+
+      - name: Cleanup - Remove built images
+        if: always()
+        run: |
+          echo "🧹 清理建置的映像..."
+          
+          # 刪除所有建置的映像
+          TAGS="${{ steps.meta.outputs.tags }}"
+          
+          for TAG in $TAGS; do
+            if docker image inspect "$TAG" > /dev/null 2>&1; then
+              echo "刪除: $TAG"
+              docker rmi "$TAG" || true
+            fi
+          done
+          
+          # 清理懸掛的映像
+          echo ""
+          echo "清理懸掛映像..."
+          docker image prune -f
+          
+          echo "✅ 映像清理完成"
 
       - name: Cleanup Docker credentials
         if: always()
