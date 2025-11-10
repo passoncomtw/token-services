@@ -1,7 +1,7 @@
 package server
 
 import (
-	"token-services/cmd/token-app-api/internal/interfaces"
+	"passontw-backend-services/cmd/token-app-api/internal/interfaces"
 
 	"github.com/gin-gonic/gin"
 	swaggerFiles "github.com/swaggo/files"

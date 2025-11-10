@@ -3,11 +3,11 @@ package services
 import (
 	"errors"
 
-	"token-services/cmd/token-admin-api/internal/interfaces"
-	"token-services/pkg/auth"
-	"token-services/pkg/config"
-	"token-services/pkg/logger"
-	"token-services/pkg/models"
+	"passontw-backend-services/cmd/token-admin-api/internal/interfaces"
+	"passontw-backend-services/pkg/auth"
+	"passontw-backend-services/pkg/config"
+	"passontw-backend-services/pkg/logger"
+	"passontw-backend-services/pkg/models"
 
 	"go.uber.org/fx"
 	"go.uber.org/zap"

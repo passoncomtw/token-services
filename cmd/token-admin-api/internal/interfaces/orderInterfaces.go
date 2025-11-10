@@ -1,7 +1,7 @@
 package interfaces
 
 import (
-	"token-services/pkg/models"
+	"passontw-backend-services/pkg/models"
 
 	"github.com/gin-gonic/gin"
 )

@@ -5,9 +5,9 @@ import (
 	"encoding/json"
 	"errors"
 
-	"token-services/cmd/token-admin-api/internal/interfaces"
-	"token-services/pkg/logger"
-	"token-services/pkg/models"
+	"passontw-backend-services/cmd/token-admin-api/internal/interfaces"
+	"passontw-backend-services/pkg/logger"
+	"passontw-backend-services/pkg/models"
 
 	"go.uber.org/fx"
 	"go.uber.org/zap"

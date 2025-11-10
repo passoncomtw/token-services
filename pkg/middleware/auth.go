@@ -3,8 +3,8 @@ package middleware
 import (
 	"strings"
 
-	"token-services/pkg/auth"
-	"token-services/pkg/response"
+	"passontw-backend-services/pkg/auth"
+	"passontw-backend-services/pkg/response"
 
 	"github.com/gin-gonic/gin"
 )

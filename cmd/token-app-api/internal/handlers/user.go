@@ -3,9 +3,9 @@ package handlers
 import (
 	"strconv"
 
-	"token-services/cmd/token-app-api/internal/interfaces"
-	"token-services/pkg/logger"
-	"token-services/pkg/response"
+	"passontw-backend-services/cmd/token-app-api/internal/interfaces"
+	"passontw-backend-services/pkg/logger"
+	"passontw-backend-services/pkg/response"
 
 	"github.com/gin-gonic/gin"
 )

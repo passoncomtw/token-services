@@ -6,10 +6,10 @@ import (
 	"net/http"
 	"time"
 
-	"token-services/cmd/token-app-api/internal/docs"
-	"token-services/pkg/config"
-	"token-services/pkg/logger"
-	"token-services/pkg/middleware"
+	"passontw-backend-services/cmd/token-app-api/internal/docs"
+	"passontw-backend-services/pkg/config"
+	"passontw-backend-services/pkg/logger"
+	"passontw-backend-services/pkg/middleware"
 
 	"github.com/gin-gonic/gin"
 	"go.uber.org/fx"

@@ -3,7 +3,7 @@ package middleware
 import (
 	"time"
 
-	"token-services/pkg/logger"
+	"passontw-backend-services/pkg/logger"
 
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"

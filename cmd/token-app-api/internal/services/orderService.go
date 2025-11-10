@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"time"
 
-	"token-services/cmd/token-app-api/internal/interfaces"
-	"token-services/pkg/logger"
-	"token-services/pkg/models"
+	"passontw-backend-services/cmd/token-app-api/internal/interfaces"
+	"passontw-backend-services/pkg/logger"
+	"passontw-backend-services/pkg/models"
 
 	"github.com/google/uuid"
 	"go.uber.org/fx"

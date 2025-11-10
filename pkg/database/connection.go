@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"log"
 
-	"token-services/pkg/config"
+	"passontw-backend-services/pkg/config"
 
 	_ "github.com/lib/pq"
 )

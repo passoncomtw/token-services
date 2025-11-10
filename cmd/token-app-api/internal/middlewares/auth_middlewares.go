@@ -4,8 +4,8 @@ import (
 	"net/http"
 	"strings"
 
-	"token-services/pkg/auth"
-	"token-services/pkg/config"
+	"passontw-backend-services/pkg/auth"
+	"passontw-backend-services/pkg/config"
 
 	"github.com/gin-gonic/gin"
 )

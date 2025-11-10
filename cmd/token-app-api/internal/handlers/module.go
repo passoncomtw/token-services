@@ -1,7 +1,7 @@
 package handlers
 
 import (
-	"token-services/cmd/token-app-api/internal/interfaces"
+	"passontw-backend-services/cmd/token-app-api/internal/interfaces"
 
 	"go.uber.org/fx"
 )

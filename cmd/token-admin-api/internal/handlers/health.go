@@ -1,7 +1,7 @@
 package handlers
 
 import (
-	"token-services/pkg/response"
+	"passontw-backend-services/pkg/response"
 
 	"github.com/gin-gonic/gin"
 )

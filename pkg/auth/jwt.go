@@ -4,7 +4,7 @@ import (
 	"errors"
 	"time"
 
-	"token-services/pkg/config"
+	"passontw-backend-services/pkg/config"
 
 	"github.com/golang-jwt/jwt/v5"
 )
