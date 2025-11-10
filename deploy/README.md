@@ -64,6 +64,8 @@ token-services/
 │   ├── token-app-api/
 │   ├── token-{新服務}-api/       # 新服務的部署配置
 │   └── Dockerfile.template       # Dockerfile 模板
+├── scripts/
+│   └── create-new-service.sh     # 自動創建新服務腳本
 └── .github/workflows/
     ├── build-token-admin-api.yml
     ├── build-token-app-api.yml
@@ -71,6 +73,21 @@ token-services/
 ```
 
 ### 🚀 快速創建新服務
+
+**推薦方式：使用自動化腳本**
+
+```bash
+# 在專案根目錄執行
+./scripts/create-new-service.sh payment
+
+# 腳本會自動完成以下步驟：
+# ✅ 創建目錄結構
+# ✅ 創建 Dockerfile
+# ✅ 更新所有現有服務的 Dockerfile（添加 --exclude）
+# ✅ 創建 GitHub Actions workflow
+```
+
+**或手動創建：**
 
 #### 步驟 1：創建服務目錄結構
 
@@ -110,6 +127,26 @@ sed -i '' "s/{SERVICE_NAME}/${SERVICE_NAME}/g" deploy/token-${SERVICE_NAME}-api/
 sed -i "s/{SERVICE_NAME}/${SERVICE_NAME}/g" deploy/token-${SERVICE_NAME}-api/Dockerfile
 ```
 
+#### 步驟 2.5：更新現有服務的 Dockerfile（重要！）
+
+新增服務後，需要在**所有現有服務**的 Dockerfile 中添加 `--exclude` 排除新服務：
+
+```bash
+# 範例：如果新增了 payment-api，需要更新 admin-api 和 app-api 的 Dockerfile
+
+# 在 deploy/token-admin-api/Dockerfile 中：
+swag init ... \
+  --exclude cmd/token-app-api \
+  --exclude cmd/token-payment-api \      ⬅️ 添加這行
+  --parseDependency --parseInternal
+
+# 在 deploy/token-app-api/Dockerfile 中：
+swag init ... \
+  --exclude cmd/token-admin-api \
+  --exclude cmd/token-payment-api \      ⬅️ 添加這行
+  --parseDependency --parseInternal
+```
+
 #### 步驟 3：創建 GitHub Actions Workflow
 
 ```bash
@@ -143,30 +180,34 @@ EXPOSE 8082  # 使用不同的埠號
 
 ### 🎯 關鍵配置：避免服務衝突
 
-**⚠️ 重要：使用 `--dir` 參數實現服務隔離**
+**⚠️ 重要：使用 `--exclude` 參數排除其他服務**
 
-在 Dockerfile 的 swag 配置中，必須使用 `--dir` 參數**只掃描當前服務**：
+在 Dockerfile 的 swag 配置中，必須使用 `--exclude` 參數排除其他服務目錄：
 
 ```dockerfile
-# ✅ 正確做法（完全隔離）
-swag init -g cmd/token-{服務}-api/main.go \
-  -o cmd/token-{服務}-api/internal/docs \
-  --dir cmd/token-{服務}-api,pkg \      ⬅️ 關鍵：只掃描當前服務和共用程式碼
+# ✅ 正確做法（排除其他服務）
+swag init -g cmd/token-admin-api/main.go \
+  -o cmd/token-admin-api/internal/docs \
+  --dir ./ \
+  --exclude cmd/token-app-api \          ⬅️ 關鍵：排除其他服務目錄
   --parseDependency --parseInternal
 ```
 
 ```dockerfile
-# ❌ 錯誤做法 1（會掃描所有目錄）
+# ❌ 錯誤做法（會掃描所有目錄，導致類型衝突）
 swag init -g cmd/token-{服務}-api/main.go \
+  --dir ./ \
   --parseDependency --parseInternal
-
-# ❌ 錯誤做法 2（需要手動維護排除列表）
-swag init -g cmd/token-{服務}-api/main.go \
-  --exclude cmd/token-admin-api \
-  --exclude cmd/token-app-api \
-  --exclude cmd/token-payment-api \
-  # ... 每次新增服務都要更新
 ```
+
+**為什麼使用 `--exclude` 而不是 `--dir`？**
+
+雖然理論上 `--dir cmd/token-admin-api,pkg` 看起來更優雅，但在實際運行中會出現問題：
+- `pkg` 目錄本身沒有 Go 文件，只是子目錄的容器
+- swag 嘗試將 `pkg` 作為包處理時會失敗
+- 錯誤：`no Go files in /app/pkg`
+
+因此，我們使用 `--dir ./` 掃描整個專案，然後用 `--exclude` 排除其他服務目錄。
 
 #### 為什麼這麼重要？
 
@@ -219,7 +260,22 @@ cmd/
 
 ### 📝 完整創建腳本
 
-將以下腳本保存為 `create-new-service.sh`：
+專案已包含自動化腳本：`scripts/create-new-service.sh`
+
+使用方式：
+
+```bash
+# 在專案根目錄執行
+./scripts/create-new-service.sh payment
+
+# 腳本會自動：
+# ✓ 創建目錄結構
+# ✓ 創建 Dockerfile
+# ✓ 更新所有現有服務的 Dockerfile（添加 --exclude）
+# ✓ 創建 GitHub Actions workflow
+```
+
+**腳本內容：**
 
 ```bash
 #!/bin/bash
@@ -228,8 +284,8 @@ cmd/
 SERVICE_NAME=$1
 
 if [ -z "$SERVICE_NAME" ]; then
-  echo "使用方法: ./create-new-service.sh {服務名稱}"
-  echo "範例: ./create-new-service.sh payment"
+  echo "使用方法: ./scripts/create-new-service.sh {服務名稱}"
+  echo "範例: ./scripts/create-new-service.sh payment"
   exit 1
 fi
 
@@ -258,6 +314,18 @@ echo "📄 創建 Dockerfile..."
 cp deploy/Dockerfile.template deploy/token-${SERVICE_NAME}-api/Dockerfile
 sed -i '' "s/{SERVICE_NAME}/${SERVICE_NAME}/g" deploy/token-${SERVICE_NAME}-api/Dockerfile
 
+# 3.5 更新現有服務的 Dockerfile（添加 --exclude）
+echo "🔧 更新現有服務的 Dockerfile..."
+for dockerfile in deploy/token-*/Dockerfile; do
+  if [[ "$dockerfile" != "deploy/token-${SERVICE_NAME}-api/Dockerfile" ]]; then
+    # 在 --parseDependency 前添加新的 --exclude 行
+    sed -i '' "/--parseDependency/i\\
+      --exclude cmd/token-${SERVICE_NAME}-api \\\\
+" "$dockerfile"
+    echo "   ✓ 更新 $dockerfile"
+  fi
+done
+
 # 4. 複製 workflow
 echo "⚙️  創建 GitHub Actions workflow..."
 cp .github/workflows/build-token-admin-api.yml \
@@ -267,14 +335,21 @@ sed -i '' "s/Admin/${SERVICE_NAME^}/g" .github/workflows/build-token-${SERVICE_N
 
 echo "✅ 服務創建完成！"
 echo ""
-echo "接下來的步驟："
+echo "📝 已完成的操作："
+echo "   ✓ 創建服務目錄結構"
+echo "   ✓ 創建 Dockerfile"
+echo "   ✓ 更新所有現有服務的 Dockerfile（添加 --exclude）"
+echo "   ✓ 創建 GitHub Actions workflow"
+echo ""
+echo "🔜 接下來的步驟："
 echo "1. 實作服務邏輯（cmd/token-${SERVICE_NAME}-api/）"
 echo "2. 調整 Dockerfile 中的埠號（EXPOSE）"
 echo "3. 本地測試建置："
 echo "   docker build -t token-${SERVICE_NAME}-api:test -f deploy/token-${SERVICE_NAME}-api/Dockerfile ."
-echo "4. 提交並推送："
+echo "4. 檢查所有 Dockerfile 的 --exclude 配置是否正確"
+echo "5. 提交並推送："
 echo "   git add ."
-echo "   git commit -m \"feat: 添加 ${SERVICE_NAME} API 服務\""
+echo "   git commit -m \"feat: 添加 ${SERVICE_NAME} API 服務並更新 Swagger 隔離配置\""
 echo "   git push origin develop"
 ```
 
@@ -409,15 +484,21 @@ open http://localhost:8082/swagger/index.html
 
 ### 📊 方案對比
 
-| 特性 | --exclude 方式 ❌ | --dir 方式 ✅ |
-|------|-------------------|---------------|
-| 可擴展性 | 需要手動維護 | 自動隔離 |
-| 維護成本 | 高（N×M） | 低（N） |
-| 錯誤風險 | 容易遺漏 | 完全隔離 |
-| 新增服務 | 需更新所有服務 | 無需修改其他服務 |
-| 建置速度 | 慢（掃描所有目錄） | 快（只掃描需要的） |
+| 特性 | 無隔離 ❌ | 使用 --exclude ⚠️ | 理想方案（不可行）|
+|------|-----------|-------------------|-------------------|
+| 類型衝突 | 會發生 | 不會發生 ✅ | 不會發生 ✅ |
+| 可擴展性 | N/A | 需手動維護 | 自動隔離 |
+| 維護成本 | 高（無法建置）| 中等（N×M） | 低（N） |
+| 錯誤風險 | 100% | 中等（可能遺漏）| 低 |
+| 新增服務 | 建置失敗 | 需更新所有 Dockerfile | 無需修改 |
+| 建置速度 | - | 正常 | 正常 |
 
 *N = 服務數量，M = 需要排除的服務數量*
+
+**說明：**
+- ❌ **無隔離**：會導致 `cannot find type definition` 錯誤，完全無法建置
+- ⚠️ **使用 --exclude**：當前採用的方案，需要維護排除列表，但可以正常運作
+- 🔮 **理想方案**：`--dir cmd/service,pkg` 在理論上最優，但 swag 無法處理空的 `pkg` 目錄
 
 ## 🛠️ 本地建置
 
@@ -824,7 +905,7 @@ cannot find type definition: token_app_api_internal_interfaces.XXX
 
 **解決方案：**
 - 檢查 Dockerfile 中的 `swag init` 命令
-- 確保使用 `--dir cmd/token-{服務}-api,pkg` 參數
+- 確保使用 `--exclude` 排除其他服務目錄
 - 參考本文檔的「新增服務指南」章節
 
 #### 2. Docker 登入失敗（macOS）
@@ -861,9 +942,13 @@ Error saving credentials: User interaction is not allowed
 **版本：** 3.0  
 **主要特性：**
 - ✅ 可擴展的微服務架構
-- ✅ Swagger 服務隔離（`--dir` 參數）
+- ✅ Swagger 服務隔離（`--exclude` 參數避免類型衝突）
 - ✅ 三層快取策略（GHA + BuildKit + Docker）
 - ✅ 完整的新服務創建指南
 - ✅ macOS CI/CD 鑰匙圈問題解決方案
 - ✅ 效能優化（建置速度提升 85-90%）
+
+**注意事項：**
+- ⚠️ 新增服務時需要更新所有現有服務的 Dockerfile（添加 `--exclude` 排除新服務）
+- ⚠️ 雖然需要手動維護排除列表，但這是目前唯一可行的方案
 

@@ -38,14 +38,17 @@ RUN --mount=type=cache,target=/go/pkg/mod \
 # 複製原始碼
 COPY . .
 
-# 安裝 swag 並生成文檔（只掃描當前服務和共用程式碼）
-# 重要：--dir 參數只包含當前服務目錄，避免與其他服務衝突
+# 安裝 swag 並生成文檔
+# 重要：使用 --exclude 排除其他服務目錄，避免類型衝突
+# 每次新增服務時，需要在現有服務的 Dockerfile 中添加對應的 --exclude
 RUN --mount=type=cache,target=/go/pkg/mod \
     --mount=type=cache,target=/root/.cache/go-build \
     go install github.com/swaggo/swag/cmd/swag@latest && \
     swag init -g cmd/token-{SERVICE_NAME}-api/main.go \
       -o cmd/token-{SERVICE_NAME}-api/internal/docs \
-      --dir cmd/token-{SERVICE_NAME}-api,pkg \
+      --dir ./ \
+      --exclude cmd/token-admin-api \
+      --exclude cmd/token-app-api \
       --parseDependency --parseInternal
 
 # 編譯應用程式（使用更積極的優化參數）

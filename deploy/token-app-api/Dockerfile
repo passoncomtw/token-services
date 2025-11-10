@@ -35,7 +35,8 @@ RUN --mount=type=cache,target=/go/pkg/mod \
     go install github.com/swaggo/swag/cmd/swag@latest && \
     swag init -g cmd/token-app-api/main.go \
       -o cmd/token-app-api/internal/docs \
-      --dir cmd/token-app-api,pkg \
+      --dir ./ \
+      --exclude cmd/token-admin-api \
       --parseDependency --parseInternal
 
 # 編譯應用程式（使用更積極的優化參數）
