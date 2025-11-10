@@ -3,60 +3,45 @@
 # ===================================
 FROM golang:1.23-alpine AS builder
 
-# 設定平台參數（自動檢測）
 ARG TARGETARCH
 
-# 設定工作目錄
 WORKDIR /app
 
-# 設定環境變數
+# 設定環境變數以優化編譯
 ENV CGO_ENABLED=0 \
     GOOS=linux \
     GOARCH=${TARGETARCH} \
     GO111MODULE=on \
-    GOPROXY=https://proxy.golang.org,direct \
+    GOPROXY=https://goproxy.cn,https://proxy.golang.org,direct \
     GOSUMDB=sum.golang.org
 
-# 安裝必要的建置工具和 CA 憑證
-RUN apk add --no-cache \
-    bash \
-    curl \
-    git \
-    make \
-    ca-certificates \
-    tzdata
+# 安裝建置工具（合併減少層數）
+RUN apk add --no-cache git ca-certificates tzdata
 
-# 複製依賴檔案並下載模組（利用 Docker 快取）
+# 複製依賴檔案（優先快取）
 COPY go.mod go.sum ./
 
-# 下載模組（增加重試和錯誤處理）
+# 下載依賴（使用 BuildKit cache mount）
 RUN --mount=type=cache,target=/go/pkg/mod \
-    go mod download -x && \
-    go mod verify
+    --mount=type=cache,target=/root/.cache/go-build \
+    go mod download && go mod verify
 
-# 複製所有原始碼
+# 複製原始碼
 COPY . .
 
-# 確保 Go 模組路徑正確
-RUN go env GOMOD && go list -m
-
-# 設定正確的 Go 工具路徑
-ENV PATH="/go/bin:$PATH"
-
-# 安裝 swag 工具並生成 swagger 文檔
+# 安裝 swag 並生成文檔
 RUN --mount=type=cache,target=/go/pkg/mod \
     --mount=type=cache,target=/root/.cache/go-build \
     go install github.com/swaggo/swag/cmd/swag@latest && \
     swag init -g cmd/token-admin-api/main.go \
       -o cmd/token-admin-api/internal/docs \
-      --parseDependency --parseInternal \
-      --exclude cmd/token-app-api,internal/token-app-api
+      --parseDependency --parseInternal
 
-# 建置 Go 應用程式
+# 編譯應用程式（使用更積極的優化參數）
 RUN --mount=type=cache,target=/go/pkg/mod \
     --mount=type=cache,target=/root/.cache/go-build \
-    go build -installsuffix cgo \
-    -ldflags='-w -s -extldflags "-static"' \
+    go build -v -trimpath \
+    -ldflags="-w -s -X main.version=${VERSION:-dev}" \
     -o token-admin-api \
     ./cmd/token-admin-api
 
