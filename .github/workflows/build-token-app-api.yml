@@ -1,26 +1,26 @@
-name: Build Token Admin API
+name: Build Token App API
 
 on:
   push:
     branches: [develop, main]
     paths:
-      - '.github/workflows/build-token-admin-api.yml'
-      - 'cmd/token-admin-api/**'
+      - '.github/workflows/build-token-app-api.yml'
+      - 'cmd/token-app-api/**'
       - 'pkg/**'
-      - 'deploy/token-admin-api/**'
+      - 'deploy/token-app-api/**'
       - 'go.mod'
       - 'go.sum'
 
 env:
   REGISTRY: ghcr.io
-  IMAGE_NAME: ${{ github.repository_owner }}/token-admin-api
+  IMAGE_NAME: ${{ github.repository_owner }}/token-app-api
 
 permissions:
   contents: read
   packages: write
 
 jobs:
-  build-only:
+  build-and-push:
     runs-on: mac-mini-build
     
     steps:
@@ -40,12 +40,12 @@ jobs:
             type=sha,prefix={{branch}}-
             type=sha
 
-      - name: Build Docker image (不推送)
+      - name: Build Docker image
         id: build
         uses: docker/build-push-action@v5
         with:
           context: .
-          file: ./deploy/token-admin-api/Dockerfile
+          file: ./deploy/token-app-api/Dockerfile
           push: false
           load: true
           tags: ${{ steps.meta.outputs.tags }}
@@ -118,13 +118,13 @@ jobs:
       - name: Generate build summary
         if: success()
         run: |
-          echo "## ✅ Token Admin API 建置與推送成功" >> $GITHUB_STEP_SUMMARY
+          echo "## ✅ Token App API 建置與推送成功" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "### 建置資訊" >> $GITHUB_STEP_SUMMARY
           echo "- **分支**: ${{ github.ref_name }}" >> $GITHUB_STEP_SUMMARY
           echo "- **Commit**: \`${{ github.sha }}\`" >> $GITHUB_STEP_SUMMARY
           echo "- **平台**: linux/amd64" >> $GITHUB_STEP_SUMMARY
-          echo "- **Dockerfile**: \`./deploy/token-admin-api/Dockerfile\`" >> $GITHUB_STEP_SUMMARY
+          echo "- **Dockerfile**: \`./deploy/token-app-api/Dockerfile\`" >> $GITHUB_STEP_SUMMARY
           echo "- **Registry**: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "### 映像標籤" >> $GITHUB_STEP_SUMMARY
@@ -157,3 +157,4 @@ jobs:
             rm -rf "$DOCKER_CONFIG"
             echo "✅ 憑證清理完成"
           fi
+
