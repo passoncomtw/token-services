@@ -1,0 +1,57 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: token-services-ingress
+  namespace: passontw-services
+  annotations:
+    # k3s 使用 traefik 作為預設 ingress controller
+    kubernetes.io/ingress.class: "traefik"
+    # 啟用 HTTPS 重定向
+    traefik.ingress.kubernetes.io/redirect-entry-point: https
+    # CORS 配置
+    traefik.ingress.kubernetes.io/frontend-entry-points: http,https
+spec:
+  rules:
+  # Admin API
+  - host: token-admin-api.passontw.com
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: token-admin-api
+            port:
+              number: 8080
+  
+  # App API
+  - host: token-app-api.passontw.com
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: token-app-api
+            port:
+              number: 8080
+  
+  # 也可以使用路徑區分
+  # - host: api.yourdomain.com
+  #   http:
+  #     paths:
+  #     - path: /admin
+  #       pathType: Prefix
+  #       backend:
+  #         service:
+  #           name: token-admin-api
+  #           port:
+  #             number: 8080
+  #     - path: /app
+  #       pathType: Prefix
+  #       backend:
+  #         service:
+  #           name: token-app-api
+  #           port:
+  #             number: 8080
+

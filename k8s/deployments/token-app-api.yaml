@@ -1,0 +1,139 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: token-app-api
+  namespace: passontw-services
+  labels:
+    app: token-app-api
+    version: v1
+spec:
+  replicas: 2
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  selector:
+    matchLabels:
+      app: token-app-api
+  template:
+    metadata:
+      labels:
+        app: token-app-api
+        version: v1
+    spec:
+      imagePullSecrets:
+        - name: ghcr-pull-secret
+      
+      containers:
+      - name: token-app-api
+        image: ghcr.io/passontw/token-app-api:latest
+        imagePullPolicy: Always
+        
+        ports:
+        - name: http
+          containerPort: 8080
+          protocol: TCP
+        
+        env:
+        # 從 ConfigMap 載入
+        - name: APP_ENV
+          valueFrom:
+            configMapKeyRef:
+              name: app-api-config
+              key: APP_ENV
+        - name: APP_PORT
+          valueFrom:
+            configMapKeyRef:
+              name: app-api-config
+              key: APP_PORT
+        - name: LOG_LEVEL
+          valueFrom:
+            configMapKeyRef:
+              name: app-api-config
+              key: LOG_LEVEL
+        
+        # 從 Secret 載入資料庫配置
+        - name: DB_HOST
+          valueFrom:
+            secretKeyRef:
+              name: database-secret
+              key: DB_HOST
+        - name: DB_PORT
+          valueFrom:
+            secretKeyRef:
+              name: database-secret
+              key: DB_PORT
+        - name: DB_USER
+          valueFrom:
+            secretKeyRef:
+              name: database-secret
+              key: DB_USER
+        - name: DB_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: database-secret
+              key: DB_PASSWORD
+        - name: DB_NAME
+          valueFrom:
+            secretKeyRef:
+              name: database-secret
+              key: DB_NAME
+        - name: DB_SSLMODE
+          valueFrom:
+            secretKeyRef:
+              name: database-secret
+              key: DB_SSLMODE
+        
+        # 從 Secret 載入 JWT 配置
+        - name: JWT_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: jwt-secret
+              key: JWT_SECRET
+        
+        # 健康檢查
+        livenessProbe:
+          httpGet:
+            path: /health-check
+            port: 8080
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+        
+        readinessProbe:
+          httpGet:
+            path: /health-check
+            port: 8080
+          initialDelaySeconds: 10
+          periodSeconds: 5
+          timeoutSeconds: 3
+          failureThreshold: 3
+        
+        # 資源限制
+        resources:
+          requests:
+            memory: "128Mi"
+            cpu: "100m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+        
+        # 安全上下文
+        securityContext:
+          runAsNonRoot: true
+          runAsUser: 65534
+          readOnlyRootFilesystem: true
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+              - ALL
+      
+      # Pod 安全策略
+      securityContext:
+        fsGroup: 65534
+      
+      # 重啟策略
+      restartPolicy: Always
+

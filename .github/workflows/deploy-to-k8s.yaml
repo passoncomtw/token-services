@@ -1,0 +1,202 @@
+name: Deploy to Kubernetes
+
+on:
+  workflow_run:
+    workflows: ["Build Token Admin API"]
+    branches: [main, develop]
+    types:
+      - completed
+  workflow_dispatch:
+    inputs:
+      service:
+        description: '要部署的服務'
+        required: true
+        type: choice
+        options:
+          - all
+          - admin-api
+          - app-api
+      environment:
+        description: '部署環境'
+        required: true
+        type: choice
+        options:
+          - production
+          - staging
+
+env:
+  NAMESPACE: passontw-services
+
+jobs:
+  deploy:
+    name: Deploy to K8s
+    runs-on: mac-mini-build
+    if: ${{ github.event.workflow_run.conclusion == 'success' || github.event_name == 'workflow_dispatch' }}
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set deployment variables
+        id: vars
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            SERVICE="${{ github.event.inputs.service }}"
+            ENV="${{ github.event.inputs.environment }}"
+          else
+            SERVICE="all"
+            if [ "${{ github.ref_name }}" = "main" ]; then
+              ENV="production"
+            else
+              ENV="staging"
+            fi
+          fi
+          
+          echo "service=${SERVICE}" >> $GITHUB_OUTPUT
+          echo "environment=${ENV}" >> $GITHUB_OUTPUT
+          echo "namespace=${NAMESPACE}-${ENV}" >> $GITHUB_OUTPUT
+          
+          echo "部署服務: ${SERVICE}"
+          echo "部署環境: ${ENV}"
+          echo "命名空間: ${NAMESPACE}-${ENV}"
+
+      - name: Verify kubectl connection
+        run: |
+          echo "🔍 驗證 kubectl 連接..."
+          kubectl version --client
+          kubectl cluster-info
+          kubectl get nodes
+
+      - name: Deploy to Kubernetes
+        run: |
+          echo "🚀 開始部署到 Kubernetes..."
+          echo ""
+          
+          SERVICE="${{ steps.vars.outputs.service }}"
+          NAMESPACE="${{ steps.vars.outputs.namespace }}"
+          
+          # 確保 namespace 存在
+          kubectl create namespace $NAMESPACE --dry-run=client -o yaml | kubectl apply -f -
+          
+          # 更新 ConfigMaps
+          echo "📝 更新 ConfigMaps..."
+          if [ "$SERVICE" = "all" ] || [ "$SERVICE" = "admin-api" ]; then
+            kubectl apply -f k8s/configmaps/admin-api-config.yaml -n $NAMESPACE
+          fi
+          
+          if [ "$SERVICE" = "all" ] || [ "$SERVICE" = "app-api" ]; then
+            kubectl apply -f k8s/configmaps/app-api-config.yaml -n $NAMESPACE
+          fi
+          
+          # 部署服務
+          if [ "$SERVICE" = "all" ] || [ "$SERVICE" = "admin-api" ]; then
+            echo ""
+            echo "🔄 部署 Admin API..."
+            kubectl apply -f k8s/deployments/token-admin-api.yaml -n $NAMESPACE
+            kubectl apply -f k8s/services/token-admin-api-service.yaml -n $NAMESPACE
+            
+            # 更新映像（觸發重新部署）
+            kubectl set image deployment/token-admin-api \
+              token-admin-api=ghcr.io/${{ github.repository_owner }}/token-admin-api:${{ github.ref_name }}-$(echo ${{ github.sha }} | cut -c1-7) \
+              -n $NAMESPACE
+            
+            echo "✅ Admin API 部署完成"
+          fi
+          
+          if [ "$SERVICE" = "all" ] || [ "$SERVICE" = "app-api" ]; then
+            echo ""
+            echo "🔄 部署 App API..."
+            kubectl apply -f k8s/deployments/token-app-api.yaml -n $NAMESPACE
+            kubectl apply -f k8s/services/token-app-api-service.yaml -n $NAMESPACE
+            
+            # 更新映像（觸發重新部署）
+            kubectl set image deployment/token-app-api \
+              token-app-api=ghcr.io/${{ github.repository_owner }}/token-app-api:${{ github.ref_name }}-$(echo ${{ github.sha }} | cut -c1-7) \
+              -n $NAMESPACE
+            
+            echo "✅ App API 部署完成"
+          fi
+
+      - name: Wait for rollout
+        run: |
+          echo ""
+          echo "⏳ 等待部署完成..."
+          
+          SERVICE="${{ steps.vars.outputs.service }}"
+          NAMESPACE="${{ steps.vars.outputs.namespace }}"
+          
+          if [ "$SERVICE" = "all" ] || [ "$SERVICE" = "admin-api" ]; then
+            echo "等待 Admin API..."
+            kubectl rollout status deployment/token-admin-api -n $NAMESPACE --timeout=300s
+          fi
+          
+          if [ "$SERVICE" = "all" ] || [ "$SERVICE" = "app-api" ]; then
+            echo "等待 App API..."
+            kubectl rollout status deployment/token-app-api -n $NAMESPACE --timeout=300s
+          fi
+          
+          echo ""
+          echo "✅ 所有服務部署完成"
+
+      - name: Verify deployment
+        run: |
+          NAMESPACE="${{ steps.vars.outputs.namespace }}"
+          
+          echo ""
+          echo "🔍 驗證部署狀態..."
+          echo ""
+          
+          echo "Deployments:"
+          kubectl get deployments -n $NAMESPACE
+          echo ""
+          
+          echo "Pods:"
+          kubectl get pods -n $NAMESPACE
+          echo ""
+          
+          echo "Services:"
+          kubectl get services -n $NAMESPACE
+
+      - name: Generate deployment summary
+        if: success()
+        run: |
+          echo "## 🚀 Kubernetes 部署成功" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### 部署資訊" >> $GITHUB_STEP_SUMMARY
+          echo "- **服務**: ${{ steps.vars.outputs.service }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **環境**: ${{ steps.vars.outputs.environment }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **命名空間**: ${{ steps.vars.outputs.namespace }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **分支**: ${{ github.ref_name }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Commit**: \`${{ github.sha }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### 查看狀態" >> $GITHUB_STEP_SUMMARY
+          echo '```bash' >> $GITHUB_STEP_SUMMARY
+          echo "kubectl get all -n ${{ steps.vars.outputs.namespace }}" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### 查看日誌" >> $GITHUB_STEP_SUMMARY
+          echo '```bash' >> $GITHUB_STEP_SUMMARY
+          echo "kubectl logs -f -n ${{ steps.vars.outputs.namespace }} deployment/token-admin-api" >> $GITHUB_STEP_SUMMARY
+          echo "kubectl logs -f -n ${{ steps.vars.outputs.namespace }} deployment/token-app-api" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+
+      - name: Rollback on failure
+        if: failure()
+        run: |
+          echo "❌ 部署失敗，開始回滾..."
+          
+          SERVICE="${{ steps.vars.outputs.service }}"
+          NAMESPACE="${{ steps.vars.outputs.namespace }}"
+          
+          if [ "$SERVICE" = "all" ] || [ "$SERVICE" = "admin-api" ]; then
+            echo "回滾 Admin API..."
+            kubectl rollout undo deployment/token-admin-api -n $NAMESPACE || true
+          fi
+          
+          if [ "$SERVICE" = "all" ] || [ "$SERVICE" = "app-api" ]; then
+            echo "回滾 App API..."
+            kubectl rollout undo deployment/token-app-api -n $NAMESPACE || true
+          fi
+          
+          echo "✅ 回滾完成"
+
