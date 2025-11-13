@@ -2,7 +2,6 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: token-admin-api
-  namespace: passontw-services
   labels:
     app: token-admin-api
     version: v1
