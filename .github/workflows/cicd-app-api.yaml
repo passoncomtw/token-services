@@ -91,12 +91,17 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           platforms: linux/amd64
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+          # 多層緩存策略加速構建
+          cache-from: |
+            type=gha,scope=app-api-${{ github.ref_name }}
+            type=gha,scope=app-api-main
+            type=gha,scope=app-api
+          cache-to: type=gha,mode=max,scope=app-api-${{ github.ref_name }}
           build-args: |
             BUILD_DATE=${{ github.event.head_commit.timestamp }}
             VCS_REF=${{ github.sha }}
             VERSION=${{ github.ref_name }}
+            BUILDKIT_INLINE_CACHE=1
 
       - name: Verify build
         run: |
