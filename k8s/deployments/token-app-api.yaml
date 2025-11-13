@@ -51,6 +51,11 @@ spec:
             configMapKeyRef:
               name: app-api-config
               key: LOG_LEVEL
+        - name: SWAGGER_BASE_DOMAIN
+          valueFrom:
+            configMapKeyRef:
+              name: app-api-config
+              key: SWAGGER_BASE_DOMAIN
         
         # 從 Secret 載入資料庫配置
         - name: DB_HOST

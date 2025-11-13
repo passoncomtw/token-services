@@ -9,6 +9,7 @@ data:
   CORS_ALLOWED_ORIGINS: "*"
   
   # Swagger 配置
+  SWAGGER_BASE_DOMAIN: "token-admin-api.passon.tw"
   SWAGGER_HOST: "token-admin-web.passontw.com"
   SWAGGER_BASEPATH: "/"
   

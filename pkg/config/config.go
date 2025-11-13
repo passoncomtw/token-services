@@ -45,6 +45,9 @@ type Config struct {
 	// Logging
 	LogLevel string
 	LogMode  string
+
+	// Swagger
+	SwaggerBaseDomain string
 }
 
 var (
@@ -169,6 +172,9 @@ func Load() *Config {
 			// Logging
 			LogLevel: getEnv("LOG_LEVEL", "info"),
 			LogMode:  getEnv("LOG_MODE", "production"),
+
+			// Swagger
+			SwaggerBaseDomain: getEnv("SWAGGER_BASE_DOMAIN", ""),
 		}
 
 		log.Println("✅ Application configuration loaded successfully")
@@ -190,9 +196,15 @@ func Get() *Config {
 
 /**
  * @brief 取得 Swagger Host（用於 Swagger UI）
- * @return string 格式: "ip:port"
+ * @return string 格式: "domain" 或 "ip:port"
  */
 func (c *Config) GetSwaggerHost() string {
+	// 優先使用環境變量中的 SWAGGER_BASE_DOMAIN
+	if c.SwaggerBaseDomain != "" {
+		return c.SwaggerBaseDomain
+	}
+	
+	// 回退到使用本地 IP:Port
 	localIP := getLocalIP()
 	return fmt.Sprintf("%s:%d", localIP, c.HTTPPort)
 }
