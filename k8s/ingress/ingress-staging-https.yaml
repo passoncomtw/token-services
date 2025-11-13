@@ -35,6 +35,6 @@ spec:
           service:
             name: token-admin-api
             port:
-              number: 8080
+              number: 80
 
 

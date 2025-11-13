@@ -21,7 +21,7 @@ spec:
           service:
             name: token-admin-api
             port:
-              number: 8080
+              number: 80
   
   # App API
   - host: token-app-api.passontw.com
@@ -33,7 +33,7 @@ spec:
           service:
             name: token-app-api
             port:
-              number: 8080
+              number: 80
   
   # 也可以使用路徑區分
   # - host: api.yourdomain.com
