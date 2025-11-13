@@ -42,9 +42,8 @@ func (s *BackendActorService) GetAll() ([]*interfaces.BackendActorResponse, erro
 // Create 新增後台角色
 func (s *BackendActorService) Create(req *interfaces.CreateBackendActorRequest) (*interfaces.BackendActorResponse, error) {
 	actor := models.BackendActor{
-		Name:        req.Name,
-		Markup:      req.Markup,
-		Permissions: models.PermissionsJSON(req.Permissions),
+		Name:   req.Name,
+		Markup: req.Markup,
 	}
 
 	if err := s.db.Create(&actor).Error; err != nil {

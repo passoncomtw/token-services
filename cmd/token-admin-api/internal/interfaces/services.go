@@ -4,12 +4,11 @@ package interfaces
 
 // LoginUser 登入使用者資訊
 type LoginUser struct {
-	ID          int                    `json:"id"`
-	Type        int                    `json:"type"`
-	Account     string                 `json:"account"`
-	Name        string                 `json:"name"`
-	CreateAt    int64                  `json:"createAt"`
-	Permissions map[string]interface{} `json:"permissions"`
+	ID       int    `json:"id"`
+	Type     int    `json:"type"`
+	Account  string `json:"account"`
+	Name     string `json:"name"`
+	CreateAt int64  `json:"createAt"`
 }
 
 // LoginResponse 登入回應

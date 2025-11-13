@@ -79,14 +79,6 @@ func (s *AuthService) Login(account, password string) (*interfaces.LoginResponse
 		return nil, errors.New("帳號或密碼錯誤")
 	}
 
-	// 取得 permissions（從關聯的 actor）
-	var permissions map[string]interface{}
-	if user.Actor != nil {
-		permissions = user.Actor.Permissions
-	} else {
-		permissions = make(map[string]interface{})
-	}
-
 	// 生成 JWT token 和過期時間
 	token, err := auth.GenerateToken(s.jwtConfig, user.ID, user.Account)
 	if err != nil {
@@ -109,12 +101,11 @@ func (s *AuthService) Login(account, password string) (*interfaces.LoginResponse
 		AccessToken: token,
 		ExpireIn:    expireIn,
 		User: interfaces.LoginUser{
-			ID:          user.ID,
-			Type:        0, // 後台使用者統一設為 0
-			Account:     user.Account,
-			Name:        user.Name,
-			CreateAt:    user.CreatedAt.Unix(),
-			Permissions: permissions,
+			ID:       user.ID,
+			Type:     0, // 後台使用者統一設為 0
+			Account:  user.Account,
+			Name:     user.Name,
+			CreateAt: user.CreatedAt.Unix(),
 		},
 	}, nil
 }

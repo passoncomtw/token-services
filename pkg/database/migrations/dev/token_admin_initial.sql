@@ -257,7 +257,6 @@ CREATE TABLE "public"."backend_actors" (
     "deleted_at" timestamptz,
     "name" varchar(255) NOT NULL,
     "markup" varchar(255) NOT NULL,
-    "permissions" json NOT NULL,
     PRIMARY KEY ("id")
 );
 

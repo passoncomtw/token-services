@@ -17,12 +17,11 @@ type ActorInfo struct {
 
 // BackendUserResponse 後台使用者回應
 type BackendUserResponse struct {
-	ID          int                    `json:"id"`
-	Name        string                 `json:"name"`
-	Account     string                 `json:"account"`
-	Status      int                    `json:"status"`
-	Permissions map[string]interface{} `json:"permissions"`
-	Actor       *ActorInfo             `json:"actor,omitempty"`
+	ID      int        `json:"id"`
+	Name    string     `json:"name"`
+	Account string     `json:"account"`
+	Status  int        `json:"status"`
+	Actor   *ActorInfo `json:"actor,omitempty"`
 }
 
 // BackendUserListQuery 後台使用者列表查詢參數
@@ -75,16 +74,13 @@ func ConvertToBackendUserResponse(user *models.BackendUser) *BackendUserResponse
 		Status:  user.Status,
 	}
 
-	// 從 Actor 取得 permissions 和 actor 資訊
+	// 從 Actor 取得 actor 資訊
 	if user.Actor != nil {
-		resp.Permissions = user.Actor.Permissions
 		resp.Actor = &ActorInfo{
 			ID:     user.Actor.ID,
 			Name:   user.Actor.Name,
 			Markup: user.Actor.Markup,
 		}
-	} else {
-		resp.Permissions = make(map[string]interface{})
 	}
 
 	return resp
