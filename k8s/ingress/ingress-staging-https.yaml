@@ -23,6 +23,9 @@ spec:
   - hosts:
     - token-admin-api.passon.tw
     secretName: token-admin-api-tls  # cert-manager 會自動創建此 Secret
+  - hosts:
+    - token-app-api.passon.tw
+    secretName: token-app-api-tls  # cert-manager 會自動創建此 Secret
   
   # 路由規則
   rules:
@@ -34,6 +37,17 @@ spec:
         backend:
           service:
             name: token-admin-api
+            port:
+              number: 80
+  
+  - host: token-app-api.passon.tw
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: token-app-api
             port:
               number: 80
 
