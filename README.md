@@ -8,6 +8,10 @@
   - [遷移現有部署](#遷移現有部署到新-cicd-架構)
   - [全新部署](#全新部署)
 - [部署驗證](#-部署驗證)
+- [DNS 和 HTTPS 設定](#-dns-和-https-設定)
+  - [快速部署（3 步驟）](#快速部署3-步驟)
+  - [詳細設定指南](#詳細設定指南)
+  - [自動更新機制](#自動更新機制)
 - [架構說明](#-架構說明)
 - [CI/CD 工作流](#-cicd-工作流)
 - [日常操作](#-日常操作)
@@ -301,6 +305,469 @@ kubectl get ingress -n passontw-services-staging
 
 # 測試外部訪問
 curl http://token-admin-api-staging.yourdomain.com/health-check
+```
+
+---
+
+## 🌐 DNS 和 HTTPS 設定
+
+> 為您的 API 配置自訂域名和自動化 HTTPS 證書
+
+### 📌 重要資訊
+
+| 項目 | 值 |
+|------|-----|
+| **域名示例** | token-admin-api.passon.tw |
+| **Traefik IP** | 172.237.27.17, 172.237.27.51 |
+| **證書簽發** | Let's Encrypt（自動） |
+| **證書有效期** | 90 天 |
+| **自動更新** | 到期前 30 天 |
+
+### 📋 前置條件
+
+您的系統已經具備：
+- ✅ k3s 集群運行中
+- ✅ Traefik Ingress Controller（k3s 預設）
+- ✅ cert-manager 已安裝
+- ✅ Let's Encrypt ClusterIssuer 已配置
+
+---
+
+### 快速部署（3 步驟）
+
+#### 1️⃣ Gandi DNS 設定（5 分鐘）
+
+登入 https://admin.gandi.net/ → 選擇您的域名
+
+**添加 DNS A 記錄：**
+
+```
+類型: A
+名稱: token-admin-api
+IPv4: 172.237.27.17
+TTL: 300
+```
+
+**驗證 DNS：**
+
+```bash
+# 等待 DNS 傳播（5-30 分鐘）
+dig token-admin-api.passon.tw
+
+# 期望看到：
+# token-admin-api.passon.tw has address 172.237.27.17
+```
+
+#### 2️⃣ 部署 HTTPS Ingress（2 分鐘）
+
+**方式 A：使用自動化腳本（推薦）**
+
+```bash
+./scripts/deploy-https.sh
+```
+
+腳本會自動：
+- ✅ 檢查所有前置條件
+- ✅ 驗證 DNS 解析
+- ✅ 部署 Ingress 配置
+- ✅ 等待證書簽發
+- ✅ 測試 HTTPS 訪問
+
+**方式 B：手動部署**
+
+```bash
+# 部署到 staging 環境
+kubectl apply -f k8s/ingress/ingress-staging-https.yaml
+
+# 驗證部署
+kubectl get ingress -n passontw-services-staging
+kubectl get certificate -n passontw-services-staging
+```
+
+#### 3️⃣ 驗證（1 分鐘）
+
+```bash
+# 測試 HTTPS
+curl https://token-admin-api.passon.tw/health-check
+
+# 在瀏覽器訪問
+https://token-admin-api.passon.tw/health-check
+```
+
+**期望結果：**
+- ✅ 證書狀態：Ready = True
+- ✅ HTTPS 返回 JSON 響應
+- ✅ 瀏覽器顯示綠色鎖頭 🔒
+- ✅ HTTP 自動重定向到 HTTPS
+
+---
+
+### 詳細設定指南
+
+#### Gandi DNS 設定
+
+**單一 IP（推薦）：**
+
+```
+類型: A
+名稱: token-admin-api
+IPv4 地址: 172.237.27.17
+TTL: 300 (5分鐘) 或 3600 (1小時)
+```
+
+**多個 IP（高可用）：**
+
+如果您有多個節點，可以添加多條 A 記錄：
+
+```
+記錄 1:
+類型: A
+名稱: token-admin-api
+IPv4 地址: 172.237.27.17
+TTL: 300
+
+記錄 2:
+類型: A
+名稱: token-admin-api
+IPv4 地址: 172.237.27.51
+TTL: 300
+```
+
+#### Ingress 配置說明
+
+系統會自動創建以下 Ingress 配置：
+
+```yaml
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: token-services-ingress-staging
+  annotations:
+    kubernetes.io/ingress.class: "traefik"
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
+    traefik.ingress.kubernetes.io/redirect-entry-point: https
+spec:
+  tls:
+  - hosts:
+    - token-admin-api.passon.tw
+    secretName: token-admin-api-tls
+  rules:
+  - host: token-admin-api.passon.tw
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: token-admin-api
+            port:
+              number: 8080
+```
+
+#### 證書申請流程
+
+```
+1. Ingress 部署
+   ↓
+2. cert-manager 檢測到 cert-manager.io/cluster-issuer annotation
+   ↓
+3. 自動創建 Certificate 資源
+   ↓
+4. 創建 CertificateRequest
+   ↓
+5. 創建 Order（Let's Encrypt 訂單）
+   ↓
+6. 創建 Challenge（HTTP-01 驗證）
+   ↓
+7. Let's Encrypt 驗證域名所有權
+   ↓
+8. 驗證成功 → 簽發證書
+   ↓
+9. 證書存儲在 Secret: token-admin-api-tls
+   ↓
+10. Traefik 自動使用證書
+```
+
+---
+
+### 自動更新機制
+
+#### cert-manager 自動更新
+
+cert-manager 會**自動更新證書**，完全無需手動操作：
+
+**更新時機：**
+- 📅 證書到期前 30 天開始嘗試更新
+- 🔄 每小時檢查一次證書狀態
+- ✅ 自動更新成功後更新 Secret
+- 🔁 Traefik 自動重載新證書（無需重啟）
+
+**更新流程：**
+
+```
+證書到期前 30 天：
+1. cert-manager 檢測到證書即將過期
+2. 自動創建新的 CertificateRequest
+3. 向 Let's Encrypt 請求新證書
+4. Let's Encrypt 驗證域名所有權
+5. 簽發新證書
+6. 更新 Secret: token-admin-api-tls
+7. Traefik 自動使用新證書
+8. 完成！（整個過程自動化，無停機時間）
+```
+
+#### 監控證書
+
+```bash
+# 查看證書狀態
+kubectl get certificate -n passontw-services-staging
+
+# 查看證書到期時間
+kubectl get certificate token-admin-api-tls \
+  -n passontw-services-staging \
+  -o jsonpath='{.status.notAfter}'
+
+# 查看證書詳情
+kubectl describe certificate token-admin-api-tls \
+  -n passontw-services-staging
+
+# 查看證書申請進度
+kubectl get challenge -n passontw-services-staging
+
+# 查看 cert-manager 日誌
+kubectl logs -n cert-manager deployment/cert-manager -f
+```
+
+---
+
+### 🔍 常用檢查命令
+
+```bash
+# DNS 檢查
+dig token-admin-api.passon.tw
+
+# Ingress 狀態
+kubectl get ingress -n passontw-services-staging
+
+# 證書狀態
+kubectl get certificate -n passontw-services-staging
+
+# 測試 HTTP 重定向
+curl -I http://token-admin-api.passon.tw/health-check
+
+# 測試 HTTPS 訪問
+curl https://token-admin-api.passon.tw/health-check
+
+# 查看證書信息
+openssl s_client -connect token-admin-api.passon.tw:443 \
+  -servername token-admin-api.passon.tw < /dev/null 2>/dev/null | \
+  openssl x509 -noout -dates
+```
+
+---
+
+### 🔧 DNS & HTTPS 故障排除
+
+#### 問題 1：DNS 無法解析
+
+```bash
+# 檢查 DNS 傳播
+dig token-admin-api.passon.tw +trace
+```
+
+**可能原因：**
+- DNS 尚未傳播（等待 5-30 分鐘）
+- Gandi 配置錯誤
+- TTL 設定過高
+
+#### 問題 2：證書申請失敗
+
+```bash
+# 查看詳細錯誤
+kubectl describe certificate token-admin-api-tls -n passontw-services-staging
+kubectl describe challenge -n passontw-services-staging
+```
+
+**常見原因：**
+- DNS 尚未生效
+- 80 端口無法訪問
+- Let's Encrypt 速率限制（50 證書/週）
+
+**解決方案：**
+```bash
+# 先使用 staging issuer 測試
+# 修改 Ingress annotation:
+# cert-manager.io/cluster-issuer: "letsencrypt-staging"
+```
+
+#### 問題 3：HTTPS 無法訪問
+
+```bash
+# 檢查證書是否就緒
+kubectl get certificate -n passontw-services-staging
+
+# 檢查 Ingress 配置
+kubectl describe ingress token-services-ingress-staging \
+  -n passontw-services-staging
+
+# 查看 Traefik 日誌
+kubectl logs -n kube-system deployment/traefik --tail=50
+```
+
+#### 問題 4：HTTP 沒有重定向到 HTTPS
+
+```bash
+# 檢查 Ingress annotations
+kubectl get ingress token-services-ingress-staging \
+  -n passontw-services-staging \
+  -o yaml | grep annotations -A 10
+```
+
+確保有：
+```yaml
+traefik.ingress.kubernetes.io/redirect-entry-point: https
+```
+
+#### 問題 5：證書不受信任
+
+檢查是否使用了 staging issuer：
+
+```bash
+kubectl get ingress token-services-ingress-staging \
+  -n passontw-services-staging \
+  -o yaml | grep cluster-issuer
+```
+
+應該是：
+```yaml
+cert-manager.io/cluster-issuer: "letsencrypt-prod"
+```
+
+而不是：`letsencrypt-staging`
+
+---
+
+### 📊 為 App API 添加 HTTPS
+
+如果您也想為 App API 設定 HTTPS：
+
+#### 1. Gandi DNS 設定
+
+```
+類型: A
+名稱: token-app-api
+IPv4 地址: 172.237.27.17
+TTL: 300
+```
+
+#### 2. 更新 Ingress 配置
+
+編輯 `k8s/ingress/ingress-staging-https.yaml` 添加：
+
+```yaml
+spec:
+  tls:
+  - hosts:
+    - token-admin-api.passon.tw
+    secretName: token-admin-api-tls
+  - hosts:
+    - token-app-api.passon.tw
+    secretName: token-app-api-tls
+  
+  rules:
+  - host: token-admin-api.passon.tw
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: token-admin-api
+            port:
+              number: 8080
+  
+  - host: token-app-api.passon.tw
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: token-app-api
+            port:
+              number: 8080
+```
+
+#### 3. 重新部署
+
+```bash
+kubectl apply -f k8s/ingress/ingress-staging-https.yaml
+```
+
+cert-manager 會自動為 `token-app-api.passon.tw` 申請證書。
+
+---
+
+### ✅ HTTPS 檢查清單
+
+#### DNS 設定
+- [ ] 登入 Gandi
+- [ ] 添加 A 記錄：token-admin-api.passon.tw → 172.237.27.17
+- [ ] 等待 DNS 傳播（5-30 分鐘）
+- [ ] 驗證 DNS：`dig token-admin-api.passon.tw`
+
+#### HTTPS 設定
+- [ ] 部署 Ingress：`kubectl apply -f k8s/ingress/ingress-staging-https.yaml`
+- [ ] 檢查 Ingress：`kubectl get ingress -n passontw-services-staging`
+- [ ] 檢查 Certificate：`kubectl get certificate -n passontw-services-staging`
+- [ ] 等待證書簽發（1-5 分鐘）
+
+#### 測試驗證
+- [ ] 測試 HTTP 重定向：`curl -I http://token-admin-api.passon.tw`
+- [ ] 測試 HTTPS 訪問：`curl https://token-admin-api.passon.tw/health-check`
+- [ ] 瀏覽器測試：https://token-admin-api.passon.tw/health-check
+- [ ] 檢查證書有效期
+
+#### 自動更新
+- [ ] 確認 cert-manager 運行中
+- [ ] 證書會在到期前 30 天自動更新
+- [ ] 無需手動操作 ✨
+
+---
+
+### 📚 Let's Encrypt 相關
+
+#### 速率限制
+
+- **證書/註冊域名/週**: 50 個
+- **重複證書/週**: 5 個
+- **失敗驗證/帳戶/小時**: 5 次
+
+**建議：**
+- 測試時使用 `letsencrypt-staging`
+- 確認無誤後再切換到 `letsencrypt-prod`
+
+#### 證書有效期
+
+- **Let's Encrypt 證書**: 90 天
+- **自動更新時間**: 到期前 30 天
+- **更新頻率**: cert-manager 每小時檢查一次
+
+---
+
+### 🎉 完成！
+
+現在您的 API 已經：
+- ✅ 使用自訂域名（如：token-admin-api.passon.tw）
+- ✅ 啟用 HTTPS 加密
+- ✅ 自動更新 SSL 證書
+- ✅ HTTP 自動重定向到 HTTPS
+- ✅ 零停機部署
+
+**自動化腳本：**
+```bash
+# 一鍵部署 DNS & HTTPS
+./scripts/deploy-https.sh
 ```
 
 ---
