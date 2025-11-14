@@ -13,7 +13,8 @@ ENV CGO_ENABLED=0 \
     GOARCH=${TARGETARCH} \
     GO111MODULE=on \
     GOPROXY=https://goproxy.cn,https://proxy.golang.org,direct \
-    GOSUMDB=sum.golang.org
+    GOSUMDB=sum.golang.org \
+    GOTMPDIR=/root/.cache/go-tmp
 
 # 安裝建置工具（合併減少層數）
 RUN apk add --no-cache git ca-certificates tzdata
@@ -32,6 +33,8 @@ COPY . .
 # 安裝 swag 並生成文檔（只掃描當前服務和共用程式碼）
 RUN --mount=type=cache,target=/go/pkg/mod \
     --mount=type=cache,target=/root/.cache/go-build \
+    --mount=type=cache,target=/root/.cache/go-tmp \
+    mkdir -p /root/.cache/go-tmp && \
     go install github.com/swaggo/swag/cmd/swag@latest && \
     swag init -g cmd/token-admin-api/main.go \
       -o cmd/token-admin-api/internal/docs \
@@ -42,6 +45,8 @@ RUN --mount=type=cache,target=/go/pkg/mod \
 # 編譯應用程式（使用更積極的優化參數）
 RUN --mount=type=cache,target=/go/pkg/mod \
     --mount=type=cache,target=/root/.cache/go-build \
+    --mount=type=cache,target=/root/.cache/go-tmp \
+    mkdir -p /root/.cache/go-tmp && \
     go build -v -trimpath \
     -ldflags="-w -s -X main.version=${VERSION:-dev}" \
     -o token-admin-api \

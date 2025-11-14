@@ -54,6 +54,34 @@ jobs:
       image_full: ${{ steps.set-output.outputs.image_full }}
     
     steps:
+      - name: Pre-build cleanup
+        run: |
+          echo "🧹 構建前清理..."
+          
+          # 清理 /tmp 中的所有 Go 構建緩存
+          echo "清理 /tmp 中的 Go 構建緩存..."
+          sudo rm -rf /tmp/go-build* 2>/dev/null || true
+          
+          # 清理 Docker 構建緩存（保留 1 小時內的）
+          echo "清理 Docker 構建緩存..."
+          docker builder prune -af --filter "until=1h" || true
+          
+          # 清理未使用的映像（保留 1 小時內的）
+          echo "清理未使用的 Docker 映像..."
+          docker image prune -af --filter "until=1h" || true
+          
+          # 顯示磁碟空間
+          echo ""
+          echo "磁碟空間狀態："
+          df -h / /tmp || df -h /
+          
+          echo ""
+          echo "Docker 空間狀態："
+          docker system df
+          
+          echo ""
+          echo "✅ 清理完成"
+
       - name: Checkout code
         uses: actions/checkout@v4
 
