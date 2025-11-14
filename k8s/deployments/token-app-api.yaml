@@ -96,6 +96,28 @@ spec:
               name: jwt-secret
               key: JWT_SECRET
         
+        # 從 Secret 載入 Redis 配置
+        - name: REDIS_HOST
+          valueFrom:
+            secretKeyRef:
+              name: redis-secret
+              key: REDIS_HOST
+        - name: REDIS_PORT
+          valueFrom:
+            secretKeyRef:
+              name: redis-secret
+              key: REDIS_PORT
+        - name: REDIS_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: redis-secret
+              key: REDIS_PASSWORD
+        - name: REDIS_DB
+          valueFrom:
+            secretKeyRef:
+              name: redis-secret
+              key: REDIS_DB
+        
         # 健康檢查
         livenessProbe:
           httpGet:

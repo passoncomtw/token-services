@@ -296,7 +296,7 @@ jobs:
           NAMESPACE="${{ steps.vars.outputs.namespace }}"
           echo "🔐 檢查必要的 Secrets..."
           
-          REQUIRED_SECRETS=("database-secret" "jwt-secret" "ghcr-pull-secret")
+          REQUIRED_SECRETS=("database-secret" "redis-secret" "jwt-secret" "ghcr-pull-secret")
           MISSING_SECRETS=()
           
           for SECRET in "${REQUIRED_SECRETS[@]}"; do
@@ -390,23 +390,24 @@ jobs:
           
           echo "🏥 執行健康檢查..."
           
-          POD_NAME=$(kubectl get pods -n ${NAMESPACE} \
+          # 等待 Pod 準備就緒
+          echo "等待 Pod 準備就緒..."
+          kubectl wait --for=condition=ready pods \
             -l app=${{ env.SERVICE_NAME }} \
-            -o jsonpath='{.items[0].metadata.name}')
+            -n ${NAMESPACE} \
+            --timeout=120s
           
-          if [ -z "$POD_NAME" ]; then
-            echo "❌ 找不到運行中的 Pod"
-            exit 1
-          fi
-          
-          echo "測試 Pod: ${POD_NAME}"
-          kubectl wait --for=condition=ready pod/${POD_NAME} -n ${NAMESPACE} --timeout=60s
-          
-          if kubectl exec ${POD_NAME} -n ${NAMESPACE} -- \
-            wget -q -O- http://localhost:8080/health-check 2>/dev/null; then
+          # 使用臨時 curl pod 進行健康檢查
+          echo "測試服務健康狀態..."
+          if kubectl run curl-test --rm -i --restart=Never \
+            --image=curlimages/curl:latest \
+            -n ${NAMESPACE} \
+            -- curl -s -f http://${{ env.SERVICE_NAME }}/health-check; then
             echo "✅ 健康檢查通過"
           else
-            echo "⚠️  健康檢查失敗，但 Pod 正在運行"
+            echo "⚠️  健康檢查失敗，查看 Pod 日誌..."
+            kubectl logs -l app=${{ env.SERVICE_NAME }} -n ${NAMESPACE} --tail=50
+            exit 1
           fi
 
       - name: Generate deployment summary
