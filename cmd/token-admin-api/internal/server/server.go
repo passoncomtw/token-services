@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"time"
 
+	"passontw-backend-services/cmd/token-admin-api/internal/docs"
 	"passontw-backend-services/pkg/config"
 	"passontw-backend-services/pkg/logger"
 	"passontw-backend-services/pkg/middleware"
@@ -44,6 +45,14 @@ func NewServer(router *Router, cfg *config.Config, log logger.Logger, loggerMw *
 	// 取得本機 IP 和 Swagger host
 	localIP := cfg.GetLocalIP()
 	swagHost := cfg.GetSwaggerHost()
+
+	// 動態設定 Swagger Host（優先使用環境變量 SWAGGER_BASE_DOMAIN）
+	docs.SwaggerInfo.Host = swagHost
+	
+	// 如果有設定 SWAGGER_BASE_DOMAIN，則使用 https scheme
+	if cfg.SwaggerBaseDomain != "" {
+		docs.SwaggerInfo.Schemes = []string{"https", "http"}
+	}
 
 	log.Info("Server configuration",
 		zap.String("localIP", localIP),

@@ -9,9 +9,8 @@ data:
   CORS_ALLOWED_ORIGINS: "*"
   
   # Swagger 配置
+  # SWAGGER_BASE_DOMAIN 會自動使用 HTTPS (如果設置)
   SWAGGER_BASE_DOMAIN: "token-app-api.passon.tw"
-  # SWAGGER_HOST: "token-app-web.passontw.com"
-  # SWAGGER_BASEPATH: "/"
   
   # 應用配置
   MAX_CONNECTIONS: "100"
