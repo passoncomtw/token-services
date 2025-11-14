@@ -189,6 +189,7 @@ jobs:
         run: |
           echo "🧹 清理建置的映像..."
           
+          # 清理本次構建的映像
           TAGS="${{ steps.meta.outputs.tags }}"
           for TAG in $TAGS; do
             if docker image inspect "$TAG" > /dev/null 2>&1; then
@@ -196,7 +197,9 @@ jobs:
             fi
           done
           
-          docker image prune -f
+          # 清理懸空和未使用的映像（超過 24 小時）
+          docker image prune -af --filter "until=24h" || true
+          
           echo "✅ 映像清理完成"
 
       - name: Cleanup Docker credentials
@@ -466,4 +469,26 @@ jobs:
           echo "環境: ${ENV}"
           echo "時間: $(date '+%Y-%m-%d %H:%M:%S')"
           echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+
+      - name: Cleanup Docker resources
+        if: always()
+        run: |
+          echo "🧹 清理 Docker 資源..."
+          
+          # 清理舊的 Admin API 映像（保留最新 3 個）
+          echo "清理舊的 ${{ env.IMAGE_NAME }} 映像..."
+          OLD_IMAGES=$(docker images "${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}" --format "{{.ID}} {{.CreatedAt}}" | \
+            sort -k2 -r | tail -n +4 | awk '{print $1}')
+          if [ -n "$OLD_IMAGES" ]; then
+            echo "$OLD_IMAGES" | xargs docker rmi -f 2>/dev/null || true
+          fi
+          
+          # 清理構建緩存（保留 7 天內的）
+          docker builder prune -af --filter "until=168h" || true
+          
+          # 清理未使用的映像（超過 48 小時）
+          docker image prune -af --filter "until=48h" || true
+          
+          echo "✅ Docker 資源清理完成"
+          docker system df
 
