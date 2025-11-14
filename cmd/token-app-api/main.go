@@ -26,7 +26,7 @@ import (
 // @license.url http://www.apache.org/licenses/LICENSE-2.0.html
 
 // @BasePath /
-// @schemes http
+// @schemes https http
 
 // @securityDefinitions.apikey Bearer
 // @in header

@@ -28,7 +28,7 @@ import (
 
 // @host localhost:8080
 // @BasePath /
-// @schemes http
+// @schemes https http
 
 // @securityDefinitions.apikey Bearer
 // @in header
