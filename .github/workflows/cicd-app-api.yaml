@@ -230,6 +230,34 @@ jobs:
           
           echo "✅ 映像清理完成"
 
+      - name: Cleanup Docker Buildx resources
+        if: always()
+        run: |
+          echo "🧹 清理 Docker Buildx 資源..."
+          
+          # 1. 清理 buildx cache（保留最近 7 天）
+          echo "清理 buildx 快取..."
+          docker buildx prune -af --filter "until=168h" --keep-storage 1GB || true
+          
+          # 2. 清理臨時 buildx builders
+          echo "清理臨時 builders..."
+          docker buildx ls | grep -v NAME | grep -v default | grep "^tmp-" | awk '{print $1}' | while read builder; do
+            echo "  移除 builder: $builder"
+            docker buildx rm "$builder" 2>/dev/null || true
+          done
+          
+          # 3. 清理懸空的 buildkit 容器（超過 1 小時未使用）
+          echo "清理 buildkit 容器..."
+          docker ps -aq --filter "ancestor=moby/buildkit:buildx-stable-1" --filter "status=exited" | head -n 10 | xargs -r docker rm 2>/dev/null || true
+          
+          # 4. 顯示清理後狀態
+          echo ""
+          echo "📊 清理後狀態："
+          echo "Builders: $(docker buildx ls | grep -v NAME | wc -l) 個"
+          echo "Buildkit 容器: $(docker ps -a --filter 'name=buildx_buildkit' --format '{{.Names}}' | wc -l) 個"
+          
+          echo "✅ Buildx 資源清理完成"
+
       - name: Cleanup Docker credentials
         if: always()
         run: |
