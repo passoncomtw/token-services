@@ -31,15 +31,17 @@ type Server struct {
  * @param cfg 應用程式配置
  * @param log Logger 實例
  * @param loggerMw Logger 中間件
+ * @param corsMw CORS 中間件
  * @return Server 指標
  */
-func NewServer(router *Router, cfg *config.Config, log logger.Logger, loggerMw *middleware.LoggerMiddleware) *Server {
+func NewServer(router *Router, cfg *config.Config, log logger.Logger, loggerMw *middleware.LoggerMiddleware, corsMw *middleware.CORSMiddleware) *Server {
 	// 設定 Gin 模式
 	gin.SetMode(gin.ReleaseMode)
 
 	// 建立 Gin 引擎
 	engine := gin.New()
 	engine.Use(gin.Recovery())
+	engine.Use(corsMw.Handler())   // 使用 CORS 中間件（必須在其他中間件之前）
 	engine.Use(loggerMw.Handler()) // 使用我們的日誌中間件
 
 	// 取得本機 IP 和 Swagger host

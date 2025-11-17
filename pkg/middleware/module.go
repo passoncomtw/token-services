@@ -18,5 +18,7 @@ var MiddlewareModule = fx.Module("middleware",
 		NewAuthMiddleware,
 		// 提供日誌中間件
 		NewLoggerMiddleware,
+		// 提供 CORS 中間件
+		ProvideCORSMiddleware,
 	),
 )

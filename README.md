@@ -18,6 +18,7 @@
 - [故障排除](#-故障排除)
 - [Longhorn 存儲系統](#-longhorn-存儲系統)
 - [安全配置](#-安全配置)
+- [CORS 配置](#-cors-配置)
 - [相關文檔](#-相關文檔)
 
 ---
@@ -1387,6 +1388,214 @@ kubectl logs -n longhorn-system deployment/longhorn-ui
 ✅ **使用 HTTPS** - 生產環境必須使用 TLS  
 ✅ **網路隔離** - 使用 NetworkPolicy 限制 Pod 間通信  
 ✅ **審計日誌** - 啟用 Kubernetes 審計日誌  
+
+---
+
+## 🌍 CORS 配置
+
+### 概述
+
+本專案已在 `pkg/middleware/cors.go` 中實作完整的 CORS（跨域資源共享）配置，以支援前端應用程式的跨域 API 請求。
+
+### 已配置的 CORS 設定
+
+#### 允許的來源 (AllowOrigins)
+
+```go
+[]string{
+    "http://localhost:3000",                // 本地開發環境
+    "http://localhost:3001",                // 備用開發端口
+    "https://token-admin-api.passon.tw",    // 生產環境 (admin-api)
+    "https://token-app-api.passon.tw",      // 生產環境 (app-api)
+}
+```
+
+#### 允許的 HTTP 方法 (AllowMethods)
+
+- `GET`
+- `POST`
+- `PUT`
+- `PATCH`
+- `DELETE`
+- `OPTIONS` ⚠️ **必須包含以處理預檢請求**
+
+#### 允許的請求標頭 (AllowHeaders)
+
+- `Origin`
+- `Content-Type`
+- `Accept`
+- `Authorization`
+- `X-Requested-With`
+- `X-CSRF-Token`
+
+#### 其他設定
+
+- **AllowCredentials**: `true` - 允許攜帶憑證（cookies、authorization headers）
+- **MaxAge**: `12 小時` - 預檢請求結果快取時間
+- **ExposeHeaders**: `Content-Length`, `Content-Type` - 允許前端存取的回應標頭
+
+### 部署狀態
+
+| 服務 | 狀態 | 網域 | 測試指令 |
+|------|------|------|----------|
+| token-admin-api | ✅ 已配置 | `https://token-admin-api.passon.tw` | `./scripts/test-cors.sh token-admin-api` |
+| token-app-api | ✅ 已配置 | `https://token-app-api.passon.tw` | `./scripts/test-cors.sh token-app-api` |
+
+### 測試 CORS 配置
+
+#### 方法 1: 使用測試腳本（推薦）
+
+```bash
+# 測試 token-admin-api
+./scripts/test-cors.sh token-admin-api
+
+# 測試 token-app-api
+./scripts/test-cors.sh token-app-api
+
+# 自訂測試
+./scripts/test-cors.sh <service> <domain> <origin>
+```
+
+#### 方法 2: 使用 curl 手動測試
+
+```bash
+# 測試 OPTIONS 預檢請求
+curl -X OPTIONS \
+  'https://token-admin-api.passon.tw/auth/login' \
+  -H 'Origin: http://localhost:3000' \
+  -H 'Access-Control-Request-Method: POST' \
+  -H 'Access-Control-Request-Headers: content-type,authorization' \
+  -v
+```
+
+**預期回應標頭**:
+```
+HTTP/2 200
+Access-Control-Allow-Origin: http://localhost:3000
+Access-Control-Allow-Methods: GET, POST, PUT, PATCH, DELETE, OPTIONS
+Access-Control-Allow-Headers: Origin, Content-Type, Accept, Authorization, X-Requested-With, X-CSRF-Token
+Access-Control-Allow-Credentials: true
+Access-Control-Max-Age: 43200
+```
+
+#### 方法 3: 使用瀏覽器開發工具測試
+
+1. 開啟前端應用（http://localhost:3000）
+2. 打開瀏覽器開發者工具（F12）
+3. 切換到 **Network** 分頁
+4. 執行登入或其他 API 請求
+5. 檢查是否有 OPTIONS 請求，狀態應為 `200` 或 `204`
+6. 檢查 POST/GET 等實際請求是否成功
+
+### 常見問題排查
+
+#### ❌ OPTIONS 請求返回 404
+
+**原因**: 後端沒有處理 OPTIONS 請求  
+**解決**: 已在 `pkg/middleware/cors.go` 配置 CORS 中介軟體
+
+#### ❌ 瀏覽器顯示 CORS 錯誤
+
+**錯誤訊息**:
+```
+Access to fetch at 'https://token-admin-api.passon.tw/auth/login' 
+from origin 'http://localhost:3000' has been blocked by CORS policy
+```
+
+**可能原因**:
+1. 前端請求的 Origin 不在允許清單中
+2. 請求的標頭不在 AllowHeaders 中
+3. CORS 中介軟體未正確載入
+
+**解決方案**:
+1. 檢查 `pkg/middleware/cors.go` 的 `AllowOrigins` 是否包含前端 Origin
+2. 檢查 `cmd/token-*-api/internal/server/server.go` 是否正確載入 CORS 中介軟體
+3. 重新部署後端服務
+
+#### ❌ 攜帶 credentials 時出錯
+
+**錯誤訊息**:
+```
+The value of the 'Access-Control-Allow-Origin' header must not be '*' 
+when the request's credentials mode is 'include'
+```
+
+**原因**: 當 `AllowCredentials` 為 `true` 時，不能使用萬用字元 `*`  
+**解決**: 已正確配置為明確的來源清單
+
+### 架構說明
+
+```
+請求流程:
+前端 (localhost:3000) 
+  ↓
+  [OPTIONS 預檢請求]
+  ↓
+後端 CORS 中介軟體 (pkg/middleware/cors.go)
+  ↓
+  [檢查 Origin, Method, Headers]
+  ↓
+  [返回 Access-Control-* 標頭]
+  ↓
+前端收到許可
+  ↓
+  [發送實際的 POST/GET 請求]
+  ↓
+後端處理請求
+  ↓
+返回結果（包含 CORS 標頭）
+```
+
+### 中介軟體載入順序
+
+**重要**: CORS 中介軟體必須在其他中介軟體之前載入
+
+```go
+engine.Use(gin.Recovery())
+engine.Use(corsMw.Handler())   // ✅ CORS 必須優先
+engine.Use(loggerMw.Handler())
+```
+
+### 如何添加新的允許來源
+
+1. 編輯 `pkg/middleware/cors.go`
+2. 在 `AllowOrigins` 中添加新的來源：
+
+```go
+AllowOrigins: []string{
+    "http://localhost:3000",
+    "http://localhost:3001",
+    "https://token-admin-api.passon.tw",
+    "https://token-app-api.passon.tw",
+    "https://new-domain.com",  // 添加新來源
+}
+```
+
+3. 重新編譯並部署
+4. 使用測試腳本驗證
+
+### 安全建議
+
+✅ **推薦做法**:
+- 明確列出允許的來源（避免使用 `*`）
+- 只開放必要的 HTTP 方法
+- 只允許必要的請求標頭
+- 設定合理的 MaxAge
+- 定期檢視和更新允許的來源清單
+
+❌ **避免做法**:
+- 使用萬用字元 `AllowOrigins: ["*"]`
+- 開放所有 HTTP 方法
+- 允許所有請求標頭
+- 在生產環境中允許開發用的 Origin
+
+### 相關檔案
+
+- `pkg/middleware/cors.go` - CORS 中介軟體實作
+- `pkg/middleware/module.go` - 中介軟體模組配置
+- `cmd/token-admin-api/internal/server/server.go` - Admin API 伺服器配置
+- `cmd/token-app-api/internal/server/server.go` - App API 伺服器配置
+- `scripts/test-cors.sh` - CORS 測試腳本
 
 ---
 
