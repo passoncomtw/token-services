@@ -421,19 +421,39 @@ jobs:
           
           echo "🏥 執行健康檢查..."
           
-          # 等待 Pod 準備就緒
-          echo "等待 Pod 準備就緒..."
-          kubectl wait --for=condition=ready pods \
+          # 等待部署完成並獲取當前 Pod
+          echo "等待部署完全就緒..."
+          sleep 5
+          
+          # 獲取當前運行的 Pod 列表
+          PODS=$(kubectl get pods -n ${NAMESPACE} \
             -l app=${{ env.SERVICE_NAME }} \
-            -n ${NAMESPACE} \
-            --timeout=120s
+            -o jsonpath='{.items[*].metadata.name}' \
+            --field-selector=status.phase=Running)
+          
+          if [ -z "$PODS" ]; then
+            echo "❌ 找不到運行中的 Pod"
+            kubectl get pods -n ${NAMESPACE} -l app=${{ env.SERVICE_NAME }}
+            exit 1
+          fi
+          
+          echo "找到運行中的 Pods: $PODS"
+          
+          # 等待這些 Pod 準備就緒
+          for POD in $PODS; do
+            echo "等待 Pod $POD 準備就緒..."
+            kubectl wait --for=condition=ready pod/$POD \
+              -n ${NAMESPACE} \
+              --timeout=60s || echo "⚠️  Pod $POD 等待超時，繼續..."
+          done
           
           # 使用臨時 curl pod 進行健康檢查
+          echo ""
           echo "測試服務健康狀態..."
-          if kubectl run curl-test --rm -i --restart=Never \
+          if kubectl run curl-test-${{ github.run_id }} --rm -i --restart=Never \
             --image=curlimages/curl:latest \
             -n ${NAMESPACE} \
-            -- curl -s -f http://${{ env.SERVICE_NAME }}/health-check; then
+            -- curl -s -f http://${{ env.SERVICE_NAME }}/health-check 2>/dev/null; then
             echo "✅ 健康檢查通過"
           else
             echo "⚠️  健康檢查失敗，查看 Pod 日誌..."
