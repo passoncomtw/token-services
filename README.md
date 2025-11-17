@@ -1403,12 +1403,14 @@ kubectl logs -n longhorn-system deployment/longhorn-ui
 
 ```go
 []string{
-    "http://localhost:3000",                // 本地開發環境
-    "http://localhost:3001",                // 備用開發端口
-    "https://token-admin-api.passon.tw",    // 生產環境 (admin-api)
-    "https://token-app-api.passon.tw",      // 生產環境 (app-api)
+    "*"    // 允許所有來源（開發階段使用）
 }
 ```
+
+⚠️ **重要提醒**：
+- 當前配置允許**所有來源**存取 API，適合開發和測試階段
+- 生產環境建議限制特定來源以提高安全性
+- 當 `AllowOrigins` 設為 `"*"` 時，`AllowCredentials` 必須為 `false`
 
 #### 允許的 HTTP 方法 (AllowMethods)
 
@@ -1430,9 +1432,13 @@ kubectl logs -n longhorn-system deployment/longhorn-ui
 
 #### 其他設定
 
-- **AllowCredentials**: `true` - 允許攜帶憑證（cookies、authorization headers）
+- **AllowCredentials**: `false` - 不允許攜帶憑證（因使用萬用字元 `"*"`）
 - **MaxAge**: `12 小時` - 預檢請求結果快取時間
 - **ExposeHeaders**: `Content-Length`, `Content-Type` - 允許前端存取的回應標頭
+
+⚠️ **關於 AllowCredentials**：
+- 當 `AllowOrigins` 為 `"*"` 時，`AllowCredentials` 必須為 `false`
+- 如需使用 cookies 或 Authorization headers，請改用明確的來源清單
 
 ### 部署狀態
 
@@ -1556,35 +1562,54 @@ engine.Use(corsMw.Handler())   // ✅ CORS 必須優先
 engine.Use(loggerMw.Handler())
 ```
 
-### 如何添加新的允許來源
+### 如何限制特定來源（生產環境建議）
+
+當前配置允許所有來源（`"*"`）。如需限制特定來源：
 
 1. 編輯 `pkg/middleware/cors.go`
-2. 在 `AllowOrigins` 中添加新的來源：
+2. 修改 `allowOrigins` 為明確的來源清單：
 
 ```go
-AllowOrigins: []string{
-    "http://localhost:3000",
-    "http://localhost:3001",
-    "https://token-admin-api.passon.tw",
-    "https://token-app-api.passon.tw",
-    "https://new-domain.com",  // 添加新來源
+func NewCORSMiddleware(allowOrigins []string) *CORSMiddleware {
+	if len(allowOrigins) == 0 {
+		// 指定允許的來源
+		allowOrigins = []string{
+			"http://localhost:3000",             // 本地開發
+			"http://localhost:3001",             // 備用開發
+			"https://admin.passon.tw",           // 前端生產環境
+			"https://app.passon.tw",             // App 生產環境
+		}
+	}
+	// ...
 }
 ```
 
-3. 重新編譯並部署
-4. 使用測試腳本驗證
+3. 如需攜帶憑證，將 `AllowCredentials` 改為 `true`：
+
+```go
+AllowCredentials: true,  // 允許 cookies 和 Authorization headers
+```
+
+4. 重新編譯並部署
+5. 使用測試腳本驗證
 
 ### 安全建議
 
-✅ **推薦做法**:
+⚠️ **當前配置（開發模式）**:
+- ✅ 允許所有來源（`"*"`）- 方便開發和測試
+- ⚠️ 不適合生產環境 - 存在安全風險
+- ⚠️ 無法攜帶憑證 - AllowCredentials 為 false
+
+✅ **生產環境推薦做法**:
 - 明確列出允許的來源（避免使用 `*`）
 - 只開放必要的 HTTP 方法
 - 只允許必要的請求標頭
 - 設定合理的 MaxAge
 - 定期檢視和更新允許的來源清單
+- 如需攜帶憑證，使用明確來源 + AllowCredentials: true
 
-❌ **避免做法**:
-- 使用萬用字元 `AllowOrigins: ["*"]`
+❌ **生產環境避免做法**:
+- 使用萬用字元 `AllowOrigins: ["*"]`（當前設定）
 - 開放所有 HTTP 方法
 - 允許所有請求標頭
 - 在生產環境中允許開發用的 Origin

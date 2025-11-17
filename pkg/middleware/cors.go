@@ -19,13 +19,9 @@ type CORSMiddleware struct {
  */
 func NewCORSMiddleware(allowOrigins []string) *CORSMiddleware {
 	if len(allowOrigins) == 0 {
-		// 預設允許的來源
-		allowOrigins = []string{
-			"http://localhost:3000",             // 本地開發環境
-			"http://localhost:3001",             // 備用開發端口
-			"https://token-admin-api.passon.tw", // 生產環境 (admin-api)
-			"https://token-app-api.passon.tw",   // 生產環境 (app-api)
-		}
+		// 預設允許所有來源（開發階段使用）
+		// 注意：生產環境建議限制特定來源以提高安全性
+		allowOrigins = []string{"*"}
 	}
 
 	return &CORSMiddleware{
@@ -69,7 +65,8 @@ func (m *CORSMiddleware) Handler() gin.HandlerFunc {
 		},
 
 		// 允許攜帶憑證（cookies, authorization headers）
-		AllowCredentials: true,
+		// 注意：當 AllowOrigins 為 "*" 時，必須設為 false
+		AllowCredentials: false,
 
 		// 預檢請求結果快取時間（12 小時）
 		MaxAge: 12 * time.Hour,
