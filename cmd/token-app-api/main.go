@@ -34,8 +34,22 @@ import (
 // @description 在 value 欄位輸入: Bearer {token}
 
 // ==================== 主程式 ====================
+
+// version 會在編譯時通過 ldflags 注入
+var version = "dev"
+
+// AppVersion 提供應用程式版本號
+type AppVersion string
+
+// ProvideVersion 提供版本號給 FX 容器
+func ProvideVersion() AppVersion {
+	return AppVersion(version)
+}
+
 func main() {
 	fx.New(
+		// 提供版本號
+		fx.Provide(ProvideVersion),
 		config.ConfigModule,
 		logger.LoggerModule,
 		middleware.MiddlewareModule,

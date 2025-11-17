@@ -108,6 +108,13 @@ jobs:
             type=sha,prefix={{branch}}-
             type=sha
 
+      - name: Extract short SHA
+        id: extract-sha
+        run: |
+          SHORT_SHA=$(echo "${{ github.sha }}" | cut -c1-7)
+          echo "short_sha=${SHORT_SHA}" >> $GITHUB_OUTPUT
+          echo "短 SHA: ${SHORT_SHA}"
+
       - name: Build Docker image
         id: build
         uses: docker/build-push-action@v5
@@ -128,7 +135,7 @@ jobs:
           build-args: |
             BUILD_DATE=${{ github.event.head_commit.timestamp }}
             VCS_REF=${{ github.sha }}
-            VERSION=${{ github.ref_name }}
+            VERSION=${{ github.ref_name }}-${{ steps.extract-sha.outputs.short_sha }}
             BUILDKIT_INLINE_CACHE=1
 
       - name: Verify build
@@ -191,9 +198,18 @@ jobs:
       - name: Set output for deploy job
         id: set-output
         run: |
-          FIRST_TAG=$(echo "${{ steps.meta.outputs.tags }}" | head -n1)
-          echo "image_full=${FIRST_TAG}" >> $GITHUB_OUTPUT
-          echo "構建的映像: ${FIRST_TAG}"
+          # 獲取帶有 commit SHA 的標籤（格式: branch-sha）
+          SHA_TAG=$(echo "${{ steps.meta.outputs.tags }}" | grep -E "${{ github.ref_name }}-[a-f0-9]{7}" | head -n1)
+          
+          if [ -z "$SHA_TAG" ]; then
+            echo "❌ 找不到帶 SHA 的標籤"
+            echo "可用標籤:"
+            echo "${{ steps.meta.outputs.tags }}"
+            exit 1
+          fi
+          
+          echo "image_full=${SHA_TAG}" >> $GITHUB_OUTPUT
+          echo "構建的映像: ${SHA_TAG}"
 
       - name: Generate build summary
         if: success()
@@ -391,6 +407,13 @@ jobs:
           IMAGE_FULL="${{ steps.vars.outputs.image_full }}"
           
           echo "🚀 開始部署 Admin API..."
+          echo ""
+          echo "📦 部署映像資訊:"
+          echo "  完整映像標籤: ${IMAGE_FULL}"
+          echo "  Registry: ${{ env.REGISTRY }}"
+          echo "  映像名稱: ${{ env.IMAGE_NAME }}"
+          echo "  Commit SHA: ${{ github.sha }}"
+          echo ""
           
           kubectl apply -f k8s/deployments/${{ env.SERVICE_NAME }}.yaml -n ${NAMESPACE}
           kubectl apply -f k8s/services/${{ env.SERVICE_NAME }}-service.yaml -n ${NAMESPACE}
@@ -420,6 +443,7 @@ jobs:
       - name: Verify deployment
         run: |
           NAMESPACE="${{ steps.vars.outputs.namespace }}"
+          IMAGE_FULL="${{ steps.vars.outputs.image_full }}"
           
           echo ""
           echo "🔍 驗證部署狀態..."
@@ -432,6 +456,19 @@ jobs:
           echo "Pods:"
           kubectl get pods -n ${NAMESPACE} -l app=${{ env.SERVICE_NAME }}
           
+          echo ""
+          echo "部署的映像版本:"
+          DEPLOYED_IMAGE=$(kubectl get deployment ${{ env.SERVICE_NAME }} \
+            -n ${NAMESPACE} \
+            -o jsonpath='{.spec.template.spec.containers[0].image}')
+          echo "  實際部署: ${DEPLOYED_IMAGE}"
+          echo "  預期映像: ${IMAGE_FULL}"
+          
+          if [ "${DEPLOYED_IMAGE}" = "${IMAGE_FULL}" ]; then
+            echo "  ✅ 映像版本匹配"
+          else
+            echo "  ⚠️  映像版本不匹配"
+          fi
           echo ""
           echo "Service:"
           kubectl get service ${{ env.SERVICE_NAME }} -n ${NAMESPACE}
