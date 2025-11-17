@@ -48,6 +48,9 @@ type Config struct {
 
 	// Swagger
 	SwaggerBaseDomain string
+	
+	// App Version
+	AppVersion string
 }
 
 var (
@@ -175,6 +178,9 @@ func Load() *Config {
 
 			// Swagger
 			SwaggerBaseDomain: getEnv("SWAGGER_BASE_DOMAIN", ""),
+			
+			// App Version
+			AppVersion: getEnv("APP_VERSION", "dev"),
 		}
 
 		log.Println("✅ Application configuration loaded successfully")

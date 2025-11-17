@@ -32,10 +32,9 @@ type Server struct {
  * @param log Logger 實例
  * @param loggerMw Logger 中間件
  * @param corsMw CORS 中間件
- * @param appVersion 應用程式版本號
  * @return Server 指標
  */
-func NewServer(router *Router, cfg *config.Config, log logger.Logger, loggerMw *middleware.LoggerMiddleware, corsMw *middleware.CORSMiddleware, appVersion interface{}) *Server {
+func NewServer(router *Router, cfg *config.Config, log logger.Logger, loggerMw *middleware.LoggerMiddleware, corsMw *middleware.CORSMiddleware) *Server {
 	// 設定 Gin 模式
 	gin.SetMode(gin.ReleaseMode)
 
@@ -48,24 +47,12 @@ func NewServer(router *Router, cfg *config.Config, log logger.Logger, loggerMw *
 	// 取得本機 IP 和 Swagger host
 	localIP := cfg.GetLocalIP()
 	swagHost := cfg.GetSwaggerHost()
-	
-	// 提取版本號字串
-	versionStr := "dev"
-	if appVersion != nil {
-		if v, ok := appVersion.(fmt.Stringer); ok {
-			versionStr = v.String()
-		} else if v, ok := appVersion.(string); ok {
-			versionStr = v
-		} else {
-			versionStr = fmt.Sprintf("%v", appVersion)
-		}
-	}
 
 	// 動態設定 Swagger Host（優先使用環境變量 SWAGGER_BASE_DOMAIN）
 	docs.SwaggerInfo.Host = swagHost
 
-	// 動態設定 Swagger 版本號
-	docs.SwaggerInfo.Version = versionStr
+	// 動態設定 Swagger 版本號（從 Config 讀取）
+	docs.SwaggerInfo.Version = cfg.AppVersion
 
 	// 支援 HTTP 和 HTTPS 兩種協議
 	docs.SwaggerInfo.Schemes = []string{"https", "http"}
@@ -73,7 +60,7 @@ func NewServer(router *Router, cfg *config.Config, log logger.Logger, loggerMw *
 	log.Info("Server configuration",
 		zap.String("localIP", localIP),
 		zap.String("swaggerHost", swagHost),
-		zap.String("version", versionStr),
+		zap.String("version", cfg.AppVersion),
 		zap.Int("port", cfg.HTTPPort),
 	)
 

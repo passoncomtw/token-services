@@ -1,0 +1,41 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+# 引用基础配置
+resources:
+  - ../../base
+  - namespace.yaml
+
+# Staging 命名空间
+namespace: passontw-services-staging
+
+# Staging 环境标签
+commonLabels:
+  environment: staging
+
+# 镜像标签（由 CI/CD 动态设置）
+images:
+  - name: ghcr.io/passontw/token-admin-api
+    newTag: develop-PLACEHOLDER  # 将被 CI/CD 替换
+  - name: ghcr.io/passontw/token-app-api
+    newTag: develop-PLACEHOLDER  # 将被 CI/CD 替换
+
+# Staging 环境的资源配置
+patches:
+  # 副本数
+  - patch: |-
+      - op: replace
+        path: /spec/replicas
+        value: 2
+    target:
+      kind: Deployment
+      name: token-admin-api
+  
+  - patch: |-
+      - op: replace
+        path: /spec/replicas
+        value: 2
+    target:
+      kind: Deployment
+      name: token-app-api
+

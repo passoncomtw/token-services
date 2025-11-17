@@ -104,9 +104,7 @@ jobs:
         with:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
           tags: |
-            type=ref,event=branch
             type=sha,prefix={{branch}}-
-            type=sha
 
       - name: Extract short SHA
         id: extract-sha
@@ -185,31 +183,19 @@ jobs:
       - name: Push Docker image
         if: success()
         run: |
-          echo "📦 推送映像到 Registry..."
-          
-          TAGS="${{ steps.meta.outputs.tags }}"
-          for TAG in $TAGS; do
-            echo "推送: $TAG"
-            docker --config "$DOCKER_CONFIG" push "$TAG"
-          done
-          
-          echo "✅ 所有映像已推送"
+          IMAGE_TAG="${{ steps.meta.outputs.tags }}"
+          echo "📦 推送映像到 Registry: ${IMAGE_TAG}"
+          docker --config "$DOCKER_CONFIG" push "${IMAGE_TAG}"
+          echo "✅ 映像已推送"
 
       - name: Set output for deploy job
         id: set-output
         run: |
-          # 獲取帶有 commit SHA 的標籤（格式: branch-sha）
-          SHA_TAG=$(echo "${{ steps.meta.outputs.tags }}" | grep -E "${{ github.ref_name }}-[a-f0-9]{7}" | head -n1)
+          # 只有一個標籤: branch-sha 格式
+          IMAGE_TAG="${{ steps.meta.outputs.tags }}"
           
-          if [ -z "$SHA_TAG" ]; then
-            echo "❌ 找不到帶 SHA 的標籤"
-            echo "可用標籤:"
-            echo "${{ steps.meta.outputs.tags }}"
-            exit 1
-          fi
-          
-          echo "image_full=${SHA_TAG}" >> $GITHUB_OUTPUT
-          echo "構建的映像: ${SHA_TAG}"
+          echo "image_full=${IMAGE_TAG}" >> $GITHUB_OUTPUT
+          echo "📦 構建的映像: ${IMAGE_TAG}"
 
       - name: Generate build summary
         if: success()
@@ -394,36 +380,38 @@ jobs:
           
           echo "✅ 所有必要的 Secrets 都已就緒"
 
-      - name: Update ConfigMap
-        run: |
-          NAMESPACE="${{ steps.vars.outputs.namespace }}"
-          echo "📝 更新 ConfigMap..."
-          kubectl apply -f k8s/configmaps/admin-api-config.yaml -n ${NAMESPACE}
-          echo "✅ ConfigMap 更新完成"
-
-      - name: Deploy to Kubernetes
+      - name: Deploy to Kubernetes with Kustomize
         run: |
           NAMESPACE="${{ steps.vars.outputs.namespace }}"
           IMAGE_FULL="${{ steps.vars.outputs.image_full }}"
+          ENV="${{ steps.vars.outputs.environment }}"
           
-          echo "🚀 開始部署 Admin API..."
+          echo "🚀 開始部署 Admin API (使用 Kustomize)..."
           echo ""
-          echo "📦 部署映像資訊:"
-          echo "  完整映像標籤: ${IMAGE_FULL}"
+          echo "📦 部署資訊:"
+          echo "  環境: ${ENV}"
+          echo "  命名空間: ${NAMESPACE}"
+          echo "  映像標籤: ${IMAGE_FULL}"
           echo "  Registry: ${{ env.REGISTRY }}"
-          echo "  映像名稱: ${{ env.IMAGE_NAME }}"
           echo "  Commit SHA: ${{ github.sha }}"
           echo ""
           
-          kubectl apply -f k8s/deployments/${{ env.SERVICE_NAME }}.yaml -n ${NAMESPACE}
-          kubectl apply -f k8s/services/${{ env.SERVICE_NAME }}-service.yaml -n ${NAMESPACE}
+          # 提取標籤（移除 registry 和 repository）
+          IMAGE_TAG=$(echo ${IMAGE_FULL} | cut -d':' -f2)
           
-          echo "🔄 更新容器映像: ${IMAGE_FULL}"
-          kubectl set image deployment/${{ env.SERVICE_NAME }} \
-            ${{ env.SERVICE_NAME }}=${IMAGE_FULL} \
-            -n ${NAMESPACE}
+          # 進入 overlay 目錄
+          cd k8s/overlays/${ENV}
           
-          echo "✅ 部署配置已應用"
+          # 使用 Kustomize 設置鏡像標籤
+          echo "🔄 設置映像標籤: ${IMAGE_TAG}"
+          kustomize edit set image \
+            ghcr.io/passontw/token-admin-api:${IMAGE_TAG}
+          
+          # 部署
+          echo "📦 應用配置..."
+          kubectl apply -k .
+          
+          echo "✅ 部署配置已應用（使用 Kustomize）"
 
       - name: Wait for rollout
         run: |

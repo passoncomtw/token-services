@@ -1,6 +1,8 @@
 package main
 
 import (
+	"os"
+
 	_ "passontw-backend-services/cmd/token-app-api/internal/docs"
 	"passontw-backend-services/cmd/token-app-api/internal/handlers"
 	"passontw-backend-services/cmd/token-app-api/internal/server"
@@ -38,18 +40,13 @@ import (
 // version 會在編譯時通過 ldflags 注入
 var version = "dev"
 
-// AppVersion 提供應用程式版本號
-type AppVersion string
-
-// ProvideVersion 提供版本號給 FX 容器
-func ProvideVersion() AppVersion {
-	return AppVersion(version)
-}
-
 func main() {
+	// 設置版本號到環境變量，讓 config 包可以讀取
+	if version != "" {
+		os.Setenv("APP_VERSION", version)
+	}
+
 	fx.New(
-		// 提供版本號
-		fx.Provide(ProvideVersion),
 		config.ConfigModule,
 		logger.LoggerModule,
 		middleware.MiddlewareModule,
