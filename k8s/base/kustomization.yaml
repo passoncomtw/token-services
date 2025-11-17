@@ -10,11 +10,6 @@ resources:
   - admin-api-configmap.yaml
   - app-api-configmap.yaml
 
-# 通用标签（可选）
-commonLabels:
-  app.kubernetes.io/managed-by: kustomize
-  app.kubernetes.io/part-of: passontw-backend
-
 # 镜像配置（将被 overlay 覆盖）
 images:
   - name: ghcr.io/passontw/token-admin-api

@@ -407,10 +407,41 @@ jobs:
           kustomize edit set image \
             ghcr.io/passontw/token-admin-api:${IMAGE_TAG}
           
-          # 部署
+          # 部署配置
           echo "📦 應用配置..."
-          kubectl apply -k .
           
+          # 嘗試應用配置
+          if ! kubectl apply -k . 2>&1 | tee /tmp/apply-output.log; then
+            # 檢查是否是 selector 不可變錯誤
+            if grep -q "field is immutable" /tmp/apply-output.log; then
+              echo ""
+              echo "⚠️  檢測到 selector 不可變錯誤，需要重新創建 Deployment"
+              echo "🔄 刪除現有的 Deployments..."
+              
+              # 刪除 Admin API deployment
+              if kubectl get deployment ${{ env.SERVICE_NAME }} -n ${NAMESPACE} &>/dev/null; then
+                kubectl delete deployment ${{ env.SERVICE_NAME }} -n ${NAMESPACE} --wait=true
+                echo "✅ 已刪除 ${{ env.SERVICE_NAME }} deployment"
+              fi
+              
+              # 等待刪除完成
+              echo "⏳ 等待資源清理..."
+              sleep 5
+              
+              # 重新應用配置
+              echo "📦 重新應用配置..."
+              kubectl apply -k .
+              echo "✅ 配置已成功應用"
+            else
+              # 其他錯誤，直接失敗
+              echo "❌ 部署失敗"
+              exit 1
+            fi
+          else
+            echo "✅ 配置已成功應用"
+          fi
+          
+          echo ""
           echo "✅ 部署配置已應用（使用 Kustomize）"
 
       - name: Wait for rollout

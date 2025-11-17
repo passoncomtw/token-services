@@ -9,10 +9,6 @@ resources:
 # Staging 命名空间
 namespace: passontw-services-staging
 
-# Staging 环境标签
-commonLabels:
-  environment: staging
-
 # 镜像标签（由 CI/CD 动态设置）
 images:
   - name: ghcr.io/passontw/token-admin-api
