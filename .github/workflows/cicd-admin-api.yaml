@@ -24,7 +24,7 @@ permissions:
 
 jobs:
   build:
-    runs-on: mac-mini-build
+    runs-on: ubuntu-latest
     outputs:
       image_tag: ${{ steps.set-tag.outputs.image_tag }}
     
