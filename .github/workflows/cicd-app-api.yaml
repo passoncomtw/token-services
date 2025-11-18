@@ -19,7 +19,7 @@ permissions:
 
 jobs:
   build:
-    runs-on: mac-mini-build
+    runs-on: ubuntu-latest
     
     steps:
       - name: Checkout code
