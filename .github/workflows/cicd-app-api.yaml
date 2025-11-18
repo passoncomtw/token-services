@@ -8,43 +8,175 @@ on:
       - 'cmd/token-app-api/**'
       - 'pkg/**'
       - 'deploy/token-app-api/**'
+      - 'k8s/**'
       - 'go.mod'
       - 'go.sum'
 
 env:
-  IMAGE_NAME: passon/token-app-api
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository_owner }}/token-app-api
+  SERVICE_NAME: token-app-api
+  NAMESPACE: passontw-services-staging
 
 permissions:
   contents: read
+  packages: write
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: mac-mini-build
+    outputs:
+      image_tag: ${{ steps.set-tag.outputs.image_tag }}
     
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Log in to Docker Hub
+      - name: Set image tag
+        id: set-tag
+        run: |
+          SHORT_SHA=$(echo ${{ github.sha }} | cut -c1-7)
+          TAG="develop-${SHORT_SHA}"
+          echo "image_tag=${TAG}" >> $GITHUB_OUTPUT
+          echo "📦 Image tag: ${TAG}"
+
+      - name: Log in to GitHub Container Registry
         uses: docker/login-action@v3
         with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_PASSWORD }}
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Build and Push Docker Image
         run: |
-          IMAGE_NAME="${{ env.IMAGE_NAME }}"
-          TAG="develop"
+          IMAGE_FULL="${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}"
+          TAG="${{ steps.set-tag.outputs.image_tag }}"
           
-          echo "Building image: $IMAGE_NAME:$TAG"
+          echo "Building image: $IMAGE_FULL:$TAG"
           
           docker build \
             --file ./deploy/token-app-api/Dockerfile \
-            --tag "$IMAGE_NAME:$TAG" \
+            --tag "$IMAGE_FULL:$TAG" \
+            --tag "$IMAGE_FULL:develop" \
             .
           
-          echo "Pushing image: $IMAGE_NAME:$TAG"
-          docker push "$IMAGE_NAME:$TAG"
+          echo "Pushing images..."
+          docker push "$IMAGE_FULL:$TAG"
+          docker push "$IMAGE_FULL:develop"
           
           echo "✅ Build and push completed"
 
+  deploy:
+    runs-on: mac-mini-build
+    needs: build
+    if: success()
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Deploy to Kubernetes
+        id: deploy
+        run: |
+          IMAGE_TAG="${{ needs.build.outputs.image_tag }}"
+          
+          echo "🚀 開始部署 ${{ env.SERVICE_NAME }}..."
+          echo "📦 Image tag: ${IMAGE_TAG}"
+          echo "📍 Namespace: ${{ env.NAMESPACE }}"
+          
+          # 進入 kustomize overlay 目錄
+          cd k8s/overlays/staging
+          
+          # 更新 image tag
+          kustomize edit set image \
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${IMAGE_TAG}
+          
+          # 應用配置
+          echo "📦 應用 Kubernetes 配置..."
+          kubectl apply -k . || {
+            echo "⚠️  部署失敗，可能是 selector 不可變問題"
+            echo "🔄 刪除並重新創建 deployment..."
+            kubectl delete deployment ${{ env.SERVICE_NAME }} -n ${{ env.NAMESPACE }} --ignore-not-found=true
+            kubectl apply -k .
+          }
+          
+          echo "✅ 配置已應用"
+
+      - name: Wait for deployment
+        id: wait
+        run: |
+          echo "⏳ 等待部署完成（超時 5 分鐘）..."
+          
+          if kubectl rollout status deployment/${{ env.SERVICE_NAME }} \
+            -n ${{ env.NAMESPACE }} \
+            --timeout=5m; then
+            echo "✅ 部署成功"
+            echo "deployment_status=success" >> $GITHUB_OUTPUT
+          else
+            echo "❌ 部署超時或失敗"
+            echo "deployment_status=failed" >> $GITHUB_OUTPUT
+            exit 1
+          fi
+
+      - name: Verify deployment
+        if: steps.wait.outputs.deployment_status == 'success'
+        run: |
+          echo "🔍 驗證部署狀態..."
+          
+          # 獲取 pod 狀態
+          kubectl get pods -n ${{ env.NAMESPACE }} -l app=${{ env.SERVICE_NAME }}
+          
+          # 檢查 pod 是否健康
+          READY_PODS=$(kubectl get pods -n ${{ env.NAMESPACE }} \
+            -l app=${{ env.SERVICE_NAME }} \
+            --field-selector=status.phase=Running \
+            -o jsonpath='{.items[*].metadata.name}' | wc -w)
+          
+          echo "✅ 健康的 Pods 數量: ${READY_PODS}"
+          
+          if [ "$READY_PODS" -eq 0 ]; then
+            echo "❌ 沒有健康的 Pod"
+            exit 1
+          fi
+
+      - name: Rollback on failure
+        if: failure()
+        run: |
+          echo "❌ 部署失敗，執行自動回滾..."
+          
+          # 回滾到上一個版本
+          kubectl rollout undo deployment/${{ env.SERVICE_NAME }} \
+            -n ${{ env.NAMESPACE }}
+          
+          echo "⏳ 等待回滾完成..."
+          kubectl rollout status deployment/${{ env.SERVICE_NAME }} \
+            -n ${{ env.NAMESPACE }} \
+            --timeout=3m
+          
+          echo "✅ 已回滾到上一個版本"
+          
+          # 顯示當前狀態
+          echo ""
+          echo "📊 當前部署狀態："
+          kubectl get pods -n ${{ env.NAMESPACE }} -l app=${{ env.SERVICE_NAME }}
+
+      - name: Deployment summary
+        if: success()
+        run: |
+          IMAGE_TAG="${{ needs.build.outputs.image_tag }}"
+          
+          echo ""
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+          echo "🎉 ${{ env.SERVICE_NAME }} 部署成功"
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+          echo ""
+          echo "📦 Image: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${IMAGE_TAG}"
+          echo "📍 Namespace: ${{ env.NAMESPACE }}"
+          echo ""
+          echo "Pod 狀態："
+          kubectl get pods -n ${{ env.NAMESPACE }} -l app=${{ env.SERVICE_NAME }}
+          echo ""
+          echo "Service 狀態："
+          kubectl get svc -n ${{ env.NAMESPACE }} ${{ env.SERVICE_NAME }}
+          echo ""
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
