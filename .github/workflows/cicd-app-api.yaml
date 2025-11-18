@@ -98,6 +98,17 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
+      - name: Configure Docker credentials storage
+        run: |
+          # 配置 Docker 使用文件存儲憑證，而不是 macOS Keychain
+          mkdir -p ~/.docker
+          cat > ~/.docker/config.json << 'EOF'
+          {
+            "credsStore": ""
+          }
+          EOF
+          echo "✅ Docker 憑證存儲已配置為文件模式"
+
       - name: Extract metadata
         id: meta
         uses: docker/metadata-action@v5
@@ -221,6 +232,15 @@ jobs:
           
           echo "✅ Buildx 資源清理完成"
 
+      - name: Cleanup Docker credentials
+        if: always()
+        run: |
+          echo "🧹 清理 Docker 憑證..."
+          # 登出 GHCR
+          docker logout ${{ env.REGISTRY }} 2>/dev/null || true
+          # 清理憑證文件
+          rm -f ~/.docker/config.json 2>/dev/null || true
+          echo "✅ Docker 憑證已清理"
 
   deploy:
     name: 部署到 Kubernetes
