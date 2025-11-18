@@ -115,16 +115,6 @@ jobs:
 
       - name: Login to GHCR
         run: |
-          echo "🔐 登入 GHCR..."
-          
-          # 配置 Docker 使用文件存儲（不使用 macOS Keychain）
-          mkdir -p ~/.docker
-          cat > ~/.docker/config.json << 'EOF'
-          {
-            "credsStore": ""
-          }
-          EOF
-          
           # 使用 stdin 登入（避免 Keychain 交互）
           echo "${{ secrets.GHCR_TOKEN }}" | docker login ${{ env.REGISTRY }} \
             -u ${{ secrets.GHCR_USERNAME }} \
