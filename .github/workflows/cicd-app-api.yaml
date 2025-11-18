@@ -1,311 +1,113 @@
-name: CI/CD - App API (Simplified)
+name: Build Token App API
 
 on:
   push:
-    branches: [develop, main]
+    branches: [develop]
     paths:
-      - '.github/workflows/cicd-app-api-v2.yaml'
+      - '.github/workflows/cicd-app-api.yaml'
       - 'cmd/token-app-api/**'
       - 'pkg/**'
       - 'deploy/token-app-api/**'
-      - 'k8s/**'
       - 'go.mod'
       - 'go.sum'
-  workflow_dispatch:
-    inputs:
-      environment:
-        description: '部署環境'
-        required: false
-        type: choice
-        options:
-          - auto
-          - staging
-        default: auto
 
 env:
   REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository_owner }}/token-app-api
-  SERVICE_NAME: token-app-api
-  NAMESPACE_PREFIX: passontw-services
 
 permissions:
   contents: read
   packages: write
 
 jobs:
-  build:
-    name: 構建 Docker 映像
+  build-backend-service:
     runs-on: mac-mini-build
-    outputs:
-      image_tag: ${{ steps.set-tag.outputs.image_tag }}
-      short_sha: ${{ steps.set-tag.outputs.short_sha }}
     
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-      
-      - name: Set up Go
-        uses: actions/setup-go@v5
-        with:
-          go-version: '1.23'
-          cache: true
-      
-      - name: Set image tag
-        id: set-tag
-        run: |
-          SHORT_SHA=$(echo ${{ github.sha }} | cut -c1-7)
-          BRANCH=${{ github.ref_name }}
-          IMAGE_TAG="${BRANCH}-${SHORT_SHA}"
-          echo "short_sha=${SHORT_SHA}" >> $GITHUB_OUTPUT
-          echo "image_tag=${IMAGE_TAG}" >> $GITHUB_OUTPUT
-          echo "📦 Image tag: ${IMAGE_TAG}"
-      
+
       - name: Log in to GitHub Container Registry
         uses: docker/login-action@v3
         with:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
-      
-      - name: Build Docker image
+
+      - name: Legacy Docker Build (last resort)
         run: |
-          echo "🔨 Building Docker image..."
+          echo "=== Legacy Docker Build ==="
           
-          IMAGE_FULL="${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}"
-          TAG="${{ steps.set-tag.outputs.image_tag }}"
-          SHORT_SHA="${{ steps.set-tag.outputs.short_sha }}"
-          BRANCH="${{ github.ref_name }}"
+          # 設定變數
+          IMAGE_NAME="${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}"
+          TAG="develop"
+          SHORT_SHA=$(echo ${{ github.sha }} | cut -c1-7)
           
-          echo "Image: ${IMAGE_FULL}:${TAG}"
+          echo "Building image with legacy docker build: $IMAGE_NAME:$TAG"
           
-          # 使用傳統 docker build（更穩定）
+          echo "Building image with legacy docker build: $IMAGE_NAME:$TAG"
+          # 移除舊的建構器（如果存在）
+          docker buildx rm multiplatform || true
+          
+          # 創建新的 buildx 建構器（支援多平台）
+          docker buildx create --name multiplatform --driver docker-container --use
+
+          # 啟動建構器
+          docker buildx inspect --bootstrap
+
+          # 使用傳統的 docker build
           docker build \
             --file ./deploy/token-app-api/Dockerfile \
-            --build-arg VERSION="${TAG}" \
-            --tag "${IMAGE_FULL}:${TAG}" \
-            --tag "${IMAGE_FULL}:${BRANCH}" \
+            --tag "$IMAGE_NAME:$TAG" \
+            --tag "$IMAGE_NAME:develop-$SHORT_SHA" \
             --label "org.opencontainers.image.title=Token App API" \
             --label "org.opencontainers.image.description=PassonTW Token App API" \
             --label "org.opencontainers.image.source=https://github.com/${{ github.repository }}" \
             --label "org.opencontainers.image.revision=${{ github.sha }}" \
-            --label "org.opencontainers.image.version=${TAG}" \
             .
           
-          echo "✅ Build completed"
-      
-      - name: Push Docker image
-        run: |
-          echo "📤 Pushing Docker images..."
+          echo "=== Pushing images ==="
+          docker push "$IMAGE_NAME:$TAG"
+          docker push "$IMAGE_NAME:develop-$SHORT_SHA"
           
-          IMAGE_FULL="${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}"
-          TAG="${{ steps.set-tag.outputs.image_tag }}"
-          BRANCH="${{ github.ref_name }}"
-          
-          docker push "${IMAGE_FULL}:${TAG}"
-          docker push "${IMAGE_FULL}:${BRANCH}"
-          
-          echo "✅ Push completed"
-          echo "Images pushed:"
-          echo "  - ${IMAGE_FULL}:${TAG}"
-          echo "  - ${IMAGE_FULL}:${BRANCH}"
-      
-      - name: Verify images
-        run: |
-          echo "🔍 Verifying pushed images..."
-          
-          IMAGE_FULL="${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}"
-          TAG="${{ steps.set-tag.outputs.image_tag }}"
-          
-          docker manifest inspect "${IMAGE_FULL}:${TAG}" > /dev/null
-          
-          echo "✅ Image verification successful"
-      
-      - name: Cleanup local images
-        if: always()
-        run: |
-          echo "🧹 Cleaning up local images..."
-          
-          IMAGE_FULL="${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}"
-          TAG="${{ steps.set-tag.outputs.image_tag }}"
-          BRANCH="${{ github.ref_name }}"
-          
-          docker rmi "${IMAGE_FULL}:${TAG}" 2>/dev/null || true
-          docker rmi "${IMAGE_FULL}:${BRANCH}" 2>/dev/null || true
-          
-          # 清理未使用的映像
-          docker image prune -f --filter "until=24h" || true
-          
-          echo "✅ Cleanup completed"
+          echo "=== Legacy build completed ==="
 
-  deploy:
-    name: 部署到 Kubernetes
-    runs-on: mac-mini-build
-    needs: build
-    if: success()
-    
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-      
-      - name: Determine environment
-        id: env
+      - name: Generate build summary
         run: |
-          if [ "${{ github.event.inputs.environment }}" == "auto" ] || [ -z "${{ github.event.inputs.environment }}" ]; then
-            if [ "${{ github.ref_name }}" == "main" ]; then
-              ENV="production"
-            else
-              ENV="staging"
-            fi
-          else
-            ENV="${{ github.event.inputs.environment }}"
-          fi
-          
-          echo "environment=${ENV}" >> $GITHUB_OUTPUT
-          echo "📍 Deploying to: ${ENV}"
-      
-      - name: Deploy to Kubernetes with Kustomize
-        run: |
-          ENV="${{ steps.env.outputs.environment }}"
-          NAMESPACE="${{ env.NAMESPACE_PREFIX }}-${ENV}"
-          IMAGE_TAG="${{ needs.build.outputs.image_tag }}"
-          IMAGE_FULL="${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${IMAGE_TAG}"
-          
-          echo "🚀 開始部署 App API (使用 Kustomize)..."
-          echo "📦 部署資訊:"
-          echo "  環境: ${ENV}"
-          echo "  命名空間: ${NAMESPACE}"
-          echo "  映像標籤: ${IMAGE_TAG}"
-          
-          # 進入 overlay 目錄
-          cd k8s/overlays/${ENV}
-          
-          # 設置映像標籤
-          echo "🔄 設置映像標籤: ${IMAGE_TAG}"
-          kustomize edit set image ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${IMAGE_TAG}
-          
-          # 應用配置
-          echo "📦 應用配置..."
-          kubectl apply -k .
-          
-          # 檢查是否有 immutable selector 錯誤
-          if [ $? -ne 0 ]; then
-            echo "⚠️  檢測到部署錯誤，可能是 selector 不可變問題"
-            echo "🔄 嘗試刪除並重新創建 deployment..."
-            
-            kubectl delete deployment ${{ env.SERVICE_NAME }} -n ${NAMESPACE} --ignore-not-found=true
-            
-            echo "📦 重新應用配置..."
-            kubectl apply -k .
-          fi
-          
-          echo "✅ 部署配置已應用"
-      
-      - name: Wait for deployment
-        run: |
-          ENV="${{ steps.env.outputs.environment }}"
-          NAMESPACE="${{ env.NAMESPACE_PREFIX }}-${ENV}"
-          
-          echo "⏳ 等待部署完成（超時 5 分鐘）..."
-          
-          kubectl rollout status deployment/${{ env.SERVICE_NAME }} \
-            -n ${NAMESPACE} \
-            --timeout=5m
-          
-          if [ $? -eq 0 ]; then
-            echo "✅ 部署成功"
-          else
-            echo "❌ 部署超時或失敗"
-            echo ""
-            echo "Pod 狀態："
-            kubectl get pods -n ${NAMESPACE} -l app=${{ env.SERVICE_NAME }}
-            exit 1
-          fi
-      
-      - name: Health check
-        run: |
-          ENV="${{ steps.env.outputs.environment }}"
-          NAMESPACE="${{ env.NAMESPACE_PREFIX }}-${ENV}"
-          
-          echo "🏥 執行健康檢查..."
-          
-          # 等待 pods 穩定
-          sleep 5
-          
-          # 獲取當前運行的 pods
-          PODS=$(kubectl get pods -n ${NAMESPACE} \
-            -l app=${{ env.SERVICE_NAME }} \
-            --field-selector=status.phase=Running \
-            -o jsonpath='{.items[*].metadata.name}')
-          
-          if [ -z "$PODS" ]; then
-            echo "❌ 沒有找到運行中的 Pod"
-            exit 1
-          fi
-          
-          echo "測試 Pods: $PODS"
-          
-          # 等待每個 pod 就緒
-          for POD in $PODS; do
-            echo "等待 Pod 就緒: $POD"
-            kubectl wait --for=condition=ready pod/$POD -n ${NAMESPACE} --timeout=2m || {
-              echo "❌ Pod $POD 未就緒"
-              kubectl describe pod/$POD -n ${NAMESPACE}
-              exit 1
-            }
-          done
-          
-          # 測試健康檢查端點
-          for POD in $PODS; do
-            echo "測試 Pod: $POD"
-            
-            kubectl run curl-test-${{ github.run_id }}-$(echo $POD | md5sum | cut -c1-8) \
-              --image=curlimages/curl:latest \
-              --rm -i --restart=Never \
-              --namespace=${NAMESPACE} \
-              -- curl -f http://${{ env.SERVICE_NAME }}:80/health-check || {
-              echo "❌ 健康檢查失敗: $POD"
-              exit 1
-            }
-            
-            echo "✅ 健康檢查通過: $POD"
-          done
-          
-          echo "✅ 所有健康檢查通過"
-      
-      - name: Deployment summary
-        if: success()
-        run: |
-          ENV="${{ steps.env.outputs.environment }}"
-          NAMESPACE="${{ env.NAMESPACE_PREFIX }}-${ENV}"
-          IMAGE_TAG="${{ needs.build.outputs.image_tag }}"
-          
-          echo ""
-          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-          echo "🎉 App API 部署成功"
-          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-          echo ""
-          echo "📦 映像: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${IMAGE_TAG}"
-          echo "🌍 環境: ${ENV}"
-          echo "📍 命名空間: ${NAMESPACE}"
-          echo ""
-          echo "Pod 狀態："
-          kubectl get pods -n ${NAMESPACE} -l app=${{ env.SERVICE_NAME }}
-          echo ""
-          echo "Service 狀態："
-          kubectl get svc -n ${NAMESPACE} ${{ env.SERVICE_NAME }}
-          echo ""
-          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-      
-      - name: Rollback on failure
-        if: failure()
-        run: |
-          ENV="${{ steps.env.outputs.environment }}"
-          NAMESPACE="${{ env.NAMESPACE_PREFIX }}-${ENV}"
-          
-          echo "❌ 部署失敗，執行回滾..."
-          
-          kubectl rollout undo deployment/${{ env.SERVICE_NAME }} -n ${NAMESPACE}
-          kubectl rollout status deployment/${{ env.SERVICE_NAME }} -n ${NAMESPACE} --timeout=2m
-          
-          echo "✅ 已回滾到上一個版本"
+          echo "## 🐳 Token App API 建置完成" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### 映像資訊" >> $GITHUB_STEP_SUMMARY
+          echo "- **Registry**: ${{ env.REGISTRY }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Image**: ${{ env.IMAGE_NAME }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Tags**: develop, develop-\$(echo ${{ github.sha }} | cut -c1-7)" >> $GITHUB_STEP_SUMMARY
+          echo "- **Platform**: linux/amd64" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### 部署命令" >> $GITHUB_STEP_SUMMARY
+          echo '```bash' >> $GITHUB_STEP_SUMMARY
+          echo "docker pull ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:develop" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
 
+      - name: Comment on PR (if applicable)
+        # if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const output = `## 🐳 Token App API 建置完成
+            
+            ### 映像資訊
+            - **Registry**: ${{ env.REGISTRY }}
+            - **Image**: ${{ env.IMAGE_NAME }}
+            - **Tags**: develop, develop-${process.env.GITHUB_SHA.substring(0, 7)}
+            - **Platform**: linux/amd64
+            
+            ### 部署命令
+            \`\`\`bash
+            docker pull ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:develop
+            \`\`\``;
+            
+            # github.rest.issues.createComment({
+            #   issue_number: context.issue.number,
+            #   owner: context.repo.owner,
+            #   repo: context.repo.repo,
+            #   body: output
+            # }); 
