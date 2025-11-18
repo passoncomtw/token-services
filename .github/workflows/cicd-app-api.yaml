@@ -98,17 +98,6 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
-      - name: Configure Docker credentials storage
-        run: |
-          # 配置 Docker 使用文件存儲憑證，而不是 macOS Keychain
-          mkdir -p ~/.docker
-          cat > ~/.docker/config.json << 'EOF'
-          {
-            "credsStore": ""
-          }
-          EOF
-          echo "✅ Docker 憑證存儲已配置為文件模式"
-
       - name: Extract metadata
         id: meta
         uses: docker/metadata-action@v5
@@ -125,11 +114,23 @@ jobs:
           echo "短 SHA: ${SHORT_SHA}"
 
       - name: Login to GHCR
-        uses: docker/login-action@v3
-        with:
-          registry: ${{ env.REGISTRY }}
-          username: ${{ secrets.GHCR_USERNAME }}
-          password: ${{ secrets.GHCR_TOKEN }}
+        run: |
+          echo "🔐 登入 GHCR..."
+          
+          # 配置 Docker 使用文件存儲（不使用 macOS Keychain）
+          mkdir -p ~/.docker
+          cat > ~/.docker/config.json << 'EOF'
+          {
+            "credsStore": ""
+          }
+          EOF
+          
+          # 使用 stdin 登入（避免 Keychain 交互）
+          echo "${{ secrets.GHCR_TOKEN }}" | docker login ${{ env.REGISTRY }} \
+            -u ${{ secrets.GHCR_USERNAME }} \
+            --password-stdin
+          
+          echo "✅ 登入成功"
 
       - name: Build and push Docker image
         id: build
