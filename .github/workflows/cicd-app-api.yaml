@@ -36,7 +36,7 @@ on:
 
 env:
   REGISTRY: ghcr.io
-  IMAGE_NAME: ${{ github.repository_owner }}/token-app-api
+  IMAGE_NAME: ${{ secrets.GHCR_USERNAME }}/token-app-api
   SERVICE_NAME: token-app-api
   NAMESPACE_PREFIX: passontw-services
 
@@ -114,8 +114,22 @@ jobs:
           echo "短 SHA: ${SHORT_SHA}"
 
       - name: Login to GHCR
-        run: |          
-          # 使用 stdin 登入（避免 Keychain 交互）
+        run: |
+          echo "🔐 配置 Docker 憑證存儲..."
+          
+          # ⚠️ 關鍵步驟：必須在登入前配置，禁用 osxkeychain
+          mkdir -p ~/.docker
+          cat > ~/.docker/config.json << 'EOF'
+          {
+            "credsStore": ""
+          }
+          EOF
+          
+          echo "✅ 配置完成 (使用文件存儲，不使用 Keychain)"
+          echo ""
+          echo "🔑 開始登入 GHCR..."
+          
+          # 使用 stdin 登入
           echo "${{ secrets.GHCR_TOKEN }}" | docker login ${{ env.REGISTRY }} \
             -u ${{ secrets.GHCR_USERNAME }} \
             --password-stdin
