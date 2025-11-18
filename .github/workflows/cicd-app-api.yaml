@@ -1,113 +1,545 @@
-name: Build Token App API
+name: CI/CD - App API
 
 on:
   push:
-    branches: [develop]
+    branches: [develop, main]
     paths:
       - '.github/workflows/cicd-app-api.yaml'
       - 'cmd/token-app-api/**'
       - 'pkg/**'
       - 'deploy/token-app-api/**'
+      - 'k8s/deployments/token-app-api.yaml'
+      - 'k8s/services/token-app-api-service.yaml'
+      - 'k8s/configmaps/app-api-config.yaml'
       - 'go.mod'
       - 'go.sum'
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: '部署環境'
+        required: false
+        type: choice
+        options:
+          - auto
+          - staging
+          - production
+        default: auto
+      skip_build:
+        description: '跳過構建（僅部署）'
+        required: false
+        type: boolean
+        default: false
+      image_tag:
+        description: '映像標籤（跳過構建時使用）'
+        required: false
+        type: string
 
 env:
   REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository_owner }}/token-app-api
+  SERVICE_NAME: token-app-api
+  NAMESPACE_PREFIX: passontw-services
 
 permissions:
   contents: read
   packages: write
 
 jobs:
-  build-backend-service:
+  build:
+    name: 構建 Docker 映像
     runs-on: mac-mini-build
+    if: ${{ github.event.inputs.skip_build != 'true' }}
+    outputs:
+      image_tag: ${{ steps.meta.outputs.tags }}
+      image_full: ${{ steps.set-output.outputs.image_full }}
+    
+    steps:
+      - name: Pre-build cleanup
+        run: |
+          echo "🧹 構建前清理..."
+          
+          # 清理 /tmp 中的所有 Go 構建緩存
+          echo "清理 /tmp 中的 Go 構建緩存..."
+          sudo rm -rf /tmp/go-build* 2>/dev/null || true
+          
+          # 清理 Docker 構建緩存（保留 1 小時內的）
+          echo "清理 Docker 構建緩存..."
+          docker builder prune -af --filter "until=1h" || true
+          
+          # 清理未使用的映像（保留 1 小時內的）
+          echo "清理未使用的 Docker 映像..."
+          docker image prune -af --filter "until=1h" || true
+          
+          # 顯示磁碟空間
+          echo ""
+          echo "磁碟空間狀態："
+          df -h / /tmp || df -h /
+          
+          echo ""
+          echo "Docker 空間狀態："
+          docker system df
+          
+          echo ""
+          echo "✅ 清理完成"
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Go cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cache/go-build
+            ~/go/pkg/mod
+          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+          restore-keys: |
+            ${{ runner.os }}-go-
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Extract metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          tags: |
+            type=ref,event=branch
+            type=sha,prefix={{branch}}-
+            type=sha
+      - name: Build Docker image
+        id: build
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./deploy/token-app-api/Dockerfile
+          push: false
+          load: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          platforms: linux/amd64
+          # 多層緩存策略加速構建
+          cache-from: |
+            type=gha,scope=app-api-${{ github.ref_name }}
+            type=gha,scope=app-api-main
+            type=gha,scope=app-api
+          cache-to: type=gha,mode=max,scope=app-api-${{ github.ref_name }}
+          build-args: |
+            BUILD_DATE=${{ github.event.head_commit.timestamp }}
+            VCS_REF=${{ github.sha }}
+            VERSION=${{ github.ref_name }}
+            BUILDKIT_INLINE_CACHE=1
+      - name: Verify build
+        run: |
+          echo "🔍 驗證建置結果..."
+          
+          FIRST_TAG=$(echo "${{ steps.meta.outputs.tags }}" | head -n1)
+          echo "測試映像: $FIRST_TAG"
+          
+          if docker image inspect "$FIRST_TAG" > /dev/null 2>&1; then
+            echo "✅ 映像建置成功"
+            docker images "$FIRST_TAG" --format "table {{.Repository}}\t{{.Tag}}\t{{.Size}}"
+          else
+            echo "❌ 映像建置失敗"
+            exit 1
+          fi
+      - name: Configure Docker authentication
+        if: success()
+        run: |
+          echo "🔧 配置 Docker 認證..."
+          
+          export DOCKER_CONFIG="${{ runner.temp }}/.docker"
+          mkdir -p "$DOCKER_CONFIG"
+          
+          AUTH_STRING="${{ secrets.GHCR_USERNAME }}:${{ secrets.GHCR_TOKEN }}"
+          AUTH_BASE64=$(echo -n "$AUTH_STRING" | base64)
+          
+          cat > "$DOCKER_CONFIG/config.json" << EOF
+          {
+            "auths": {
+              "${{ env.REGISTRY }}": {
+                "auth": "$AUTH_BASE64"
+              }
+            }
+          }
+          EOF
+          
+          if [ -f "$DOCKER_CONFIG/config.json" ]; then
+            echo "✅ 認證配置完成"
+            echo "DOCKER_CONFIG=$DOCKER_CONFIG" >> $GITHUB_ENV
+          else
+            echo "❌ 配置建立失敗"
+            exit 1
+          fi
+      - name: Push Docker image
+        if: success()
+        run: |
+          echo "📦 推送映像到 Registry..."
+          
+          TAGS="${{ steps.meta.outputs.tags }}"
+          for TAG in $TAGS; do
+            echo "推送: $TAG"
+            docker --config "$DOCKER_CONFIG" push "$TAG"
+          done
+          
+          echo "✅ 所有映像已推送"
+      - name: Set output for deploy job
+        id: set-output
+        run: |
+          FIRST_TAG=$(echo "${{ steps.meta.outputs.tags }}" | head -n1)
+          echo "image_full=${FIRST_TAG}" >> $GITHUB_OUTPUT
+          echo "構建的映像: ${FIRST_TAG}"
+      - name: Generate build summary
+        if: success()
+        run: |
+          echo "## ✅ App API 建置成功" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### 建置資訊" >> $GITHUB_STEP_SUMMARY
+          echo "- **分支**: ${{ github.ref_name }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Commit**: \`${{ github.sha }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "- **映像**: \`${{ steps.set-output.outputs.image_full }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### 映像標籤" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          echo "${{ steps.meta.outputs.tags }}" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "⏭️ 準備開始部署..." >> $GITHUB_STEP_SUMMARY
+      - name: Cleanup built images
+        if: always()
+        run: |
+          echo "🧹 清理建置的映像..."
+          
+          # 清理本次構建的映像
+          TAGS="${{ steps.meta.outputs.tags }}"
+          for TAG in $TAGS; do
+            if docker image inspect "$TAG" > /dev/null 2>&1; then
+              docker rmi "$TAG" || true
+            fi
+          done
+          
+          # 清理懸空和未使用的映像（超過 24 小時）
+          docker image prune -af --filter "until=24h" || true
+          
+          echo "✅ 映像清理完成"
+      - name: Cleanup Docker Buildx resources
+        if: always()
+        run: |
+          echo "🧹 清理 Docker Buildx 資源..."
+          
+          # 1. 清理 buildx cache（保留最近 7 天）
+          echo "清理 buildx 快取..."
+          docker buildx prune -af --filter "until=168h" --keep-storage 1GB || true
+          
+          # 2. 清理臨時 buildx builders
+          echo "清理臨時 builders..."
+          docker buildx ls | grep -v NAME | grep -v default | grep "^tmp-" | awk '{print $1}' | while read builder; do
+            echo "  移除 builder: $builder"
+            docker buildx rm "$builder" 2>/dev/null || true
+          done
+          
+          # 3. 清理懸空的 buildkit 容器（超過 1 小時未使用）
+          echo "清理 buildkit 容器..."
+          docker ps -aq --filter "ancestor=moby/buildkit:buildx-stable-1" --filter "status=exited" | head -n 10 | xargs -r docker rm 2>/dev/null || true
+          
+          # 4. 顯示清理後狀態
+          echo ""
+          echo "📊 清理後狀態："
+          echo "Builders: $(docker buildx ls | grep -v NAME | wc -l) 個"
+          echo "Buildkit 容器: $(docker ps -a --filter 'name=buildx_buildkit' --format '{{.Names}}' | wc -l) 個"
+          
+          echo "✅ Buildx 資源清理完成"
+      - name: Cleanup Docker credentials
+        if: always()
+        run: |
+          echo "🧹 清理 Docker 憑證..."
+          
+          if [ -n "$DOCKER_CONFIG" ] && [ -d "$DOCKER_CONFIG" ]; then
+            docker --config "$DOCKER_CONFIG" logout ${{ env.REGISTRY }} 2>/dev/null || true
+            rm -rf "$DOCKER_CONFIG"
+            echo "✅ 憑證清理完成"
+          fi
+  deploy:
+    name: 部署到 Kubernetes
+    runs-on: mac-mini-build
+    needs: build
+    if: ${{ always() && (needs.build.result == 'success' || github.event.inputs.skip_build == 'true') }}
     
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Log in to GitHub Container Registry
-        uses: docker/login-action@v3
-        with:
-          registry: ${{ env.REGISTRY }}
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Legacy Docker Build (last resort)
+      - name: Set deployment variables
+        id: vars
         run: |
-          echo "=== Legacy Docker Build ==="
+          echo "🔧 設定部署變數..."
           
-          # 設定變數
-          IMAGE_NAME="${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}"
-          TAG="develop"
-          SHORT_SHA=$(echo ${{ github.sha }} | cut -c1-7)
+          # 判斷部署環境
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            if [ "${{ github.event.inputs.environment }}" = "auto" ]; then
+              # auto 模式：根據分支決定
+              if [ "${{ github.ref_name }}" = "main" ]; then
+                ENV="production"
+              else
+                ENV="staging"
+              fi
+            else
+              ENV="${{ github.event.inputs.environment }}"
+            fi
+            
+            # 如果跳過構建，使用指定的映像標籤
+            if [ "${{ github.event.inputs.skip_build }}" = "true" ]; then
+              if [ -z "${{ github.event.inputs.image_tag }}" ]; then
+                echo "❌ 跳過構建時必須指定映像標籤"
+                exit 1
+              fi
+              IMAGE_TAG="${{ github.event.inputs.image_tag }}"
+            else
+              IMAGE_TAG="${{ needs.build.outputs.image_full }}"
+            fi
+          else
+            # 自動觸發：根據分支決定環境
+            if [ "${{ github.ref_name }}" = "main" ]; then
+              ENV="production"
+            else
+              ENV="staging"
+            fi
+            IMAGE_TAG="${{ needs.build.outputs.image_full }}"
+          fi
           
-          echo "Building image with legacy docker build: $IMAGE_NAME:$TAG"
+          NAMESPACE="${NAMESPACE_PREFIX}-${ENV}"
           
-          echo "Building image with legacy docker build: $IMAGE_NAME:$TAG"
-          # 移除舊的建構器（如果存在）
-          docker buildx rm multiplatform || true
+          # 輸出變數
+          echo "environment=${ENV}" >> $GITHUB_OUTPUT
+          echo "namespace=${NAMESPACE}" >> $GITHUB_OUTPUT
+          echo "image_full=${IMAGE_TAG}" >> $GITHUB_OUTPUT
           
-          # 創建新的 buildx 建構器（支援多平台）
-          docker buildx create --name multiplatform --driver docker-container --use
-
-          # 啟動建構器
-          docker buildx inspect --bootstrap
-
-          # 使用傳統的 docker build
-          docker build \
-            --file ./deploy/token-app-api/Dockerfile \
-            --tag "$IMAGE_NAME:$TAG" \
-            --tag "$IMAGE_NAME:develop-$SHORT_SHA" \
-            --label "org.opencontainers.image.title=Token App API" \
-            --label "org.opencontainers.image.description=PassonTW Token App API" \
-            --label "org.opencontainers.image.source=https://github.com/${{ github.repository }}" \
-            --label "org.opencontainers.image.revision=${{ github.sha }}" \
-            .
-          
-          echo "=== Pushing images ==="
-          docker push "$IMAGE_NAME:$TAG"
-          docker push "$IMAGE_NAME:develop-$SHORT_SHA"
-          
-          echo "=== Legacy build completed ==="
-
-      - name: Generate build summary
+          # 顯示部署資訊
+          echo ""
+          echo "📋 部署配置"
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+          echo "服務名稱: ${{ env.SERVICE_NAME }}"
+          echo "部署環境: ${ENV}"
+          echo "命名空間: ${NAMESPACE}"
+          echo "分支名稱: ${{ github.ref_name }}"
+          echo "完整映像: ${IMAGE_TAG}"
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+      - name: Verify kubectl connection
         run: |
-          echo "## 🐳 Token App API 建置完成" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "### 映像資訊" >> $GITHUB_STEP_SUMMARY
-          echo "- **Registry**: ${{ env.REGISTRY }}" >> $GITHUB_STEP_SUMMARY
-          echo "- **Image**: ${{ env.IMAGE_NAME }}" >> $GITHUB_STEP_SUMMARY
-          echo "- **Tags**: develop, develop-\$(echo ${{ github.sha }} | cut -c1-7)" >> $GITHUB_STEP_SUMMARY
-          echo "- **Platform**: linux/amd64" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "### 部署命令" >> $GITHUB_STEP_SUMMARY
-          echo '```bash' >> $GITHUB_STEP_SUMMARY
-          echo "docker pull ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:develop" >> $GITHUB_STEP_SUMMARY
-          echo '```' >> $GITHUB_STEP_SUMMARY
-
-      - name: Comment on PR (if applicable)
-        # if: github.event_name == 'pull_request'
-        uses: actions/github-script@v7
-        with:
-          script: |
-            const output = `## 🐳 Token App API 建置完成
-            
-            ### 映像資訊
-            - **Registry**: ${{ env.REGISTRY }}
-            - **Image**: ${{ env.IMAGE_NAME }}
-            - **Tags**: develop, develop-${process.env.GITHUB_SHA.substring(0, 7)}
-            - **Platform**: linux/amd64
-            
-            ### 部署命令
-            \`\`\`bash
-            docker pull ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:develop
-            \`\`\``;
-            
-            # github.rest.issues.createComment({
-            #   issue_number: context.issue.number,
-            #   owner: context.repo.owner,
-            #   repo: context.repo.repo,
-            #   body: output
-            # }); 
+          echo "🔍 驗證 Kubernetes 連接..."
+          kubectl version --client
+          kubectl cluster-info
+          kubectl get nodes
+          echo "✅ Kubernetes 連接正常"
+      - name: Prepare namespace
+        run: |
+          NAMESPACE="${{ steps.vars.outputs.namespace }}"
+          echo "📦 準備命名空間: ${NAMESPACE}"
+          kubectl create namespace ${NAMESPACE} --dry-run=client -o yaml | kubectl apply -f -
+          echo "✅ 命名空間準備完成"
+      - name: Check secrets
+        run: |
+          NAMESPACE="${{ steps.vars.outputs.namespace }}"
+          echo "🔐 檢查必要的 Secrets..."
+          
+          REQUIRED_SECRETS=("database-secret" "redis-secret" "jwt-secret" "ghcr-pull-secret")
+          MISSING_SECRETS=()
+          
+          for SECRET in "${REQUIRED_SECRETS[@]}"; do
+            if kubectl get secret ${SECRET} -n ${NAMESPACE} &> /dev/null; then
+              echo "✅ ${SECRET} 存在"
+            else
+              echo "⚠️  ${SECRET} 不存在"
+              MISSING_SECRETS+=("${SECRET}")
+            fi
+          done
+          
+          if [ ${#MISSING_SECRETS[@]} -gt 0 ]; then
+            echo ""
+            echo "❌ 缺少必要的 Secrets: ${MISSING_SECRETS[*]}"
+            echo ""
+            echo "請參考文檔創建 Secrets："
+            echo "  k8s/secrets/*.yaml.example"
+            exit 1
+          fi
+          
+          echo "✅ 所有必要的 Secrets 都已就緒"
+      - name: Update ConfigMap
+        run: |
+          NAMESPACE="${{ steps.vars.outputs.namespace }}"
+          echo "📝 更新 ConfigMap..."
+          kubectl apply -f k8s/configmaps/app-api-config.yaml -n ${NAMESPACE}
+          echo "✅ ConfigMap 更新完成"
+      - name: Deploy to Kubernetes
+        run: |
+          NAMESPACE="${{ steps.vars.outputs.namespace }}"
+          IMAGE_FULL="${{ steps.vars.outputs.image_full }}"
+          
+          echo "🚀 開始部署 App API..."
+          
+          kubectl apply -f k8s/deployments/${{ env.SERVICE_NAME }}.yaml -n ${NAMESPACE}
+          kubectl apply -f k8s/services/${{ env.SERVICE_NAME }}-service.yaml -n ${NAMESPACE}
+          
+          echo "🔄 更新容器映像: ${IMAGE_FULL}"
+          kubectl set image deployment/${{ env.SERVICE_NAME }} \
+            ${{ env.SERVICE_NAME }}=${IMAGE_FULL} \
+            -n ${NAMESPACE}
+          
+          echo "✅ 部署配置已應用"
+      - name: Wait for rollout
+        run: |
+          NAMESPACE="${{ steps.vars.outputs.namespace }}"
+          echo "⏳ 等待部署完成（超時 5 分鐘）..."
+          
+          if kubectl rollout status deployment/${{ env.SERVICE_NAME }} \
+            -n ${NAMESPACE} \
+            --timeout=300s; then
+            echo "✅ 部署成功完成"
+          else
+            echo "❌ 部署超時或失敗"
+            kubectl get pods -n ${NAMESPACE} -l app=${{ env.SERVICE_NAME }}
+            exit 1
+          fi
+      - name: Verify deployment
+        run: |
+          NAMESPACE="${{ steps.vars.outputs.namespace }}"
+          
+          echo ""
+          echo "🔍 驗證部署狀態..."
+          echo ""
+          
+          echo "Deployment:"
+          kubectl get deployment ${{ env.SERVICE_NAME }} -n ${NAMESPACE}
+          
+          echo ""
+          echo "Pods:"
+          kubectl get pods -n ${NAMESPACE} -l app=${{ env.SERVICE_NAME }}
+          
+          echo ""
+          echo "Service:"
+          kubectl get service ${{ env.SERVICE_NAME }} -n ${NAMESPACE}
+          
+          echo ""
+          echo "容器映像:"
+          kubectl get deployment ${{ env.SERVICE_NAME }} \
+            -n ${NAMESPACE} \
+            -o jsonpath='{.spec.template.spec.containers[0].image}'
+          echo ""
+      - name: Health check
+        run: |
+          NAMESPACE="${{ steps.vars.outputs.namespace }}"
+          
+          echo "🏥 執行健康檢查..."
+          
+          # 等待部署完成並獲取當前 Pod
+          echo "等待部署完全就緒..."
+          sleep 5
+          
+          # 獲取當前運行的 Pod 列表
+          PODS=$(kubectl get pods -n ${NAMESPACE} \
+            -l app=${{ env.SERVICE_NAME }} \
+            -o jsonpath='{.items[*].metadata.name}' \
+            --field-selector=status.phase=Running)
+          
+          if [ -z "$PODS" ]; then
+            echo "❌ 找不到運行中的 Pod"
+            kubectl get pods -n ${NAMESPACE} -l app=${{ env.SERVICE_NAME }}
+            exit 1
+          fi
+          
+          echo "找到運行中的 Pods: $PODS"
+          
+          # 等待這些 Pod 準備就緒
+          for POD in $PODS; do
+            echo "等待 Pod $POD 準備就緒..."
+            kubectl wait --for=condition=ready pod/$POD \
+              -n ${NAMESPACE} \
+              --timeout=60s || echo "⚠️  Pod $POD 等待超時，繼續..."
+          done
+          
+          # 使用臨時 curl pod 進行健康檢查
+          echo ""
+          echo "測試服務健康狀態..."
+          if kubectl run curl-test-${{ github.run_id }} --rm -i --restart=Never \
+            --image=curlimages/curl:latest \
+            -n ${NAMESPACE} \
+            -- curl -s -f http://${{ env.SERVICE_NAME }}/health-check 2>/dev/null; then
+            echo "✅ 健康檢查通過"
+          else
+            echo "⚠️  健康檢查失敗，查看 Pod 日誌..."
+            kubectl logs -l app=${{ env.SERVICE_NAME }} -n ${NAMESPACE} --tail=50
+            exit 1
+          fi
+      - name: Generate deployment summary
+        if: success()
+        run: |
+          cat >> $GITHUB_STEP_SUMMARY << EOF
+          ## 🚀 App API 部署成功
+          
+          ### 📋 部署資訊
+          - **環境**: ${{ steps.vars.outputs.environment }}
+          - **命名空間**: ${{ steps.vars.outputs.namespace }}
+          - **分支**: ${{ github.ref_name }}
+          - **映像**: \`${{ steps.vars.outputs.image_full }}\`
+          
+          ### 🔍 查看狀態
+          \`\`\`bash
+          kubectl get all -n ${{ steps.vars.outputs.namespace }} -l app=${{ env.SERVICE_NAME }}
+          kubectl logs -f deployment/${{ env.SERVICE_NAME }} -n ${{ steps.vars.outputs.namespace }}
+          \`\`\`
+          EOF
+      - name: Rollback on failure
+        if: failure()
+        run: |
+          NAMESPACE="${{ steps.vars.outputs.namespace }}"
+          echo "❌ 部署失敗，開始回滾..."
+          
+          kubectl get deployment ${{ env.SERVICE_NAME }} -n ${NAMESPACE}
+          kubectl get pods -n ${NAMESPACE} -l app=${{ env.SERVICE_NAME }}
+          
+          if kubectl rollout undo deployment/${{ env.SERVICE_NAME }} -n ${NAMESPACE}; then
+            echo "✅ 回滾命令已執行"
+            kubectl rollout status deployment/${{ env.SERVICE_NAME }} -n ${NAMESPACE} --timeout=180s || true
+          else
+            echo "⚠️  回滾失敗"
+          fi
+      - name: Send notification
+        if: always()
+        run: |
+          STATUS="${{ job.status }}"
+          ENV="${{ steps.vars.outputs.environment }}"
+          
+          if [ "$STATUS" = "success" ]; then
+            EMOJI="✅"
+            MESSAGE="部署成功"
+          else
+            EMOJI="❌"
+            MESSAGE="部署失敗"
+          fi
+          
+          echo ""
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+          echo "${EMOJI} App API ${MESSAGE}"
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+          echo "環境: ${ENV}"
+          echo "時間: $(date '+%Y-%m-%d %H:%M:%S')"
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+      - name: Cleanup Docker resources
+        if: always()
+        run: |
+          echo "🧹 清理 Docker 資源..."
+          
+          # 清理舊的 App API 映像（保留最新 3 個）
+          echo "清理舊的 ${{ env.IMAGE_NAME }} 映像..."
+          OLD_IMAGES=$(docker images "${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}" --format "{{.ID}} {{.CreatedAt}}" | \
+            sort -k2 -r | tail -n +4 | awk '{print $1}')
+          if [ -n "$OLD_IMAGES" ]; then
+            echo "$OLD_IMAGES" | xargs docker rmi -f 2>/dev/null || true
+          fi
+          
+          # 清理構建緩存（保留 7 天內的）
+          docker builder prune -af --filter "until=168h" || true
+          
+          # 清理未使用的映像（超過 48 小時）
+          docker image prune -af --filter "until=48h" || true
+          
+          echo "✅ Docker 資源清理完成"
+          docker system df
