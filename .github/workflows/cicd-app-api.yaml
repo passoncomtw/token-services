@@ -89,7 +89,7 @@ jobs:
           
           # 更新 image tag
           kustomize edit set image \
-            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${IMAGE_TAG}
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${IMAGE_TAG}
           
           # 應用配置
           echo "📦 應用 Kubernetes 配置..."
