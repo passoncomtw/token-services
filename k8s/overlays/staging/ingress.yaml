@@ -2,7 +2,6 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: token-services-ingress-staging
-  namespace: passontw-services-staging
   annotations:
     # Traefik Ingress Controller
     kubernetes.io/ingress.class: "traefik"

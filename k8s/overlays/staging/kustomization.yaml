@@ -5,15 +5,16 @@ kind: Kustomization
 resources:
   - ../../base
   - namespace.yaml
+  - ingress.yaml  # Ingress 配置（包含 HTTPS/TLS）
 
 # Staging 命名空间
 namespace: passontw-services-staging
 
 # 镜像标签（由 CI/CD 动态设置）
 images:
-  - name: ghcr.io/passontw/token-admin-api
+  - name: ghcr.io/passoncomtw/token-admin-api
     newTag: develop-PLACEHOLDER  # 将被 CI/CD 替换
-  - name: ghcr.io/passontw/token-app-api
+  - name: ghcr.io/passoncomtw/token-app-api
     newTag: develop-PLACEHOLDER  # 将被 CI/CD 替换
 
 # Staging 环境的资源配置

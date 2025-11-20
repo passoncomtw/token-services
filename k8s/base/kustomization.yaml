@@ -12,8 +12,8 @@ resources:
 
 # 镜像配置（将被 overlay 覆盖）
 images:
-  - name: ghcr.io/passontw/token-admin-api
+  - name: ghcr.io/passoncomtw/token-admin-api
     newTag: placeholder
-  - name: ghcr.io/passontw/token-app-api
+  - name: ghcr.io/passoncomtw/token-app-api
     newTag: placeholder
 
