@@ -113,27 +113,27 @@ kubectl logs -f deployment/token-admin-api -n passontw-services-staging
 
 ### 設計原則
 
-本專案已移除硬編碼命名空間，支持多環境部署，遵循以下原則：
+本專案使用 Staging 環境進行開發和測試，遵循以下原則：
 
-- **DRY 原則** - 單一配置文件適用所有環境
-- **開放封閉原則** - 易於擴展新環境，無需修改配置
-- **單一職責原則** - 配置定義規格，部署腳本指定環境
+- **DRY 原則** - 單一配置文件，避免重複
+- **簡單明確** - 專注於 Staging 環境，配置清晰
+- **單一職責原則** - 配置定義規格，部署腳本執行部署
 
 ### 命名空間架構
 
 | 環境 | 命名空間 | 用途 |
 |------|----------|------|
-| Staging | `passontw-services-staging` | 測試環境 |
-| Production | `passontw-services-production` | 生產環境 |
+| Staging | `passontw-services-staging` | 開發/測試環境 |
 
-**命名規則：** `{project-name}-{environment}`
+**命名規則：** `{project-name}-staging`
 
-### 部署到不同環境
+**注意：** 目前只使用 Staging 環境
+
+### 部署到 Staging 環境
 
 ```bash
 # 方式 1：使用 GitHub Actions（推薦）
-git push origin develop    # → staging
-git push origin main        # → production
+git push origin develop    # → 自動部署到 staging
 
 # 方式 2：手動部署
 NAMESPACE="passontw-services-staging"
@@ -148,44 +148,31 @@ kubectl apply -f k8s/services/ -n $NAMESPACE
 
 ### Secrets 管理
 
-**為每個環境創建 Secrets：**
+**創建 Staging 環境的 Secrets：**
 
 ```bash
 # Staging 環境
 kubectl create secret generic database-secret \
-  --from-literal=DB_HOST=staging-db \
+  --from-literal=DB_HOST=your-db-host \
   --from-literal=DB_PORT=5432 \
-  --from-literal=DB_USER=staging_user \
-  --from-literal=DB_PASSWORD=staging_pass \
+  --from-literal=DB_USER=your_user \
+  --from-literal=DB_PASSWORD=your_password \
   --from-literal=DB_NAME=token_services \
   --from-literal=DB_SSLMODE=disable \
   -n passontw-services-staging
-
-# Production 環境（使用不同的憑證）
-kubectl create secret generic database-secret \
-  --from-literal=DB_HOST=prod-db \
-  --from-literal=DB_PORT=5432 \
-  --from-literal=DB_USER=prod_user \
-  --from-literal=DB_PASSWORD=prod_pass \
-  --from-literal=DB_NAME=token_services \
-  --from-literal=DB_SSLMODE=require \
-  -n passontw-services-production
 ```
 
 ### 常用命令
 
 ```bash
-# 查看所有命名空間
-kubectl get namespaces
-
-# 查看特定命名空間的資源
+# 查看 Staging 命名空間的資源
 kubectl get all -n passontw-services-staging
 
 # 設置預設命名空間
 kubectl config set-context --current --namespace=passontw-services-staging
 
-# 切換環境
-kubectl get pods -n passontw-services-production
+# 查看所有 Pods
+kubectl get pods -n passontw-services-staging
 ```
 
 ---
@@ -237,9 +224,8 @@ kubectl create secret docker-registry ghcr-pull-secret \
 **使用 GitHub Actions（推薦）：**
 
 ```bash
-# 推送代碼觸發自動部署
-git push origin develop  # 部署到 staging
-git push origin main     # 部署到 production
+# 推送代碼觸發自動部署到 Staging
+git push origin develop
 ```
 
 **或使用部署腳本：**
@@ -359,8 +345,8 @@ kubectl rollout undo deployment/token-admin-api \
 
 | 工作流 | 觸發條件 | 環境 |
 |--------|----------|------|
-| `cicd-admin-api.yaml` | Admin API 代碼變更 | develop→staging, main→production |
-| `cicd-app-api.yaml` | App API 代碼變更 | develop→staging, main→production |
+| `cicd-admin-api.yaml` | Admin API 代碼變更 | develop→staging |
+| `cicd-app-api.yaml` | App API 代碼變更 | develop→staging |
 
 **自動部署流程：**
 1. 代碼推送到 develop/main
@@ -599,6 +585,295 @@ kubectl delete deployment token-admin-api -n passontw-services-staging
 
 ---
 
+## SSL 證書管理（各自管理）
+
+> 本專案管理 Backend APIs 的 SSL 證書和 Ingress 配置
+
+### 🎯 架構設計
+
+**各專案獨立管理原則：**
+- ✅ 本專案管理：token-admin-api.passon.tw、token-app-api.passon.tw
+- ✅ Web 專案管理：token-admin-web.passon.tw（在 passontw-web-services）
+- ✅ cert-manager 自動申請和續期 Let's Encrypt 證書
+- ✅ 微服務獨立性 - 各專案部署互不影響
+- ✅ 避免跨專案依賴 - 前後端配置分離
+
+### 📊 架構圖
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│ passontw-web-services/k8s/overlays/staging/ingress.yaml    │
+│  Ingress: token-admin-web-ingress-staging                  │
+│  └─ token-admin-web.passon.tw → token-admin-web-tls       │
+└─────────────────────────────────────────────────────────────┘
+                            │
+                            ↓
+              ┌─────────────────────────┐
+              │   cert-manager          │
+              │   ClusterIssuer:        │
+              │   letsencrypt-prod      │
+              └─────────────────────────┘
+                            ↑
+                            │
+┌─────────────────────────────────────────────────────────────┐
+│ passontw-backend-services/k8s/overlays/staging/ingress.yaml│
+│  Ingress: token-backend-apis-ingress-staging               │
+│  ├─ token-admin-api.passon.tw → token-admin-api-tls       │
+│  └─ token-app-api.passon.tw   → token-app-api-tls         │
+└─────────────────────────────────────────────────────────────┘
+
+✅ 各專案獨立管理自己的 Ingress 和證書
+✅ 使用不同的 Ingress 名稱，避免衝突
+✅ cert-manager 自動為所有域名申請 Production 證書
+```
+
+### 🔐 證書管理策略
+
+**本專案管理 Backend APIs 證書：**
+
+```yaml
+# passontw-backend-services/k8s/overlays/staging/ingress.yaml
+tls:
+- hosts:
+  - token-admin-api.passon.tw
+  secretName: token-admin-api-tls
+- hosts:
+  - token-app-api.passon.tw
+  secretName: token-app-api-tls
+```
+
+**優點：**
+- ✅ 各專案獨立部署，互不影響
+- ✅ 前後端配置分離，職責清晰
+- ✅ cert-manager 自動處理證書操作
+- ✅ 符合微服務獨立性原則
+
+### 🚀 新增服務流程
+
+當需要新增服務時（例如：token-payment-api），只需 3 步驟：
+
+#### 1. 部署服務
+```bash
+kubectl apply -f k8s/deployments/token-payment-api.yaml -n passontw-services-staging
+kubectl apply -f k8s/services/token-payment-api-service.yaml -n passontw-services-staging
+```
+
+#### 2. 更新統一 Ingress
+編輯 `k8s/overlays/staging/ingress.yaml`：
+
+```yaml
+spec:
+  tls:
+  # 添加新域名的 TLS 配置
+  - hosts:
+    - token-payment-api.passon.tw
+    secretName: token-payment-api-tls
+  
+  rules:
+  # 添加路由規則
+  - host: token-payment-api.passon.tw
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: token-payment-api
+            port:
+              number: 80
+```
+
+#### 3. 應用配置
+```bash
+kubectl apply -f k8s/overlays/staging/ingress.yaml
+```
+
+**完成！** cert-manager 會在 2-3 分鐘內自動為新域名申請證書。
+
+### 📋 證書狀態檢查
+
+#### 查看所有證書
+```bash
+kubectl get certificate -n passontw-services-staging
+```
+
+**期望輸出（僅顯示本專案管理的證書）：**
+```
+NAME                  READY   SECRET                AGE
+token-admin-api-tls   True    token-admin-api-tls   5d
+token-app-api-tls     True    token-app-api-tls     5d
+```
+
+✅ **READY = True** 表示證書正常！
+
+**注意：** token-admin-web-tls 在 passontw-web-services 專案中管理
+
+#### 查看證書詳情
+```bash
+kubectl describe certificate <cert-name> -n passontw-services-staging
+```
+
+#### 查看後端 API 證書到期時間
+```bash
+for cert in token-admin-api-tls token-app-api-tls; do
+  echo "=== $cert ==="
+  kubectl get certificate $cert -n passontw-services-staging \
+    -o jsonpath='{.status.notAfter}' | xargs -I {} echo "到期時間: {}"
+  echo ""
+done
+```
+
+### 🔄 證書生命週期
+
+```
+1. 部署 Ingress
+   ↓
+2. cert-manager 自動檢測 TLS 配置
+   ↓
+3. 創建 Certificate 資源
+   ↓
+4. 向 Let's Encrypt 發起 ACME Challenge
+   ↓
+5. Let's Encrypt 驗證域名所有權
+   ↓
+6. 簽發證書（2-3 分鐘）
+   ↓
+7. 存儲到 Kubernetes Secret
+   ↓
+8. Ingress 自動使用證書
+   ↓
+9. 到期前 30 天自動續期（90 天週期）
+```
+
+**您不需要手動操作任何證書！**
+
+### 🔧 故障排除
+
+#### 證書申請失敗
+
+```bash
+# 1. 查看詳細錯誤
+kubectl describe certificate <cert-name> -n passontw-services-staging
+
+# 2. 查看證書申請請求
+kubectl get certificaterequest -n passontw-services-staging
+
+# 3. 查看 ACME 驗證
+kubectl get challenge -n passontw-services-staging
+
+# 4. 查看 cert-manager 日誌
+kubectl logs -n cert-manager -l app=cert-manager --tail=100
+```
+
+#### 強制重新簽發證書
+
+```bash
+# 刪除證書和 Secret
+kubectl delete certificate <cert-name> -n passontw-services-staging
+kubectl delete secret <cert-name> -n passontw-services-staging
+
+# cert-manager 會自動重新申請（2-3 分鐘）
+kubectl get certificate -n passontw-services-staging -w
+```
+
+#### 瀏覽器顯示不安全
+
+**原因：** 瀏覽器快取
+
+**解決：**
+- Chrome/Edge: `Ctrl + Shift + R`
+- Firefox: `Ctrl + F5`
+- Safari: `Cmd + Option + R`
+- 或重新啟動瀏覽器
+
+### 🌐 驗證 SSL 證書
+
+#### 瀏覽器驗證（後端 API）
+1. 訪問 Swagger 文檔：
+   - https://token-admin-api.passon.tw/swagger/index.html
+   - https://token-app-api.passon.tw/swagger/index.html
+2. 檢查地址欄左側的 🔒 鎖頭圖示
+3. 點擊鎖頭 → 查看憑證
+4. 確認：
+   - ✅ 簽發者：Let's Encrypt
+   - ✅ 有效期：90 天
+   - ✅ 域名正確
+
+#### 命令行驗證
+```bash
+# 使用 curl 測試
+curl -vI https://token-admin-api.passon.tw/health-check
+
+# 使用 openssl 檢查證書
+echo | openssl s_client -servername token-admin-api.passon.tw \
+  -connect token-admin-api.passon.tw:443 2>/dev/null | \
+  openssl x509 -noout -issuer -dates
+```
+
+### 📝 維護清單
+
+#### 日常檢查（每週）
+- [ ] 所有證書 READY = True
+- [ ] 所有服務可通過 HTTPS 訪問
+- [ ] 瀏覽器顯示 🔒 鎖頭
+- [ ] 證書有效期 > 30 天
+
+**如果以上全部正常，無需任何操作！**
+
+#### 證書自動更新
+- Let's Encrypt 證書有效期：**90 天**
+- cert-manager 自動續期時間：**到期前 30 天**
+- **您不需要手動更新證書**
+
+### 💡 核心原則
+
+```
+★ 專案獨立
+  └─ 各專案管理自己的 Ingress（前後端分離）
+
+★ 職責清晰
+  └─ 本專案僅管理後端 API 的 SSL 證書
+
+★ 自動化優先
+  └─ cert-manager 自動處理證書
+
+★ 簡單配置
+  └─ 標準化所有後端 API 配置
+
+★ 最小維護
+  └─ 每週檢查一次，通常無需操作
+
+結果：
+├─ 5 分鐘完成初始設定
+├─ 每週 1 分鐘檢查狀態
+├─ 證書自動續期（90 天週期）
+└─ 新增 API 只需 3 步驟
+```
+
+### 🔗 ClusterIssuer 配置
+
+**Production 證書簽發者：**
+```yaml
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+  name: letsencrypt-prod
+spec:
+  acme:
+    server: https://acme-v02.api.letsencrypt.org/directory
+    email: admin@passon.tw
+    privateKeySecretRef:
+      name: letsencrypt-prod
+    solvers:
+    - http01:
+        ingress:
+          class: traefik
+```
+
+**位置：** 通常已在集群層級配置，無需修改
+
+---
+
 ## 相關資源
 
 ### 文檔
@@ -611,6 +886,7 @@ kubectl delete deployment token-admin-api -n passontw-services-staging
 - [Deployments](./deployments/) - 部署定義
 - [Services](./services/) - 服務定義
 - [Secrets 範例](./secrets/) - Secrets 範例檔案
+- [統一 Ingress](./overlays/staging/ingress.yaml) - SSL 證書和路由管理
 
 ### 部署腳本
 - [deploy-all.sh](./scripts/deploy-all.sh) - 部署所有服務
@@ -622,11 +898,16 @@ kubectl delete deployment token-admin-api -n passontw-services-staging
 - [Kubernetes 官方文檔](https://kubernetes.io/docs/)
 - [kubectl 速查表](https://kubernetes.io/docs/reference/kubectl/cheatsheet/)
 - [k3s 文檔](https://docs.k3s.io/)
+- [cert-manager 文檔](https://cert-manager.io/docs/)
+- [Let's Encrypt 文檔](https://letsencrypt.org/docs/)
 
 ---
 
-**最後更新：** 2025-11-13  
+**最後更新：** 2025-11-20  
 **維護者：** DevOps Team
 
 **快速開始：** 
 1. 創建 Secrets → 2. 推送代碼到 develop → 3. 自動部署完成！
+
+**SSL 管理：**
+cert-manager 自動處理所有證書，您只需檢查證書狀態（每週 1 分鐘）
