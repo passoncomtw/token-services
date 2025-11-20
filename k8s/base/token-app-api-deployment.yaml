@@ -27,7 +27,7 @@ spec:
       containers:
       - name: token-app-api
         # 镜像标签由 Kustomize 在部署时动态设置
-        image: ghcr.io/passontw/token-app-api:placeholder
+        image: ghcr.io/passoncomtw/token-app-api:placeholder
         imagePullPolicy: Always
         
         ports:

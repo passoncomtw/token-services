@@ -27,7 +27,7 @@ spec:
       containers:
       - name: token-admin-api
         # 镜像标签由 Kustomize 在部署时动态设置
-        image: ghcr.io/passontw/token-admin-api:placeholder
+        image: ghcr.io/passoncomtw/token-admin-api:placeholder
         imagePullPolicy: Always
         
         ports:
