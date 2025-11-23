@@ -101,8 +101,6 @@ jobs:
           
           # 清理臨時文件
           rm -f /tmp/pos-merchant-full.env /tmp/pos-merchant.env
-          
-          echo "💡 提醒：敏感信息（SECRET/PASSWORD/KEY/TOKEN）請使用 Kubernetes Secrets 管理"
 
       - name: Deploy to Kubernetes
         id: deploy

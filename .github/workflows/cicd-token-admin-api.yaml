@@ -101,8 +101,6 @@ jobs:
           
           # 清理臨時文件
           rm -f /tmp/token-admin-full.env /tmp/token-admin.env
-          
-          echo "💡 提醒：敏感信息（SECRET/PASSWORD/KEY/TOKEN）請使用 Kubernetes Secrets 管理"
 
       - name: Deploy to Kubernetes
         id: deploy
