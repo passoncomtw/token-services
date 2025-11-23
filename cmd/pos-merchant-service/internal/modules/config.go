@@ -126,9 +126,9 @@ func NewPkgConfig() *pkgConfig.Config {
 // ConfigModule 配置模組 (遵循 SRP - 只負責配置相關依賴)
 var ConfigModule = fx.Module("config",
 	fx.Provide(
-		config.LoadConfig,      // internal/config.Config (用於服務特定配置)
-		NewPkgConfig,           // pkg/config.Config (用於 database 模組)
-		NewLoggerConfig,        // logger.Config
-		NewLogger,              // logger.Logger
+		config.LoadConfig, // internal/config.Config (用於服務特定配置)
+		NewPkgConfig,      // pkg/config.Config (用於 database 模組)
+		NewLoggerConfig,   // logger.Config
+		NewLogger,         // logger.Logger
 	),
 )
