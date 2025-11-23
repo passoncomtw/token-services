@@ -80,9 +80,9 @@ jobs:
           # 從 GitHub Secret 創建臨時 .env 文件
           echo "${{ secrets.DEV_POS_MERCHANT }}" > /tmp/pos-merchant-full.env
           
-          # 過濾敏感信息（排除包含 SECRET, PASSWORD, KEY, TOKEN 的變量）
-          # 這些應該在 Kubernetes Secrets 中管理，不應放在 ConfigMap
-          grep -v -E '(SECRET|PASSWORD|KEY|TOKEN)=' /tmp/pos-merchant-full.env > /tmp/pos-merchant.env || true
+          # 將所有環境變數寫入 ConfigMap（包括敏感信息）
+          # 注意：ConfigMap 在 Kubernetes 中有 RBAC 保護
+          cp /tmp/pos-merchant-full.env /tmp/pos-merchant.env
           
           # 如果過濾後的文件不為空，則更新 ConfigMap
           if [ -s /tmp/pos-merchant.env ]; then

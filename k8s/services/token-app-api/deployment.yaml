@@ -35,71 +35,10 @@ spec:
           protocol: TCP
         
         # 使用 envFrom 自動載入 ConfigMap 的所有環境變數
+        # ConfigMap 由 CI/CD 自動更新 (from GitHub Secrets)
         envFrom:
         - configMapRef:
             name: app-api-config
-        
-        env:
-        # 從 Secret 載入資料庫配置
-        - name: DB_HOST
-          valueFrom:
-            secretKeyRef:
-              name: database-secret
-              key: DB_HOST
-        - name: DB_PORT
-          valueFrom:
-            secretKeyRef:
-              name: database-secret
-              key: DB_PORT
-        - name: DB_USER
-          valueFrom:
-            secretKeyRef:
-              name: database-secret
-              key: DB_USER
-        - name: DB_PASSWORD
-          valueFrom:
-            secretKeyRef:
-              name: database-secret
-              key: DB_PASSWORD
-        - name: DB_NAME
-          valueFrom:
-            secretKeyRef:
-              name: database-secret
-              key: DB_NAME
-        - name: DB_SSLMODE
-          valueFrom:
-            secretKeyRef:
-              name: database-secret
-              key: DB_SSLMODE
-        
-        # 從 Secret 載入 JWT 配置
-        - name: JWT_SECRET
-          valueFrom:
-            secretKeyRef:
-              name: jwt-secret
-              key: JWT_SECRET
-        
-        # 從 Secret 載入 Redis 配置
-        - name: REDIS_HOST
-          valueFrom:
-            secretKeyRef:
-              name: redis-secret
-              key: REDIS_HOST
-        - name: REDIS_PORT
-          valueFrom:
-            secretKeyRef:
-              name: redis-secret
-              key: REDIS_PORT
-        - name: REDIS_PASSWORD
-          valueFrom:
-            secretKeyRef:
-              name: redis-secret
-              key: REDIS_PASSWORD
-        - name: REDIS_DB
-          valueFrom:
-            secretKeyRef:
-              name: redis-secret
-              key: REDIS_DB
         
         # 健康檢查
         livenessProbe:
