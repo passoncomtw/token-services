@@ -106,24 +106,55 @@ jobs:
         id: deploy
         run: |
           IMAGE_TAG="${{ needs.build.outputs.image_tag }}"
+          IMAGE_FULL="ghcr.io/passoncomtw/pos-merchant-service"
           
-          echo "🚀 開始部署 ${{ env.SERVICE_NAME }}..."
-          echo "📦 Image tag: ${IMAGE_TAG}"
+          echo "🚀 開始部署 pos-merchant-service..."
+          echo "📦 Image: ${IMAGE_FULL}:${IMAGE_TAG}"
           echo "📍 Namespace: ${{ env.NAMESPACE }}"
           
           # 進入 kustomize overlay 目錄
           cd k8s/overlays/staging
           
-          # 更新 image tag
+          echo ""
+          echo "📋 修改前的 kustomization.yaml:"
+          grep -A 1 "pos-merchant-service" kustomization.yaml || true
+          
+          # 更新 image tag（使用完整的 image 名稱）
           kustomize edit set image \
-            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${IMAGE_TAG}
+            "${IMAGE_FULL}=${IMAGE_FULL}:${IMAGE_TAG}"
+          
+          echo ""
+          echo "📋 修改後的 kustomization.yaml:"
+          grep -A 1 "pos-merchant-service" kustomization.yaml
+          
+          # ✅ 驗證：確保沒有 PLACEHOLDER
+          if grep -q "develop-PLACEHOLDER" kustomization.yaml; then
+            echo ""
+            echo "❌ 錯誤：kustomization.yaml 仍包含 PLACEHOLDER！"
+            echo "kustomize edit set image 命令失敗"
+            cat kustomization.yaml
+            exit 1
+          fi
+          
+          # ✅ 驗證：確保使用了正確的 tag
+          if ! grep -q "${IMAGE_TAG}" kustomization.yaml; then
+            echo ""
+            echo "❌ 錯誤：kustomization.yaml 不包含正確的 tag: ${IMAGE_TAG}"
+            cat kustomization.yaml
+            exit 1
+          fi
+          
+          echo ""
+          echo "✅ 驗證通過：image tag 已正確更新"
+          echo ""
           
           # 應用配置
           echo "📦 應用 Kubernetes 配置..."
           kubectl apply -k . || {
             echo "⚠️  部署失敗，可能是 selector 不可變問題"
             echo "🔄 刪除並重新創建 deployment..."
-            kubectl delete deployment ${{ env.SERVICE_NAME }} -n ${{ env.NAMESPACE }} --ignore-not-found=true
+            kubectl delete deployment pos-merchant-service -n ${{ env.NAMESPACE }} --ignore-not-found=true
+            sleep 5
             kubectl apply -k .
           }
           

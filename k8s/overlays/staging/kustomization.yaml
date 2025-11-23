@@ -3,12 +3,12 @@ kind: Kustomization
 
 # 引用各服务的配置
 resources:
-  - namespace.yaml
-  - ../../services/token-admin-api
-  - ../../services/token-app-api
-  - ../../services/pos-backend-service
-  - ../../services/pos-merchant-service
-  - ingress.yaml
+- namespace.yaml
+- ../../services/token-admin-api
+- ../../services/token-app-api
+- ../../services/pos-backend-service
+- ../../services/pos-merchant-service
+- ingress.yaml
 
 # Staging 命名空间
 namespace: passontw-services-staging
@@ -26,39 +26,39 @@ images:
 
 # Staging 环境的资源配置
 # 使用 JSON Patch 语法来修改副本数
-patches:
   # Token Admin API - 2 副本
-  - patch: |-
-      - op: replace
-        path: /spec/replicas
-        value: 2
-    target:
-      kind: Deployment
-      name: token-admin-api
   
   # Token App API - 2 副本
-  - patch: |-
-      - op: replace
-        path: /spec/replicas
-        value: 2
-    target:
-      kind: Deployment
-      name: token-app-api
   
   # POS Backend Service - 2 副本
-  - patch: |-
-      - op: replace
-        path: /spec/replicas
-        value: 2
-    target:
-      kind: Deployment
-      name: pos-backend-service
   
   # POS Merchant Service - 2 副本
-  - patch: |-
-      - op: replace
-        path: /spec/replicas
-        value: 2
-    target:
-      kind: Deployment
-      name: pos-merchant-service
+patches:
+- patch: |-
+    - op: replace
+      path: /spec/replicas
+      value: 2
+  target:
+    kind: Deployment
+    name: token-admin-api
+- patch: |-
+    - op: replace
+      path: /spec/replicas
+      value: 2
+  target:
+    kind: Deployment
+    name: token-app-api
+- patch: |-
+    - op: replace
+      path: /spec/replicas
+      value: 2
+  target:
+    kind: Deployment
+    name: pos-backend-service
+- patch: |-
+    - op: replace
+      path: /spec/replicas
+      value: 2
+  target:
+    kind: Deployment
+    name: pos-merchant-service
