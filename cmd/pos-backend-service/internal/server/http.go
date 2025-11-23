@@ -11,6 +11,7 @@ import (
 	"passontw-backend-services/cmd/pos-backend-service/internal/docs"
 	"passontw-backend-services/cmd/pos-backend-service/internal/handlers"
 	"passontw-backend-services/cmd/pos-backend-service/internal/middleware"
+	"passontw-backend-services/pkg/logger"
 
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
@@ -19,11 +20,11 @@ import (
 type HTTPServer struct {
 	server *http.Server
 	engine *gin.Engine
-	logger *zap.Logger
+	logger logger.Logger
 	config *config.Config
 }
 
-func NewHTTPServer(cfg *config.Config, logger *zap.Logger, handlers *handlers.Handlers) (*HTTPServer, error) {
+func NewHTTPServer(cfg *config.Config, lgr logger.Logger, handlers *handlers.Handlers) (*HTTPServer, error) {
 	gin.SetMode(gin.ReleaseMode)
 	engine := gin.New()
 	engine.Use(gin.Recovery())
@@ -34,7 +35,7 @@ func NewHTTPServer(cfg *config.Config, logger *zap.Logger, handlers *handlers.Ha
 	engine.GET("/health", func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{"status": "ok", "service": "backend-service"})
 	})
-	
+
 	engine.GET("/ready", func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{"status": "ready", "service": "backend-service"})
 	})
@@ -67,7 +68,7 @@ func NewHTTPServer(cfg *config.Config, logger *zap.Logger, handlers *handlers.Ha
 	return &HTTPServer{
 		server: server,
 		engine: engine,
-		logger: logger,
+		logger: lgr,
 		config: cfg,
 	}, nil
 }

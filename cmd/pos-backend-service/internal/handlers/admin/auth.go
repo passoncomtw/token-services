@@ -5,20 +5,20 @@ import (
 
 	"passontw-backend-services/cmd/pos-backend-service/internal/models"
 	"passontw-backend-services/cmd/pos-backend-service/internal/services"
+	"passontw-backend-services/pkg/logger"
 
 	"github.com/gin-gonic/gin"
-	"go.uber.org/zap"
 )
 
 type AuthHandler struct {
 	AuthService *services.AuthService
-	Logger      *zap.Logger
+	Logger      logger.Logger
 }
 
-func NewAuthHandler(authService *services.AuthService, logger *zap.Logger) *AuthHandler {
+func NewAuthHandler(authService *services.AuthService, lgr logger.Logger) *AuthHandler {
 	return &AuthHandler{
 		AuthService: authService,
-		Logger:      logger,
+		Logger:      lgr,
 	}
 }
 

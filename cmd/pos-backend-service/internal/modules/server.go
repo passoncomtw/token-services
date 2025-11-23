@@ -14,6 +14,7 @@ import (
 	"passontw-backend-services/cmd/pos-backend-service/internal/handlers"
 	"passontw-backend-services/cmd/pos-backend-service/internal/server"
 	"passontw-backend-services/cmd/pos-backend-service/internal/services"
+	"passontw-backend-services/pkg/logger"
 )
 
 func NewDB(cfg *config.Config) (*gorm.DB, error) {
@@ -44,12 +45,12 @@ var ServerModule = fx.Module("server",
 		server.NewHTTPServer,
 		server.NewServerManager,
 	),
-	fx.Invoke(func(lc fx.Lifecycle, manager *server.ServerManager, dbInit *services.DBInitService, logger *zap.Logger) {
+	fx.Invoke(func(lc fx.Lifecycle, manager *server.ServerManager, dbInit *services.DBInitService, lgr logger.Logger) {
 		lc.Append(fx.Hook{
 			OnStart: func(ctx context.Context) error {
 				// 初始化數據庫
 				if err := dbInit.InitializeDatabase(); err != nil {
-					logger.Error("Failed to initialize database", zap.Error(err))
+					lgr.Error("Failed to initialize database", zap.Error(err))
 					return err
 				}
 				// 啟動服務器

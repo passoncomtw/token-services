@@ -5,6 +5,7 @@ import (
 
 	"passontw-backend-services/cmd/pos-backend-service/internal/models"
 	"passontw-backend-services/cmd/pos-backend-service/internal/utils"
+	"passontw-backend-services/pkg/logger"
 
 	"go.uber.org/zap"
 	"gorm.io/gorm"
@@ -12,14 +13,14 @@ import (
 
 type AuthService struct {
 	DB        *gorm.DB
-	Logger    *zap.Logger
+	Logger    logger.Logger
 	JWTSecret string
 }
 
-func NewAuthService(db *gorm.DB, logger *zap.Logger, jwtSecret string) *AuthService {
+func NewAuthService(db *gorm.DB, lgr logger.Logger, jwtSecret string) *AuthService {
 	return &AuthService{
 		DB:        db,
-		Logger:    logger,
+		Logger:    lgr,
 		JWTSecret: jwtSecret,
 	}
 }

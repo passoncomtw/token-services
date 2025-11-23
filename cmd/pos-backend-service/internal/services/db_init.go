@@ -6,17 +6,18 @@ import (
 
 	"passontw-backend-services/cmd/pos-backend-service/internal/models"
 	"passontw-backend-services/cmd/pos-backend-service/internal/utils"
+	"passontw-backend-services/pkg/logger"
 )
 
 type DBInitService struct {
 	db     *gorm.DB
-	logger *zap.Logger
+	logger logger.Logger
 }
 
-func NewDBInitService(db *gorm.DB, logger *zap.Logger) *DBInitService {
+func NewDBInitService(db *gorm.DB, lgr logger.Logger) *DBInitService {
 	return &DBInitService{
 		db:     db,
-		logger: logger,
+		logger: lgr,
 	}
 }
 
@@ -71,9 +72,9 @@ func (s *DBInitService) createDefaultAdmin() error {
 		return err
 	}
 
-	s.logger.Info("Default admin user created successfully", 
+	s.logger.Info("Default admin user created successfully",
 		zap.String("account", admin.Account),
 		zap.String("role", admin.Role))
-	
+
 	return nil
 }

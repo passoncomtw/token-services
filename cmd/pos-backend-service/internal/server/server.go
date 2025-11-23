@@ -4,19 +4,21 @@ import (
 	"context"
 	"sync"
 
+	"passontw-backend-services/pkg/logger"
+
 	"go.uber.org/zap"
 )
 
 type ServerManager struct {
 	httpServer *HTTPServer
-	logger     *zap.Logger
+	logger     logger.Logger
 	wg         sync.WaitGroup
 }
 
-func NewServerManager(httpServer *HTTPServer, logger *zap.Logger) *ServerManager {
+func NewServerManager(httpServer *HTTPServer, lgr logger.Logger) *ServerManager {
 	return &ServerManager{
 		httpServer: httpServer,
-		logger:     logger,
+		logger:     lgr,
 	}
 }
 
