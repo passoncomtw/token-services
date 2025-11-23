@@ -10,11 +10,6 @@ resources:
   - ../../services/pos-merchant-service
   - ingress.yaml
 
-# 应用共用的配置补丁（从 base）
-patchesStrategicMerge:
-  - ../../base/common-patches.yaml
-  - ../../base/common-secrets-env.yaml
-
 # Staging 命名空间
 namespace: passontw-services-staging
 
@@ -31,7 +26,50 @@ images:
 
 # Staging 环境的资源配置
 patches:
-  # 副本数 - Token APIs
+  # ============================================
+  # 共用配置 - 应用到所有 Deployments
+  # ============================================
+  
+  # 镜像拉取凭证和策略
+  - patch: |-
+      apiVersion: apps/v1
+      kind: Deployment
+      metadata:
+        name: all-deployments
+      spec:
+        template:
+          spec:
+            imagePullSecrets:
+              - name: ghcr-pull-secret
+            securityContext:
+              fsGroup: 65534
+            restartPolicy: Always
+            containers:
+              - name: container
+                imagePullPolicy: Always
+                resources:
+                  requests:
+                    memory: "128Mi"
+                    cpu: "100m"
+                  limits:
+                    memory: "512Mi"
+                    cpu: "500m"
+                securityContext:
+                  runAsNonRoot: true
+                  runAsUser: 65534
+                  readOnlyRootFilesystem: true
+                  allowPrivilegeEscalation: false
+                  capabilities:
+                    drop:
+                      - ALL
+    target:
+      kind: Deployment
+  
+  # ============================================
+  # 副本数配置
+  # ============================================
+  
+  # Token APIs
   - patch: |-
       - op: replace
         path: /spec/replicas
@@ -48,7 +86,7 @@ patches:
       kind: Deployment
       name: token-app-api
   
-  # 副本數 - POS Services
+  # POS Services
   - patch: |-
       - op: replace
         path: /spec/replicas
@@ -64,14 +102,3 @@ patches:
     target:
       kind: Deployment
       name: pos-merchant-service
-  
-  # Redis 配置 - 只应用到 Token APIs
-  - path: ../../base/redis-secrets-env.yaml
-    target:
-      kind: Deployment
-      name: token-admin-api
-  
-  - path: ../../base/redis-secrets-env.yaml
-    target:
-      kind: Deployment
-      name: token-app-api
