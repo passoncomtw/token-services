@@ -125,26 +125,16 @@ jobs:
       - name: Deploy to Kubernetes
         id: deploy
         run: |
-          IMAGE_TAG="${{ needs.build.outputs.image_tag }}"
-          
           echo "🚀 開始部署 pos-backend-service..."
-          echo "📦 Image: ghcr.io/passoncomtw/pos-backend-service:develop (built as ${IMAGE_TAG})"
+          echo "📦 Image: ghcr.io/passoncomtw/pos-backend-service:develop"
           echo "📍 Namespace: ${{ env.NAMESPACE }}"
           
-          # 進入 kustomize overlay 目錄
-          cd k8s/overlays/staging
+          # 更新鏡像並觸發滾動更新
+          kubectl set image deployment/pos-backend-service \
+            pos-backend-service=ghcr.io/passoncomtw/pos-backend-service:develop \
+            -n ${{ env.NAMESPACE }}
           
-          # 直接應用配置（使用固定的 develop tag）
-          echo "📦 應用 Kubernetes 配置..."
-          kubectl apply -k . || {
-            echo "⚠️  部署失敗，可能是 selector 不可變問題"
-            echo "🔄 刪除並重新創建 deployment..."
-            kubectl delete deployment pos-backend-service -n ${{ env.NAMESPACE }} --ignore-not-found=true
-            sleep 5
-            kubectl apply -k .
-          }
-          
-          echo "✅ 配置已應用"
+          echo "✅ 鏡像已更新，滾動更新已觸發"
 
       - name: Wait for deployment
         id: wait
