@@ -28,7 +28,6 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       image_tag: ${{ steps.set-tag.outputs.image_tag }}
-    
     steps:
       - name: Checkout code
         uses: actions/checkout@v4

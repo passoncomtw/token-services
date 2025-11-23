@@ -175,7 +175,6 @@ jobs:
         if: success()
         run: |
           IMAGE_TAG="${{ needs.build.outputs.image_tag }}"
-          
           echo ""
           echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
           echo "🎉 ${{ env.SERVICE_NAME }} 部署成功"

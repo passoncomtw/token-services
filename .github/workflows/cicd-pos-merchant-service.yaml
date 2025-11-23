@@ -191,4 +191,3 @@ jobs:
           kubectl get svc -n ${{ env.NAMESPACE }} ${{ env.SERVICE_NAME }}
           echo ""
           echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-
