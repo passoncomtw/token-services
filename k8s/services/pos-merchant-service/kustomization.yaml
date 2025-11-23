@@ -7,10 +7,10 @@ resources:
   - service.yaml
   - configmap.yaml
 
-# 应用共用的配置补丁
-patchesStrategicMerge:
-  - ../../base/common-patches.yaml       # 安全设置、资源限制
-  - ../../base/common-secrets-env.yaml   # Database + JWT（POS 不需要 Redis）
+# 注意：共用配置补丁现在在 overlays/staging 层级应用
+# - common-patches.yaml（安全设置、资源限制）
+# - common-secrets-env.yaml（Database + JWT）
+# POS Services 不需要 Redis
 
 # 镜像配置（将被 overlay 覆盖）
 images:

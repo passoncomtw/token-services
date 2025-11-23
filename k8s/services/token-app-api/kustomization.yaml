@@ -7,11 +7,10 @@ resources:
   - service.yaml
   - configmap.yaml
 
-# 应用共用的配置补丁
-patchesStrategicMerge:
-  - ../../base/common-patches.yaml       # 安全设置、资源限制
-  - ../../base/common-secrets-env.yaml   # Database + JWT
-  - ../../base/redis-secrets-env.yaml    # Redis（Token APIs 需要）
+# 注意：共用配置补丁现在在 overlays/staging 层级应用
+# - common-patches.yaml（安全设置、资源限制）
+# - common-secrets-env.yaml（Database + JWT）
+# - redis-secrets-env.yaml（Redis，仅 Token APIs）
 
 # 镜像配置（将被 overlay 覆盖）
 images:

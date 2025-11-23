@@ -10,6 +10,11 @@ resources:
   - ../../services/pos-merchant-service
   - ingress.yaml
 
+# 应用共用的配置补丁（从 base）
+patchesStrategicMerge:
+  - ../../base/common-patches.yaml
+  - ../../base/common-secrets-env.yaml
+
 # Staging 命名空间
 namespace: passontw-services-staging
 
@@ -59,3 +64,14 @@ patches:
     target:
       kind: Deployment
       name: pos-merchant-service
+  
+  # Redis 配置 - 只应用到 Token APIs
+  - path: ../../base/redis-secrets-env.yaml
+    target:
+      kind: Deployment
+      name: token-admin-api
+  
+  - path: ../../base/redis-secrets-env.yaml
+    target:
+      kind: Deployment
+      name: token-app-api
