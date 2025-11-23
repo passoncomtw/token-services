@@ -14,6 +14,7 @@
   - [自動更新機制](#自動更新機制)
 - [架構說明](#-架構說明)
 - [CI/CD 工作流](#-cicd-工作流)
+- [POS Services 環境變數管理](#-pos-services-環境變數管理)
 - [日常操作](#-日常操作)
 - [故障排除](#-故障排除)
 - [Longhorn 存儲系統](#-longhorn-存儲系統)
@@ -936,6 +937,418 @@ gh workflow run "CI/CD - App API" -f environment=production
 # 適用於只修改了 k8s 配置的情況
 gh workflow run "CI/CD - Admin API" -f skip_build=true
 ```
+
+---
+
+## 🔧 環境變數管理
+
+> 所有服務的自動化環境變數管理（Token APIs 和 POS Services）
+
+### 📋 概述
+
+所有服務使用以下方式管理環境變數：
+
+- **非敏感配置** → Kubernetes ConfigMap（從 GitHub Secrets 自動同步）
+- **敏感配置** → Kubernetes Secret（手動創建，如 DB_PASSWORD, JWT_SECRET）
+
+### 🎯 支援的服務
+
+| 服務 | GitHub Secret | ConfigMap 名稱 |
+|------|---------------|----------------|
+| **token-admin-api** | `DEV_TOKEN_ADMIN` | `admin-api-config` |
+| **token-app-api** | `DEV_TOKEN_APP` | `app-api-config` |
+| **pos-backend-service** | `DEV_POS_BACKEND` | `pos-backend-config` |
+| **pos-merchant-service** | `DEV_POS_MERCHANT` | `pos-merchant-config` |
+
+### 🎯 核心功能
+
+#### 1. 自動同步環境變數
+- 從 GitHub Secrets（`DEV_POS_BACKEND`, `DEV_POS_MERCHANT`）讀取 .env 內容
+- 自動過濾敏感信息（包含 SECRET/PASSWORD/KEY/TOKEN 的變量）
+- 更新 Kubernetes ConfigMap
+- 部署時自動應用新配置
+
+#### 2. 安全性保護
+- ✅ 敏感信息自動過濾，不會寫入 ConfigMap
+- ✅ ConfigMap 只包含非敏感配置
+- ✅ 敏感配置繼續使用 Kubernetes Secret 管理
+
+#### 3. 簡化配置
+- ✅ 使用 `envFrom` 自動載入所有 ConfigMap 變數
+- ✅ 新增環境變數無需修改 deployment.yaml
+- ✅ 維護更簡單
+
+### 🚀 快速設定
+
+#### 步驟 1：在 GitHub 添加 Secrets
+
+前往：Repository → Settings → Secrets and variables → Actions
+
+**Token Admin API: `DEV_TOKEN_ADMIN`**
+```bash
+APP_ENV=staging
+APP_PORT=8080
+LOG_LEVEL=info
+CORS_ALLOWED_ORIGINS=*
+SWAGGER_BASE_DOMAIN=token-admin-api.passon.tw
+MAX_CONNECTIONS=100
+IDLE_TIMEOUT=120s
+READ_TIMEOUT=30s
+WRITE_TIMEOUT=30s
+# ... 其他非敏感配置
+```
+
+**Token App API: `DEV_TOKEN_APP`**
+```bash
+APP_ENV=staging
+APP_PORT=8080
+LOG_LEVEL=info
+SWAGGER_BASE_DOMAIN=token-app-api.passon.tw
+# ... 其他非敏感配置
+```
+
+**POS Backend Service: `DEV_POS_BACKEND`**
+```bash
+APP_ENV=staging
+HTTP_PORT=8080
+LOG_LEVEL=info
+SWAGGER_BASE_DOMAIN=pos-backend-api.passon.tw
+# ... 其他非敏感配置
+```
+
+**POS Merchant Service: `DEV_POS_MERCHANT`**
+```bash
+APP_ENV=staging
+HTTP_PORT=8080
+LOG_LEVEL=info
+LOG_DEVELOPMENT=false
+LOG_ENCODING=json
+SWAGGER_BASE_DOMAIN=pos-merchant-api.passon.tw
+# ... 其他非敏感配置
+```
+
+#### 步驟 2：觸發部署
+
+```bash
+# 推送代碼自動部署
+git push origin develop
+
+# 或手動觸發（GitHub Actions 頁面）
+```
+
+#### 步驟 3：驗證
+
+```bash
+# 查看 ConfigMap
+kubectl get configmap admin-api-config -n passontw-services-staging -o yaml
+kubectl get configmap app-api-config -n passontw-services-staging -o yaml
+kubectl get configmap pos-backend-config -n passontw-services-staging -o yaml
+kubectl get configmap pos-merchant-config -n passontw-services-staging -o yaml
+
+# 查看 Pod 狀態
+kubectl get pods -n passontw-services-staging -l app=token-admin-api
+kubectl get pods -n passontw-services-staging -l app=token-app-api
+kubectl get pods -n passontw-services-staging -l app=pos-backend-service
+kubectl get pods -n passontw-services-staging -l app=pos-merchant-service
+```
+
+### ⚠️ 重要注意事項
+
+#### 什麼應該放在 GitHub Secrets？
+
+✅ **可以放入**（非敏感配置）：
+- `APP_ENV`
+- `HTTP_PORT`
+- `LOG_LEVEL`
+- `LOG_DEVELOPMENT`
+- `LOG_ENCODING`
+- `SWAGGER_BASE_DOMAIN`
+- 任何不包含密碼、密鑰的配置
+
+❌ **不應放入**（敏感配置）：
+- `DB_PASSWORD`
+- `JWT_SECRET`
+- `API_KEY`
+- `SECRET_TOKEN`
+- 任何包含 `SECRET`, `PASSWORD`, `KEY`, `TOKEN` 的變量
+
+**原因**：CI/CD 會自動過濾包含 `SECRET/PASSWORD/KEY/TOKEN` 的變量，這些應該在 Kubernetes Secrets 中管理。
+
+### 🔄 工作流程
+
+```
+開發本地 .env
+    ↓
+複製內容到 GitHub Secret
+(DEV_POS_BACKEND / DEV_POS_MERCHANT)
+    ↓
+推送代碼到 develop 分支
+    ↓
+GitHub Actions 觸發
+    ↓
+CI/CD 讀取 GitHub Secret
+    ↓
+過濾敏感信息
+    ↓
+更新 Kubernetes ConfigMap
+    ↓
+部署應用
+    ↓
+Pod 自動載入新配置
+```
+
+### 📝 添加新環境變數
+
+#### 快速步驟
+
+1. **更新本地 .env**
+```bash
+# cmd/pos-backend-service/.env
+NEW_FEATURE_ENABLED=true
+```
+
+2. **更新 GitHub Secret**
+- 前往 GitHub → Settings → Secrets
+- 編輯 `DEV_POS_BACKEND`
+- 添加新行：`NEW_FEATURE_ENABLED=true`
+
+3. **觸發部署**
+```bash
+git push origin develop
+```
+
+4. **完成** 🎉
+- ConfigMap 自動更新
+- Pod 自動重啟（如果配置有變化）
+- 新環境變數生效
+
+### 📊 配置對比
+
+#### 更新前（傳統方式）
+
+```yaml
+# deployment.yaml - 每個環境變數都要手動定義
+env:
+- name: APP_ENV
+  valueFrom:
+    configMapKeyRef:
+      name: pos-backend-config
+      key: APP_ENV
+- name: HTTP_PORT
+  valueFrom:
+    configMapKeyRef:
+      name: pos-backend-config
+      key: HTTP_PORT
+# ... 重複 N 次
+```
+
+**問題**：
+- ❌ 每次新增環境變數都要修改 deployment.yaml
+- ❌ 容易遺漏
+- ❌ 維護困難
+
+#### 更新後（新方式）
+
+```yaml
+# deployment.yaml - 自動載入所有 ConfigMap 變數
+envFrom:
+- configMapRef:
+    name: pos-backend-config
+
+env:
+# 只需定義 Secret 引用
+- name: DB_HOST
+  valueFrom:
+    secretKeyRef: ...
+```
+
+**優勢**：
+- ✅ 新增環境變數只需更新 GitHub Secret
+- ✅ 自動同步到 Kubernetes
+- ✅ 維護簡單
+- ✅ 敏感信息自動過濾
+
+### 🔐 敏感信息管理
+
+#### 如何添加敏感配置？
+
+敏感配置應該使用 Kubernetes Secret 管理：
+
+```bash
+# 創建 Secret
+kubectl create secret generic pos-backend-secrets \
+  --from-literal=API_KEY="your-api-key" \
+  --from-literal=SECRET_TOKEN="your-secret" \
+  -n passontw-services-staging
+
+# 或更新現有 Secret
+kubectl create secret generic pos-backend-secrets \
+  --from-literal=API_KEY="new-key" \
+  --dry-run=client -o yaml | kubectl apply -f -
+```
+
+#### 在 Deployment 中使用 Secret
+
+如果需要添加新的敏感配置，需要更新 `k8s/services/pos-backend-service/deployment.yaml`：
+
+```yaml
+env:
+# ... 現有的 Secret 引用 ...
+
+# 新增 Secret 引用
+- name: API_KEY
+  valueFrom:
+    secretKeyRef:
+      name: pos-backend-secrets
+      key: API_KEY
+```
+
+### 🧪 測試和驗證
+
+#### 測試 ConfigMap 更新
+
+```bash
+# 1. 查看當前 ConfigMap
+kubectl describe configmap pos-backend-config -n passontw-services-staging
+
+# 2. 更新 GitHub Secret
+# （在 GitHub 網頁更新）
+
+# 3. 觸發部署
+git commit --allow-empty -m "test: trigger deployment"
+git push origin develop
+
+# 4. 等待部署完成後檢查
+kubectl get configmap pos-backend-config -n passontw-services-staging -o yaml
+
+# 5. 檢查 Pod 是否使用新配置
+kubectl get pods -n passontw-services-staging -l app=pos-backend-service
+kubectl logs <pod-name> -n passontw-services-staging | head -20
+```
+
+#### 驗證環境變數
+
+```bash
+# 進入 Pod
+kubectl exec -it <pod-name> -n passontw-services-staging -- sh
+
+# 查看所有環境變數
+env | sort
+
+# 查看特定環境變數
+echo $APP_ENV
+echo $LOG_LEVEL
+```
+
+### 🚨 故障排除
+
+#### 問題 1：ConfigMap 沒有更新
+
+**可能原因**：
+- GitHub Secret 格式錯誤
+- 所有變量都包含敏感關鍵字被過濾了
+
+**解決方法**：
+```bash
+# 查看 GitHub Actions 日誌
+# Actions → 選擇最近的 workflow run → 查看 "Update ConfigMap from .env" 步驟
+
+# 手動驗證 Secret 格式
+# 確保每行格式為：KEY=VALUE
+# 沒有多餘的空格或特殊字符
+```
+
+#### 問題 2：Pod 無法啟動
+
+**可能原因**：
+- 缺少必要的環境變數
+- 環境變數格式錯誤
+
+**解決方法**：
+```bash
+# 查看 Pod 日誌
+kubectl logs <pod-name> -n passontw-services-staging
+
+# 查看 Pod 事件
+kubectl describe pod <pod-name> -n passontw-services-staging
+
+# 檢查 ConfigMap
+kubectl get configmap pos-backend-config -n passontw-services-staging -o yaml
+```
+
+#### 問題 3：環境變數沒有生效
+
+**可能原因**：
+- Pod 沒有重啟
+- ConfigMap 引用錯誤
+
+**解決方法**：
+```bash
+# 強制重啟 Pod
+kubectl rollout restart deployment/pos-backend-service -n passontw-services-staging
+
+# 等待重啟完成
+kubectl rollout status deployment/pos-backend-service -n passontw-services-staging
+
+# 驗證新 Pod
+kubectl exec -it <new-pod-name> -n passontw-services-staging -- env | grep YOUR_VAR
+```
+
+### ✨ 優勢總結
+
+#### 1. 自動化
+- ✅ 環境變數自動從 GitHub Secrets 同步
+- ✅ 無需手動更新 ConfigMap
+- ✅ 部署時自動應用
+
+#### 2. 安全性
+- ✅ 敏感信息自動過濾
+- ✅ ConfigMap 只包含非敏感配置
+- ✅ 敏感配置使用 Kubernetes Secret
+
+#### 3. 易維護
+- ✅ 統一的配置管理
+- ✅ 使用 `envFrom` 自動載入
+- ✅ 新增變數無需修改 deployment.yaml
+
+#### 4. 一致性
+- ✅ 本地 .env 與 Kubernetes 配置一致
+- ✅ 降低配置錯誤風險
+
+### 📚 相關文件
+
+**已更新的文件**：
+
+**Token APIs**：
+1. `.github/workflows/cicd-token-admin-api.yaml` - 添加 ConfigMap 同步步驟
+2. `.github/workflows/cicd-token-app-api.yaml` - 添加 ConfigMap 同步步驟
+3. `k8s/services/token-admin-api/deployment.yaml` - 改用 envFrom
+4. `k8s/services/token-app-api/deployment.yaml` - 改用 envFrom
+5. `k8s/services/token-admin-api/configmap.yaml` - 添加說明註釋
+6. `k8s/services/token-app-api/configmap.yaml` - 添加說明註釋
+
+**POS Services**：
+7. `.github/workflows/cicd-pos-backend-service.yaml` - 添加 ConfigMap 同步步驟
+8. `.github/workflows/cicd-pos-merchant-service.yaml` - 添加 ConfigMap 同步步驟
+9. `k8s/services/pos-backend-service/deployment.yaml` - 改用 envFrom
+10. `k8s/services/pos-merchant-service/deployment.yaml` - 改用 envFrom
+11. `k8s/services/pos-backend-service/configmap.yaml` - 添加說明註釋
+12. `k8s/services/pos-merchant-service/configmap.yaml` - 添加說明註釋
+
+### ✅ 驗證檢查清單
+
+部署後請驗證：
+
+- [ ] GitHub Secrets 已設定
+  - [ ] `DEV_TOKEN_ADMIN`（Token Admin API）
+  - [ ] `DEV_TOKEN_APP`（Token App API）
+  - [ ] `DEV_POS_BACKEND`（POS Backend Service）
+  - [ ] `DEV_POS_MERCHANT`（POS Merchant Service）
+- [ ] CI/CD 執行成功
+- [ ] ConfigMap 已更新（`kubectl get configmap -n passontw-services-staging`）
+- [ ] Pod 正常運行（`kubectl get pods -n passontw-services-staging`）
+- [ ] 應用日誌正常（`kubectl logs -f deployment/<service-name>`）
+- [ ] 健康檢查通過（`/health-check` 或 `/health`, `/ready`）
 
 ---
 

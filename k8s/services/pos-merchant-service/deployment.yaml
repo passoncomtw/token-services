@@ -35,39 +35,12 @@ spec:
           containerPort: 8080
           protocol: TCP
         
-        env:
-        # 從 ConfigMap 載入
-        - name: APP_ENV
-          valueFrom:
-            configMapKeyRef:
-              name: pos-merchant-config
-              key: APP_ENV
-        - name: HTTP_PORT
-          valueFrom:
-            configMapKeyRef:
-              name: pos-merchant-config
-              key: HTTP_PORT
-        - name: LOG_LEVEL
-          valueFrom:
-            configMapKeyRef:
-              name: pos-merchant-config
-              key: LOG_LEVEL
-        - name: LOG_DEVELOPMENT
-          valueFrom:
-            configMapKeyRef:
-              name: pos-merchant-config
-              key: LOG_DEVELOPMENT
-        - name: LOG_ENCODING
-          valueFrom:
-            configMapKeyRef:
-              name: pos-merchant-config
-              key: LOG_ENCODING
-        - name: SWAGGER_BASE_DOMAIN
-          valueFrom:
-            configMapKeyRef:
-              name: pos-merchant-config
-              key: SWAGGER_BASE_DOMAIN
+        # 使用 envFrom 自動載入 ConfigMap 的所有環境變數
+        envFrom:
+        - configMapRef:
+            name: pos-merchant-config
         
+        env:
         # 從 Secret 載入資料庫配置
         - name: DB_HOST
           valueFrom:

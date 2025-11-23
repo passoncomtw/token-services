@@ -35,29 +35,12 @@ spec:
           containerPort: 8080
           protocol: TCP
         
-        env:
-        # 從 ConfigMap 載入
-        - name: APP_ENV
-          valueFrom:
-            configMapKeyRef:
-              name: admin-api-config
-              key: APP_ENV
-        - name: APP_PORT
-          valueFrom:
-            configMapKeyRef:
-              name: admin-api-config
-              key: APP_PORT
-        - name: LOG_LEVEL
-          valueFrom:
-            configMapKeyRef:
-              name: admin-api-config
-              key: LOG_LEVEL
-        - name: SWAGGER_BASE_DOMAIN
-          valueFrom:
-            configMapKeyRef:
-              name: admin-api-config
-              key: SWAGGER_BASE_DOMAIN
+        # 使用 envFrom 自動載入 ConfigMap 的所有環境變數
+        envFrom:
+        - configMapRef:
+            name: admin-api-config
         
+        env:
         # 從 Secret 載入資料庫配置
         - name: DB_HOST
           valueFrom:

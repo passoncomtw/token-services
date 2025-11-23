@@ -76,6 +76,34 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Update ConfigMap from .env
+        run: |
+          echo "📝 更新 ConfigMap..."
+          
+          # 從 GitHub Secret 創建臨時 .env 文件
+          echo "${{ secrets.DEV_TOKEN_APP }}" > /tmp/token-app-full.env
+          
+          # 過濾敏感信息（排除包含 SECRET, PASSWORD, KEY, TOKEN 的變量）
+          # 這些應該在 Kubernetes Secrets 中管理，不應放在 ConfigMap
+          grep -v -E '(SECRET|PASSWORD|KEY|TOKEN)=' /tmp/token-app-full.env > /tmp/token-app.env || true
+          
+          # 如果過濾後的文件不為空，則更新 ConfigMap
+          if [ -s /tmp/token-app.env ]; then
+            echo "📦 更新 ConfigMap（已過濾敏感信息）..."
+            kubectl create configmap app-api-config \
+              --from-env-file=/tmp/token-app.env \
+              --dry-run=client -o yaml | \
+              kubectl apply -f - -n ${{ env.NAMESPACE }}
+            echo "✅ ConfigMap 已更新"
+          else
+            echo "⚠️  所有變量都是敏感信息，ConfigMap 保持不變"
+          fi
+          
+          # 清理臨時文件
+          rm -f /tmp/token-app-full.env /tmp/token-app.env
+          
+          echo "💡 提醒：敏感信息（SECRET/PASSWORD/KEY/TOKEN）請使用 Kubernetes Secrets 管理"
+
       - name: Deploy to Kubernetes
         id: deploy
         run: |
