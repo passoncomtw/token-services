@@ -13,16 +13,16 @@ resources:
 # Staging 命名空间
 namespace: passontw-services-staging
 
-# 镜像标签（由 CI/CD 动态设置）
+# 镜像标签（统一使用 develop tag）
 images:
   - name: ghcr.io/passoncomtw/token-admin-api
-    newTag: develop-PLACEHOLDER  # 将被 CI/CD 替换
+    newTag: develop
   - name: ghcr.io/passoncomtw/token-app-api
-    newTag: develop-PLACEHOLDER  # 将被 CI/CD 替换
+    newTag: develop
   - name: ghcr.io/passoncomtw/pos-backend-service
-    newTag: develop-PLACEHOLDER  # 将被 CI/CD 替换
+    newTag: develop
   - name: ghcr.io/passoncomtw/pos-merchant-service
-    newTag: develop-PLACEHOLDER  # 将被 CI/CD 替换
+    newTag: develop
 
 # Staging 环境的资源配置
 # 使用 JSON Patch 语法来修改副本数
