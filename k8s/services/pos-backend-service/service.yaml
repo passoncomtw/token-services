@@ -1,9 +1,9 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: token-admin-api
+  name: pos-backend-service
   labels:
-    app: token-admin-api
+    app: pos-backend-service
 spec:
   type: ClusterIP
   ports:
@@ -12,6 +12,6 @@ spec:
     protocol: TCP
     name: http
   selector:
-    app: token-admin-api
+    app: pos-backend-service
   sessionAffinity: None
 

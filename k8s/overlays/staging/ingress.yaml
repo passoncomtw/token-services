@@ -1,7 +1,7 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: token-backend-apis-ingress-staging
+  name: passontw-backend-apis-ingress-staging
   namespace: passontw-services-staging
   annotations:
     # Traefik Ingress Controller
@@ -24,18 +24,25 @@ metadata:
 spec:
   # TLS 配置 - Backend APIs 證書
   tls:
-  # Admin API
+  # Token APIs
   - hosts:
     - token-admin-api.passon.tw
     secretName: token-admin-api-tls
-  # App API
   - hosts:
     - token-app-api.passon.tw
     secretName: token-app-api-tls
   
-  # 路由規則 - 只包含 Backend APIs
+  # POS Services
+  - hosts:
+    - pos-backend-api.passon.tw
+    secretName: pos-backend-api-tls
+  - hosts:
+    - pos-merchant-api.passon.tw
+    secretName: pos-merchant-api-tls
+  
+  # 路由規則
   rules:
-  # Admin API
+  # Token Admin API
   - host: token-admin-api.passon.tw
     http:
       paths:
@@ -47,7 +54,7 @@ spec:
             port:
               number: 80
   
-  # App API
+  # Token App API
   - host: token-app-api.passon.tw
     http:
       paths:
@@ -56,6 +63,30 @@ spec:
         backend:
           service:
             name: token-app-api
+            port:
+              number: 80
+  
+  # POS Backend Service
+  - host: pos-backend-api.passon.tw
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: pos-backend-service
+            port:
+              number: 80
+  
+  # POS Merchant Service
+  - host: pos-merchant-api.passon.tw
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: pos-merchant-service
             port:
               number: 80
 

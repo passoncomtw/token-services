@@ -1,19 +1,14 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
-# 基础资源
-resources:
-  - token-admin-api-deployment.yaml
-  - token-admin-api-service.yaml
-  - token-app-api-deployment.yaml
-  - token-app-api-service.yaml
-  - admin-api-configmap.yaml
-  - app-api-configmap.yaml
+# Base 目录包含所有服务的共用配置
+# 这些配置会通过 patches 应用到各个服务
 
-# 镜像配置（将被 overlay 覆盖）
-images:
-  - name: ghcr.io/passoncomtw/token-admin-api
-    newTag: placeholder
-  - name: ghcr.io/passoncomtw/token-app-api
-    newTag: placeholder
+# 说明：
+# - common-patches.yaml: 共用的安全设置、资源限制
+# - common-secrets-env.yaml: 共用的 Secret 环境变量（Database, JWT）
+# - redis-secrets-env.yaml: Redis 环境变量（仅 Token APIs 使用）
+
+# 注意：这个 base 不直接包含任何 resources
+# 它只提供 patches 供各服务使用
 

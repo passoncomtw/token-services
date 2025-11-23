@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: pos-merchant-config
+data:
+  APP_ENV: "staging"
+  HTTP_PORT: "8080"
+  LOG_LEVEL: "info"
+  LOG_DEVELOPMENT: "false"
+  LOG_ENCODING: "json"
+  SWAGGER_BASE_DOMAIN: "pos-merchant-api.passon.tw"
+

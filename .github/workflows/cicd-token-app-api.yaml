@@ -4,11 +4,12 @@ on:
   push:
     branches: [develop]
     paths:
-      - '.github/workflows/cicd-app-api.yaml'
+      - '.github/workflows/cicd-token-app-api.yaml'
       - 'cmd/token-app-api/**'
       - 'pkg/**'
       - 'deploy/token-app-api/**'
-      - 'k8s/**'
+      - 'k8s/services/token-app-api/**'
+      - 'k8s/overlays/**'
       - 'go.mod'
       - 'go.sum'
 

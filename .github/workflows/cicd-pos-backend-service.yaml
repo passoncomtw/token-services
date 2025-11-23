@@ -1,22 +1,22 @@
-name: Build Token Admin API
+name: Build POS Backend Service
 
 on:
   push:
     branches: [develop]
     paths:
-      - '.github/workflows/cicd-token-admin-api.yaml'
-      - 'cmd/token-admin-api/**'
+      - '.github/workflows/cicd-pos-backend-service.yaml'
+      - 'cmd/pos-backend-service/**'
       - 'pkg/**'
-      - 'deploy/token-admin-api/**'
-      - 'k8s/services/token-admin-api/**'
+      - 'deploy/pos-backend-service/**'
+      - 'k8s/services/pos-backend-service/**'
       - 'k8s/overlays/**'
       - 'go.mod'
       - 'go.sum'
 
 env:
   REGISTRY: ghcr.io
-  IMAGE_NAME: ${{ github.repository_owner }}/token-admin-api
-  SERVICE_NAME: token-admin-api
+  IMAGE_NAME: ${{ github.repository_owner }}/pos-backend-service
+  SERVICE_NAME: pos-backend-service
   NAMESPACE: passontw-services-staging
 
 permissions:
@@ -56,7 +56,7 @@ jobs:
           echo "Building image: $IMAGE_FULL:$TAG"
           
           docker build \
-            --file ./deploy/token-admin-api/Dockerfile \
+            --file ./deploy/pos-backend-service/Dockerfile \
             --tag "$IMAGE_FULL:$TAG" \
             --tag "$IMAGE_FULL:develop" \
             .
@@ -181,3 +181,4 @@ jobs:
           kubectl get svc -n ${{ env.NAMESPACE }} ${{ env.SERVICE_NAME }}
           echo ""
           echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+

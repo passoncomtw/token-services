@@ -6,6 +6,9 @@
 
 - [目錄結構](#目錄結構)
 - [快速開始](#快速開始)
+- [Base 共用配置](#base-共用配置)
+  - [快速指南](#快速指南)
+  - [詳細說明](#詳細說明)
 - [命名空間管理](#命名空間管理)
 - [首次部署](#首次部署)
 - [日常操作](#日常操作)
@@ -20,29 +23,33 @@
 
 ```
 k8s/
-├── README.md                          # 本文檔
-├── namespace.yaml                     # 命名空間定義
-├── configmaps/                        # 應用配置
-│   ├── admin-api-config.yaml         # Admin API 配置
-│   └── app-api-config.yaml           # App API 配置
-├── secrets/                           # 敏感資訊（範例）
-│   ├── database-secret.yaml.example  # 資料庫憑證範例
-│   ├── jwt-secret.yaml.example       # JWT 密鑰範例
-│   └── ghcr-pull-secret.yaml.example # GHCR 認證範例
-├── deployments/                       # 部署配置
-│   ├── token-admin-api.yaml          # Admin API 部署
-│   └── token-app-api.yaml            # App API 部署
-├── services/                          # 服務配置
-│   ├── token-admin-api-service.yaml  # Admin API 服務
-│   └── token-app-api-service.yaml    # App API 服務
-├── ingress/                           # 入口配置
-│   └── ingress.yaml                  # 統一入口
-└── scripts/                           # 部署腳本
-    ├── create-secrets.sh             # 創建 Secrets
-    ├── deploy-all.sh                 # 部署所有服務
-    ├── deploy-admin.sh               # 部署 Admin API
-    ├── deploy-app.sh                 # 部署 App API
-    └── rollback.sh                   # 回滾
+├── README.md                          # 本文檔（包含完整使用指南）
+├── BASE_USAGE_GUIDE.md               # ⚠️ 已整合到本文檔
+├── base/                              # 共用配置（透過 Kustomize patches）
+│   ├── README.md                     # ⚠️ 已整合到本文檔
+│   ├── kustomization.yaml            # Base 層配置
+│   ├── common-patches.yaml           # 所有服務共用的配置
+│   ├── common-secrets-env.yaml       # Database & JWT Secrets
+│   └── redis-secrets-env.yaml        # Redis Secrets（僅 Token APIs）
+├── services/                          # 各服務配置目錄
+│   ├── token-admin-api/
+│   │   ├── kustomization.yaml        # 服務配置清單
+│   │   ├── deployment.yaml           # 部署定義
+│   │   ├── service.yaml              # 服務定義
+│   │   └── configmap.yaml            # 配置映射
+│   ├── token-app-api/
+│   ├── pos-backend-service/
+│   └── pos-merchant-service/
+├── overlays/                          # 環境覆蓋配置
+│   └── staging/
+│       ├── kustomization.yaml        # Staging 環境配置
+│       ├── namespace.yaml            # 命名空間
+│       └── ingress.yaml              # Ingress & SSL
+└── secrets/                           # Secrets 範例
+    ├── database-secret.yaml.example
+    ├── jwt-secret.yaml.example
+    ├── redis-secret.yaml.example
+    └── ghcr-pull-secret.yaml.example
 ```
 
 ---
@@ -106,6 +113,548 @@ kubectl get pods -n passontw-services-staging -w
 # 查看日誌
 kubectl logs -f deployment/token-admin-api -n passontw-services-staging
 ```
+
+---
+
+## Base 共用配置
+
+> 透過 Kustomize 自動應用共用配置到所有服務，避免重複定義，確保一致性
+
+### 快速指南
+
+#### 📦 什麼是 Base？
+
+`k8s/base/` 目錄包含所有服務共用的配置，通過 Kustomize 自動應用到每個服務，避免重複配置。
+
+#### 🎯 Base 包含什麼？
+
+**1. `common-patches.yaml` - 所有服務共用**
+- ✅ 安全設置（非 root 用戶、只讀文件系統）
+- ✅ 資源限制（128Mi/100m 請求，512Mi/500m 限制）
+- ✅ imagePullSecrets（GHCR 凭证）
+- ✅ 重启策略
+
+**2. `common-secrets-env.yaml` - 所有服務共用**
+- ✅ Database Secret（DB_HOST, DB_PORT, etc.）
+- ✅ JWT Secret（JWT_SECRET）
+
+**3. `redis-secrets-env.yaml` - 僅 Token APIs**
+- ✅ Redis Secret（REDIS_HOST, REDIS_PORT, etc.）
+
+#### 🚀 如何使用？
+
+**各服務的 `kustomization.yaml`**
+
+```yaml
+patchesStrategicMerge:
+  - ../../base/common-patches.yaml       # ← 所有服務必須
+  - ../../base/common-secrets-env.yaml   # ← 所有服務必須
+  - ../../base/redis-secrets-env.yaml    # ← 僅 Token APIs 需要
+```
+
+**服務分類**
+
+| 服務類型 | common-patches | common-secrets-env | redis-secrets-env |
+|---------|----------------|-------------------|-------------------|
+| Token Admin API | ✅ | ✅ | ✅ |
+| Token App API | ✅ | ✅ | ✅ |
+| POS Backend | ✅ | ✅ | ❌ |
+| POS Merchant | ✅ | ✅ | ❌ |
+
+#### 🔧 常見操作
+
+**1. 更新所有服務的資源限制**
+
+```bash
+# 編輯 base 配置
+vim k8s/base/common-patches.yaml
+
+# 修改 resources 部分
+resources:
+  requests:
+    memory: "256Mi"  # 原 128Mi
+    cpu: "200m"      # 原 100m
+
+# 應用（所有服務自動生效）
+cd k8s/overlays/staging
+kubectl apply -k .
+```
+
+**2. 特定服務覆蓋 Base 配置**
+
+在服務的 `deployment.yaml` 中直接定義即可，Kustomize 會自動合併：
+
+```yaml
+# k8s/services/my-service/deployment.yaml
+spec:
+  template:
+    spec:
+      containers:
+      - name: my-service
+        resources:
+          limits:
+            memory: "2Gi"  # 覆蓋 base 的 512Mi
+```
+
+#### ✅ 驗證配置
+
+```bash
+# 查看 token-admin-api 的最終配置
+cd k8s/services/token-admin-api
+kustomize build .
+
+# 檢查是否包含 base 的配置
+kustomize build . | grep -E "(imagePullSecrets|securityContext|DB_HOST|REDIS_HOST)"
+```
+
+#### 📊 對比示例
+
+**沒有使用 Base（傳統方式）**
+
+```yaml
+# 每個服務都要重複這些配置
+spec:
+  template:
+    spec:
+      imagePullSecrets:          # ❌ 重複 4 次
+        - name: ghcr-pull-secret
+      securityContext:           # ❌ 重複 4 次
+        fsGroup: 65534
+      containers:
+      - name: my-service
+        imagePullPolicy: Always  # ❌ 重複 4 次
+        resources:               # ❌ 重複 4 次
+          requests:
+            memory: "128Mi"
+        env:                     # ❌ 重複 4 次
+        - name: DB_HOST
+          valueFrom:
+            secretKeyRef:
+              name: database-secret
+              key: DB_HOST
+```
+
+**使用 Base（新方式）**
+
+```yaml
+# kustomization.yaml - 引用 base
+patchesStrategicMerge:
+  - ../../base/common-patches.yaml      # ✅ 一次定義
+  - ../../base/common-secrets-env.yaml  # ✅ 所有服務共用
+
+# deployment.yaml - 只需服務特定配置
+spec:
+  template:
+    spec:
+      containers:
+      - name: my-service
+        image: ghcr.io/passoncomtw/my-service:latest
+        ports:
+        - containerPort: 8080
+        
+        # 服務特定的 ConfigMap
+        env:
+        - name: APP_ENV
+          valueFrom:
+            configMapKeyRef:
+              name: my-config
+              key: APP_ENV
+        
+        # 共用配置自動應用（無需重複定義）
+```
+
+#### 💡 核心價值
+
+| 指標 | 效果 |
+|------|------|
+| **代碼減少** | 每個服務節省 ~50 行 |
+| **維護點** | 從 4 個文件 → 1 個文件 |
+| **一致性** | 100% 保證 |
+| **擴展性** | 新服務自動繼承 |
+
+---
+
+### 詳細說明
+
+#### 📁 文件說明
+
+**`common-patches.yaml`**
+
+共用的基礎配置，應用到所有服務：
+
+| 配置項 | 值 | 說明 |
+|--------|-----|------|
+| `imagePullSecrets` | `ghcr-pull-secret` | GHCR 鏡像拉取凭证 |
+| `imagePullPolicy` | `Always` | 始終拉取最新鏡像 |
+| `restartPolicy` | `Always` | Pod 重啟策略 |
+| `fsGroup` | `65534` | Pod 安全策略 - 文件系統組 |
+| `runAsNonRoot` | `true` | 容器必須以非 root 用戶運行 |
+| `runAsUser` | `65534` | 容器運行用戶 ID (nobody) |
+| `readOnlyRootFilesystem` | `true` | 只讀根文件系統 |
+| `allowPrivilegeEscalation` | `false` | 禁止權限提升 |
+| `capabilities.drop` | `ALL` | 刪除所有 Linux capabilities |
+| `resources.requests` | `128Mi / 100m` | 資源請求（內存/CPU）|
+| `resources.limits` | `512Mi / 500m` | 資源限制（內存/CPU）|
+
+**`common-secrets-env.yaml`**
+
+共用的 Secret 環境變量，應用到所有服務：
+
+**Database Secret**
+- `DB_HOST` - 數據庫主機
+- `DB_PORT` - 數據庫端口
+- `DB_USER` - 數據庫用戶
+- `DB_PASSWORD` - 數據庫密碼
+- `DB_NAME` - 數據庫名稱
+- `DB_SSL_MODE` - SSL 模式
+
+**JWT Secret**
+- `JWT_SECRET` - JWT 簽名密鑰
+
+**`redis-secrets-env.yaml`**
+
+Redis Secret 環境變量，僅應用到 Token APIs：
+
+- `REDIS_HOST` - Redis 主機
+- `REDIS_PORT` - Redis 端口
+- `REDIS_PASSWORD` - Redis 密碼
+- `REDIS_DB` - Redis 數據庫編號
+
+#### 🔧 使用方式
+
+**1. 在服務中引用**
+
+在每個服務的 `kustomization.yaml` 中：
+
+```yaml
+patchesStrategicMerge:
+  - ../../base/common-patches.yaml       # 所有服務都需要
+  - ../../base/common-secrets-env.yaml   # 所有服務都需要
+  - ../../base/redis-secrets-env.yaml    # 僅 Token APIs 需要
+```
+
+**2. 服務分類**
+
+**Token APIs（使用所有 patches）**
+- `token-admin-api`
+- `token-app-api`
+
+```yaml
+patchesStrategicMerge:
+  - ../../base/common-patches.yaml
+  - ../../base/common-secrets-env.yaml
+  - ../../base/redis-secrets-env.yaml  # ✅ 使用 Redis
+```
+
+**POS Services（不使用 Redis）**
+- `pos-backend-service`
+- `pos-merchant-service`
+
+```yaml
+patchesStrategicMerge:
+  - ../../base/common-patches.yaml
+  - ../../base/common-secrets-env.yaml
+  # ❌ 不使用 redis-secrets-env.yaml
+```
+
+#### ✨ 優勢
+
+**1. DRY 原則（Don't Repeat Yourself）**
+- ✅ 共用配置只定義一次
+- ✅ 修改一處，所有服務生效
+- ✅ 減少配置冗餘
+
+**2. 一致性**
+- ✅ 所有服務使用相同的安全設置
+- ✅ 統一的資源限制
+- ✅ 標準化的 Secret 引用
+
+**3. 易維護**
+- ✅ 更新安全策略只需修改一個文件
+- ✅ 調整資源限制統一生效
+- ✅ 新增服務可直接使用 base patches
+
+**4. 靈活性**
+- ✅ 服務可以覆蓋 base 中的配置
+- ✅ 可選擇性應用 patches（如 Redis）
+- ✅ 保持服務特定配置的獨立性
+
+#### 🔄 配置覆蓋
+
+**如何覆蓋 Base 配置？**
+
+如果某個服務需要不同的配置，可以在服務的 `deployment.yaml` 中定義，Kustomize 會自動合併：
+
+**示例：增加特定服務的資源限制**
+
+```yaml
+# k8s/services/high-memory-service/deployment.yaml
+spec:
+  template:
+    spec:
+      containers:
+      - name: high-memory-service
+        resources:
+          requests:
+            memory: "256Mi"  # 覆蓋 base 的 128Mi
+            cpu: "200m"      # 覆蓋 base 的 100m
+          limits:
+            memory: "2Gi"    # 覆蓋 base 的 512Mi
+            cpu: "2000m"     # 覆蓋 base 的 500m
+```
+
+Kustomize 會自動合併，最終結果：
+- ✅ 資源限制使用服務特定的值（已覆蓋）
+- ✅ 安全設置使用 base 的值（未覆蓋）
+- ✅ imagePullSecrets 使用 base 的值（未覆蓋）
+
+#### 📊 配置對比
+
+**使用 Base Patches 前後對比**
+
+**Before（每個服務重複定義）**
+
+```yaml
+# token-admin-api/deployment.yaml
+spec:
+  template:
+    spec:
+      imagePullSecrets:
+        - name: ghcr-pull-secret    # ❌ 重複
+      securityContext:
+        fsGroup: 65534              # ❌ 重複
+      containers:
+      - name: token-admin-api
+        imagePullPolicy: Always     # ❌ 重複
+        resources:                  # ❌ 重複
+          requests:
+            memory: "128Mi"
+            cpu: "100m"
+        securityContext:            # ❌ 重複
+          runAsNonRoot: true
+          runAsUser: 65534
+        env:
+        - name: DB_HOST             # ❌ 重複
+          valueFrom:
+            secretKeyRef:
+              name: database-secret
+              key: DB_HOST
+        # ... 更多重複配置
+```
+
+**問題**：
+- 4 個服務 × 每個 50 行重複配置 = 200 行冗餘代碼
+- 修改安全策略需要更新 4 個文件
+- 容易出現不一致
+
+**After（使用 Base Patches）**
+
+```yaml
+# token-admin-api/deployment.yaml（簡化後）
+spec:
+  template:
+    spec:
+      containers:
+      - name: token-admin-api
+        image: ghcr.io/passoncomtw/token-admin-api:placeholder
+        ports:
+        - name: http
+          containerPort: 8080
+        
+        # 服務特定的 ConfigMap 環境變量
+        env:
+        - name: APP_ENV
+          valueFrom:
+            configMapKeyRef:
+              name: admin-api-config
+              key: APP_ENV
+        
+        # 健康檢查（服務特定）
+        livenessProbe:
+          httpGet:
+            path: /health-check
+            port: 8080
+        
+        # 共用配置通過 base patches 自動應用：
+        # ✅ imagePullSecrets
+        # ✅ securityContext
+        # ✅ resources
+        # ✅ DB/JWT/Redis secrets
+```
+
+**好處**：
+- 每個服務的 deployment.yaml 減少 50% 代碼
+- 共用配置集中管理
+- 修改一次，所有服務生效
+
+#### 🎯 最佳實踐
+
+**1. 什麼應該放在 Base？**
+
+✅ **應該放在 Base**：
+- 安全設置（所有服務統一）
+- 資源限制的默認值（可覆蓋）
+- 共用的 Secret 引用（Database, JWT）
+- imagePullSecrets（統一使用 GHCR）
+- 標準化的 labels/annotations
+
+❌ **不應該放在 Base**：
+- 服務特定的端口
+- 健康檢查路徑（各服務不同）
+- ConfigMap 引用（服務特定）
+- 副本數（可能不同）
+- 服務特定的環境變量
+
+**2. 如何決定是否共用？**
+
+問自己三個問題：
+
+1. **這個配置在所有服務中都相同嗎？**
+   - 是 → 放 base
+   - 否 → 放服務目錄
+
+2. **這個配置需要統一管理嗎？**
+   - 是 → 放 base
+   - 否 → 放服務目錄
+
+3. **這個配置是否關鍵到需要明確可見？**
+   - 是 → 保留在服務 deployment.yaml
+   - 否 → 可以只在 base
+
+**3. 推薦的配置策略**
+
+**選項 A：完全簡化**（推薦給熟悉 Kustomize 的團隊）
+- 服務的 deployment.yaml 只包含服務特定配置
+- 所有共用配置通過 base patches 應用
+- **優點**：最小化重複，易維護
+- **缺點**：需要理解 Kustomize 合併機制
+
+**選項 B：保持完整**（推薦給需要清晰可見配置的團隊）
+- 服務的 deployment.yaml 保持完整配置
+- base patches 作為"保險"確保配置一致
+- **優點**：配置一目了然，易理解
+- **缺點**：有一定重複，但 Kustomize 會自動合併
+
+**本項目採用**：選項 B（保持完整），因為：
+- 配置更直觀，新人容易理解
+- 查看單個服務時能看到完整配置
+- base patches 作為"安全網"確保關鍵配置不被遺漏
+
+#### 🧪 驗證配置
+
+**查看最終合併後的配置**
+
+```bash
+# 構建單個服務的配置（不應用）
+cd k8s/services/token-admin-api
+kustomize build .
+
+# 查看 Deployment
+kustomize build . | grep -A 200 "kind: Deployment"
+
+# 驗證 patches 是否正確應用
+kustomize build . | grep -A 10 "securityContext"
+kustomize build . | grep -A 10 "imagePullSecrets"
+```
+
+**驗證 Secrets 引用**
+
+```bash
+# 查看環境變量配置
+kustomize build . | grep -A 50 "env:"
+
+# 應該看到：
+# - DB_HOST, DB_PORT, etc. (來自 common-secrets-env.yaml)
+# - JWT_SECRET (來自 common-secrets-env.yaml)
+# - REDIS_HOST, etc. (來自 redis-secrets-env.yaml，僅 Token APIs)
+```
+
+#### 📝 修改共用配置
+
+**示例：更新所有服務的資源限制**
+
+```bash
+# 編輯 base 配置
+vim k8s/base/common-patches.yaml
+
+# 修改 resources 部分
+resources:
+  requests:
+    memory: "256Mi"  # 從 128Mi 增加到 256Mi
+    cpu: "200m"      # 從 100m 增加到 200m
+  limits:
+    memory: "1Gi"    # 從 512Mi 增加到 1Gi
+    cpu: "1000m"     # 從 500m 增加到 1000m
+
+# 應用更改（所有服務自動生效）
+cd k8s/overlays/staging
+kubectl apply -k .
+
+# 驗證
+kubectl get deployments -n passontw-services-staging -o yaml | grep -A 5 "resources:"
+```
+
+#### 🚨 故障排除
+
+**問題 1：配置沒有生效**
+
+**症狀**：修改了 base 配置但服務沒有更新
+
+**原因**：可能服務的 `kustomization.yaml` 沒有引用 base patches
+
+**解決**：
+```bash
+# 檢查服務的 kustomization.yaml
+cat k8s/services/my-service/kustomization.yaml
+
+# 確保包含：
+patchesStrategicMerge:
+  - ../../base/common-patches.yaml
+```
+
+**問題 2：Kustomize 構建失敗**
+
+**症狀**：`kustomize build` 報錯
+
+**常見原因**：
+1. Base patches 的路徑錯誤
+2. YAML 語法錯誤
+
+**解決**：
+```bash
+# 驗證 YAML 語法
+yamllint k8s/base/common-patches.yaml
+
+# 測試構建
+cd k8s/services/my-service
+kustomize build . --enable-alpha-plugins
+```
+
+**問題 3：配置衝突**
+
+**症狀**：部署後配置與預期不符
+
+**原因**：服務的 deployment.yaml 和 base patch 有衝突
+
+**解決**：Kustomize 的合併規則是服務配置優先，無需擔心衝突
+
+#### 🎉 總結
+
+**共用配置的好處**
+
+| 方面 | 傳統方式 | 使用 Base Patches |
+|------|---------|-------------------|
+| **代碼重複** | 200+ 行重複 | 0 行重複 |
+| **維護性** | 需要更新 4 個文件 | 只需更新 1 個文件 |
+| **一致性** | 容易出現差異 | 保證一致 |
+| **擴展性** | 添加服務需要複製配置 | 添加服務自動繼承 |
+| **可讀性** | 配置分散 | 集中管理 |
+
+**文件統計**
+
+- **Base Patches**：3 個文件（~150 行）
+- **節省代碼**：~200 行（每個服務節省 50 行）
+- **維護點**：從 4 個文件減少到 1 個文件
 
 ---
 

@@ -1,9 +1,9 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: token-admin-api
+  name: token-app-api
   labels:
-    app: token-admin-api
+    app: token-app-api
     version: v1
 spec:
   replicas: 2
@@ -14,20 +14,19 @@ spec:
       maxUnavailable: 0
   selector:
     matchLabels:
-      app: token-admin-api
+      app: token-app-api
   template:
     metadata:
       labels:
-        app: token-admin-api
+        app: token-app-api
         version: v1
     spec:
       imagePullSecrets:
         - name: ghcr-pull-secret
       
       containers:
-      - name: token-admin-api
-        # 镜像标签由 Kustomize 在部署时动态设置
-        image: ghcr.io/passoncomtw/token-admin-api:placeholder
+      - name: token-app-api
+        image: ghcr.io/passoncomtw/token-app-api:placeholder
         imagePullPolicy: Always
         
         ports:
@@ -40,22 +39,22 @@ spec:
         - name: APP_ENV
           valueFrom:
             configMapKeyRef:
-              name: admin-api-config
+              name: app-api-config
               key: APP_ENV
         - name: APP_PORT
           valueFrom:
             configMapKeyRef:
-              name: admin-api-config
+              name: app-api-config
               key: APP_PORT
         - name: LOG_LEVEL
           valueFrom:
             configMapKeyRef:
-              name: admin-api-config
+              name: app-api-config
               key: LOG_LEVEL
         - name: SWAGGER_BASE_DOMAIN
           valueFrom:
             configMapKeyRef:
-              name: admin-api-config
+              name: app-api-config
               key: SWAGGER_BASE_DOMAIN
         
         # 從 Secret 載入資料庫配置

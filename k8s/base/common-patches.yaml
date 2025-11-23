@@ -1,0 +1,46 @@
+# 共用的 Deployment 配置补丁
+# 这些配置会应用到所有服务的 Deployment
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: not-important  # 会被忽略，因为这是 patch
+spec:
+  template:
+    spec:
+      # 共用：镜像拉取凭证
+      imagePullSecrets:
+        - name: ghcr-pull-secret
+      
+      # 共用：Pod 安全策略
+      securityContext:
+        fsGroup: 65534
+      
+      # 共用：重启策略
+      restartPolicy: Always
+      
+      containers:
+      - name: placeholder  # 会被实际容器名覆盖
+        
+        # 共用：镜像拉取策略
+        imagePullPolicy: Always
+        
+        # 共用：资源限制（基础值，可以在各服务中覆盖）
+        resources:
+          requests:
+            memory: "128Mi"
+            cpu: "100m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+        
+        # 共用：容器安全上下文
+        securityContext:
+          runAsNonRoot: true
+          runAsUser: 65534
+          readOnlyRootFilesystem: true
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+              - ALL
+

@@ -1,9 +1,9 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: token-app-api
+  name: pos-merchant-service
   labels:
-    app: token-app-api
+    app: pos-merchant-service
     version: v1
 spec:
   replicas: 2
@@ -14,20 +14,20 @@ spec:
       maxUnavailable: 0
   selector:
     matchLabels:
-      app: token-app-api
+      app: pos-merchant-service
   template:
     metadata:
       labels:
-        app: token-app-api
+        app: pos-merchant-service
         version: v1
     spec:
       imagePullSecrets:
         - name: ghcr-pull-secret
       
       containers:
-      - name: token-app-api
+      - name: pos-merchant-service
         # 镜像标签由 Kustomize 在部署时动态设置
-        image: ghcr.io/passoncomtw/token-app-api:placeholder
+        image: ghcr.io/passoncomtw/pos-merchant-service:placeholder
         imagePullPolicy: Always
         
         ports:
@@ -40,22 +40,32 @@ spec:
         - name: APP_ENV
           valueFrom:
             configMapKeyRef:
-              name: app-api-config
+              name: pos-merchant-config
               key: APP_ENV
-        - name: APP_PORT
+        - name: HTTP_PORT
           valueFrom:
             configMapKeyRef:
-              name: app-api-config
-              key: APP_PORT
+              name: pos-merchant-config
+              key: HTTP_PORT
         - name: LOG_LEVEL
           valueFrom:
             configMapKeyRef:
-              name: app-api-config
+              name: pos-merchant-config
               key: LOG_LEVEL
+        - name: LOG_DEVELOPMENT
+          valueFrom:
+            configMapKeyRef:
+              name: pos-merchant-config
+              key: LOG_DEVELOPMENT
+        - name: LOG_ENCODING
+          valueFrom:
+            configMapKeyRef:
+              name: pos-merchant-config
+              key: LOG_ENCODING
         - name: SWAGGER_BASE_DOMAIN
           valueFrom:
             configMapKeyRef:
-              name: app-api-config
+              name: pos-merchant-config
               key: SWAGGER_BASE_DOMAIN
         
         # 從 Secret 載入資料庫配置
@@ -84,7 +94,7 @@ spec:
             secretKeyRef:
               name: database-secret
               key: DB_NAME
-        - name: DB_SSLMODE
+        - name: DB_SSL_MODE
           valueFrom:
             secretKeyRef:
               name: database-secret
@@ -97,32 +107,10 @@ spec:
               name: jwt-secret
               key: JWT_SECRET
         
-        # 從 Secret 載入 Redis 配置
-        - name: REDIS_HOST
-          valueFrom:
-            secretKeyRef:
-              name: redis-secret
-              key: REDIS_HOST
-        - name: REDIS_PORT
-          valueFrom:
-            secretKeyRef:
-              name: redis-secret
-              key: REDIS_PORT
-        - name: REDIS_PASSWORD
-          valueFrom:
-            secretKeyRef:
-              name: redis-secret
-              key: REDIS_PASSWORD
-        - name: REDIS_DB
-          valueFrom:
-            secretKeyRef:
-              name: redis-secret
-              key: REDIS_DB
-        
         # 健康檢查
         livenessProbe:
           httpGet:
-            path: /health-check
+            path: /health
             port: 8080
           initialDelaySeconds: 30
           periodSeconds: 10
@@ -131,7 +119,7 @@ spec:
         
         readinessProbe:
           httpGet:
-            path: /health-check
+            path: /ready
             port: 8080
           initialDelaySeconds: 10
           periodSeconds: 5
