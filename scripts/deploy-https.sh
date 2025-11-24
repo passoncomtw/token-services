@@ -42,12 +42,12 @@ read -p "請選擇 (1/2): " ENV_CHOICE
 case $ENV_CHOICE in
     1)
         NAMESPACE="passontw-services-staging"
-        INGRESS_FILE="k8s/ingress/ingress-staging-https.yaml"
+        INGRESS_FILE="k8s/overlays/staging/ingress.yaml"
         printf "${GREEN}✓ 將部署到 Staging 環境${NC}\n"
         ;;
     2)
         NAMESPACE="passontw-services-production"
-        INGRESS_FILE="k8s/ingress/ingress-production-https.yaml"
+        INGRESS_FILE="k8s/overlays/production/ingress.yaml"
         printf "${GREEN}✓ 將部署到 Production 環境${NC}\n"
         ;;
     *)
@@ -115,37 +115,47 @@ printf "${BLUE}   步驟 2: DNS 檢查${NC}\n"
 printf "${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}\n"
 echo ""
 
-DOMAIN="token-admin-api.passon.tw"
-printf "${YELLOW}檢查 DNS: ${DOMAIN}${NC}\n"
+# 檢查所有域名的 DNS
+DOMAINS=(
+    "token-admin-api.passon.tw"
+    "token-app-api.passon.tw"
+    "pos-backend-api.passon.tw"
+    "pos-merchant-api.passon.tw"
+)
 
-# 檢查 DNS 解析
-if command -v dig &> /dev/null; then
-    DNS_IP=$(dig +short $DOMAIN | head -n 1)
-    if [ -n "$DNS_IP" ]; then
-        printf "${GREEN}✓ DNS 已解析: ${DOMAIN} → ${DNS_IP}${NC}\n"
-        
-        # 檢查 IP 是否匹配
-        if [ "$DNS_IP" = "$TRAEFIK_IP" ]; then
-            printf "${GREEN}✓ DNS IP 與 Traefik IP 匹配${NC}\n"
+DNS_ISSUES=0
+
+for DOMAIN in "${DOMAINS[@]}"; do
+    printf "${YELLOW}檢查 DNS: ${DOMAIN}${NC}\n"
+    
+    if command -v dig &> /dev/null; then
+        DNS_IP=$(dig +short $DOMAIN | head -n 1)
+        if [ -n "$DNS_IP" ]; then
+            if [ "$DNS_IP" = "$TRAEFIK_IP" ]; then
+                printf "${GREEN}✓ DNS 已正確解析: ${DOMAIN} → ${DNS_IP}${NC}\n"
+            else
+                printf "${YELLOW}⚠️  DNS IP (${DNS_IP}) 與 Traefik IP (${TRAEFIK_IP}) 不匹配${NC}\n"
+                ((DNS_ISSUES++))
+            fi
         else
-            printf "${YELLOW}⚠️  DNS IP (${DNS_IP}) 與 Traefik IP (${TRAEFIK_IP}) 不匹配${NC}\n"
-            printf "${YELLOW}   請確認 Gandi DNS 設定是否正確${NC}\n"
-        fi
-    else
-        printf "${RED}❌ DNS 尚未解析${NC}\n"
-        printf "${YELLOW}請先在 Gandi 設定 DNS A 記錄：${NC}\n"
-        printf "   名稱: token-admin-api\n"
-        printf "   類型: A\n"
-        printf "   IPv4: ${TRAEFIK_IP}\n"
-        printf "   TTL: 300\n"
-        echo ""
-        read -p "是否繼續部署？(y/n): " CONTINUE
-        if [ "$CONTINUE" != "y" ]; then
-            exit 0
+            printf "${RED}❌ DNS 尚未解析: ${DOMAIN}${NC}\n"
+            ((DNS_ISSUES++))
         fi
     fi
-else
-    printf "${YELLOW}⚠️  dig 命令未安裝，跳過 DNS 檢查${NC}\n"
+done
+
+if [ $DNS_ISSUES -gt 0 ]; then
+    printf "\n${YELLOW}⚠️  發現 ${DNS_ISSUES} 個 DNS 問題${NC}\n"
+    printf "${YELLOW}請確認 DNS 設定：${NC}\n"
+    echo "   名稱: *.passon.tw 或個別子域名"
+    echo "   類型: A"
+    echo "   IPv4: ${TRAEFIK_IP}"
+    echo "   TTL: 300"
+    echo ""
+    read -p "是否繼續部署？(y/n): " CONTINUE
+    if [ "$CONTINUE" != "y" ]; then
+        exit 0
+    fi
 fi
 
 echo ""
@@ -171,21 +181,38 @@ echo ""
 printf "${YELLOW}等待 cert-manager 創建證書...${NC}\n"
 sleep 5
 
-# 檢查 Certificate
-CERT_NAME="token-admin-api-tls"
+# 檢查所有服務的證書
+CERT_NAMES=(
+    "token-admin-api-tls"
+    "token-app-api-tls"
+    "pos-backend-api-tls"
+    "pos-merchant-api-tls"
+)
+
 MAX_WAIT=300  # 最多等待 5 分鐘
 ELAPSED=0
+ALL_READY=false
 
 while [ $ELAPSED -lt $MAX_WAIT ]; do
-    CERT_STATUS=$(kubectl get certificate $CERT_NAME -n $NAMESPACE -o jsonpath='{.status.conditions[?(@.type=="Ready")].status}' 2>/dev/null || echo "NotFound")
+    ALL_READY=true
+    READY_COUNT=0
     
-    if [ "$CERT_STATUS" = "True" ]; then
-        printf "${GREEN}✓ 證書簽發成功！${NC}\n"
+    for CERT_NAME in "${CERT_NAMES[@]}"; do
+        CERT_STATUS=$(kubectl get certificate $CERT_NAME -n $NAMESPACE -o jsonpath='{.status.conditions[?(@.type=="Ready")].status}' 2>/dev/null || echo "NotFound")
+        
+        if [ "$CERT_STATUS" = "True" ]; then
+            ((READY_COUNT++))
+        else
+            ALL_READY=false
+        fi
+    done
+    
+    printf "${YELLOW}⏳ 等待證書簽發... ($READY_COUNT/${#CERT_NAMES[@]} 就緒, $ELAPSED 秒)${NC}\r"
+    
+    if [ "$ALL_READY" = true ]; then
+        echo ""
+        printf "${GREEN}✓ 所有證書簽發成功！${NC}\n"
         break
-    elif [ "$CERT_STATUS" = "NotFound" ]; then
-        printf "${YELLOW}⏳ 等待證書創建... ($ELAPSED 秒)${NC}\r"
-    else
-        printf "${YELLOW}⏳ 等待證書簽發... ($ELAPSED 秒)${NC}\r"
     fi
     
     sleep 5
@@ -194,15 +221,16 @@ done
 
 echo ""
 
-if [ "$CERT_STATUS" != "True" ]; then
-    printf "${YELLOW}⚠️  證書尚未簽發完成（可能需要更長時間）${NC}\n"
+if [ "$ALL_READY" != true ]; then
+    printf "${YELLOW}⚠️  部分證書尚未簽發完成（可能需要更長時間）${NC}\n"
     printf "${YELLOW}   可以使用以下命令檢查狀態：${NC}\n"
-    echo "   kubectl describe certificate $CERT_NAME -n $NAMESPACE"
+    echo "   kubectl get certificate -n $NAMESPACE"
+    echo "   kubectl describe certificate <cert-name> -n $NAMESPACE"
     echo "   kubectl get challenge -n $NAMESPACE"
 else
-    # 顯示證書詳情
+    # 顯示所有證書詳情
     printf "\n${GREEN}證書詳情：${NC}\n"
-    kubectl get certificate $CERT_NAME -n $NAMESPACE
+    kubectl get certificate -n $NAMESPACE
 fi
 
 echo ""
@@ -211,30 +239,38 @@ printf "${BLUE}   步驟 5: 驗證 HTTPS 訪問${NC}\n"
 printf "${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}\n"
 echo ""
 
-# 測試 HTTP（應該重定向到 HTTPS）
-printf "${YELLOW}測試 HTTP 重定向...${NC}\n"
-HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" -L http://$DOMAIN/health-check 2>/dev/null || echo "000")
+# 測試所有服務的 HTTPS 訪問
+TEST_ENDPOINTS=(
+    "https://token-admin-api.passon.tw/health-check"
+    "https://token-app-api.passon.tw/health-check"
+    "https://pos-backend-api.passon.tw/health"
+    "https://pos-merchant-api.passon.tw/health"
+)
 
-if [ "$HTTP_STATUS" = "200" ]; then
-    printf "${GREEN}✓ HTTP 訪問正常（可能已重定向到 HTTPS）${NC}\n"
-else
-    printf "${YELLOW}⚠️  HTTP 狀態碼: $HTTP_STATUS${NC}\n"
-fi
+HTTPS_SUCCESS=0
+HTTPS_FAIL=0
 
-# 測試 HTTPS
-printf "${YELLOW}測試 HTTPS 訪問...${NC}\n"
-if command -v curl &> /dev/null; then
-    HTTPS_RESPONSE=$(curl -s --max-time 10 https://$DOMAIN/health-check 2>/dev/null || echo "")
+for ENDPOINT in "${TEST_ENDPOINTS[@]}"; do
+    SERVICE_NAME=$(echo $ENDPOINT | cut -d'/' -f3 | cut -d'.' -f1)
+    printf "${YELLOW}測試 ${SERVICE_NAME}...${NC}\n"
     
-    if echo "$HTTPS_RESPONSE" | grep -q "success"; then
-        printf "${GREEN}✓ HTTPS 訪問成功！${NC}\n"
-        echo "   響應: $HTTPS_RESPONSE"
-    else
-        printf "${YELLOW}⚠️  HTTPS 訪問異常或證書尚未生效${NC}\n"
-        printf "${YELLOW}   如果 DNS 和證書都已就緒，請稍後再試${NC}\n"
+    if command -v curl &> /dev/null; then
+        HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" --max-time 10 $ENDPOINT 2>/dev/null || echo "000")
+        
+        if [ "$HTTP_CODE" = "200" ]; then
+            printf "${GREEN}✓ ${SERVICE_NAME} HTTPS 訪問成功 (${HTTP_CODE})${NC}\n"
+            ((HTTPS_SUCCESS++))
+        else
+            printf "${YELLOW}⚠️  ${SERVICE_NAME} 狀態碼: ${HTTP_CODE}${NC}\n"
+            ((HTTPS_FAIL++))
+        fi
     fi
-else
-    printf "${YELLOW}⚠️  curl 命令未安裝，跳過 HTTPS 測試${NC}\n"
+done
+
+echo ""
+printf "${GREEN}✓ 成功: ${HTTPS_SUCCESS}/${#TEST_ENDPOINTS[@]}${NC}\n"
+if [ $HTTPS_FAIL -gt 0 ]; then
+    printf "${YELLOW}⚠️  失敗: ${HTTPS_FAIL}/${#TEST_ENDPOINTS[@]}（可能證書尚未生效）${NC}\n"
 fi
 
 echo ""
@@ -245,20 +281,30 @@ echo ""
 
 printf "${YELLOW}📝 下一步：${NC}\n"
 echo ""
-echo "1. 在瀏覽器中測試："
-echo "   https://$DOMAIN/health-check"
+echo "1. 在瀏覽器中測試所有服務："
+echo "   • https://token-admin-api.passon.tw/health-check"
+echo "   • https://token-app-api.passon.tw/health-check"
+echo "   • https://pos-backend-api.passon.tw/health"
+echo "   • https://pos-merchant-api.passon.tw/health"
 echo ""
-echo "2. 查看證書狀態："
+echo "2. 訪問 Swagger 文檔："
+echo "   • https://token-admin-api.passon.tw/swagger/index.html"
+echo "   • https://token-app-api.passon.tw/swagger/index.html"
+echo "   • https://pos-backend-api.passon.tw/swagger/index.html"
+echo "   • https://pos-merchant-api.passon.tw/swagger/index.html"
+echo ""
+echo "3. 查看證書狀態："
 echo "   kubectl get certificate -n $NAMESPACE"
 echo ""
-echo "3. 查看 Ingress 狀態："
+echo "4. 查看 Ingress 狀態："
 echo "   kubectl get ingress -n $NAMESPACE"
 echo ""
-echo "4. 查看證書詳情："
-echo "   kubectl describe certificate $CERT_NAME -n $NAMESPACE"
+echo "5. 查看特定證書詳情："
+echo "   kubectl describe certificate <cert-name> -n $NAMESPACE"
 echo ""
-echo "5. 如果證書申請失敗，查看 Challenge："
-echo "   kubectl describe challenge -n $NAMESPACE"
+echo "6. 如果證書申請失敗，查看 Challenge："
+echo "   kubectl get challenges -n $NAMESPACE"
+echo "   kubectl describe challenge <challenge-name> -n $NAMESPACE"
 echo ""
 
 printf "${BLUE}💡 提示：${NC}\n"
@@ -266,6 +312,7 @@ echo "• 證書會在到期前 30 天自動更新"
 echo "• HTTP 會自動重定向到 HTTPS"
 echo "• 證書有效期為 90 天"
 echo "• cert-manager 會自動處理更新，無需手動操作"
+echo "• 所有 4 個服務已配置 SSL 證書和 HTTPS"
 echo ""
 
 
