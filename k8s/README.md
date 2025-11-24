@@ -134,32 +134,62 @@ kubectl logs -f deployment/token-admin-api -n passontw-services-staging
 - ✅ imagePullSecrets（GHCR 凭证）
 - ✅ 重启策略
 
-**2. `common-secrets-env.yaml` - 所有服務共用**
-- ✅ Database Secret（DB_HOST, DB_PORT, etc.）
-- ✅ JWT Secret（JWT_SECRET）
-
-**3. `redis-secrets-env.yaml` - 僅 Token APIs**
+**2. `redis-secrets-env.yaml` - 僅 Token APIs**
 - ✅ Redis Secret（REDIS_HOST, REDIS_PORT, etc.）
+
+**⚠️ 已棄用：`common-secrets-env.yaml`**
+- ❌ 已於 2024-11-24 棄用（見 `common-secrets-env.yaml.deprecated`）
+- ❌ 原因：database-secret 和 jwt-secret 為空值，會覆蓋 ConfigMap 配置
+- ✅ 新架構：所有配置（包括資料庫、JWT）都存儲在各服務的 ConfigMap 中
+
+#### 🔧 新配置架構 (2024-11-24)
+
+**環境變數來源優先順序：**
+
+1. **ConfigMap**（主要配置來源）
+   - 由 CI/CD 從 GitHub Secrets 自動同步
+   - 包含所有配置：DB_HOST, DB_PORT, DB_USER, DB_PASSWORD, JWT_SECRET 等
+   - HTTP_HOST 必須設置為 `0.0.0.0`（避免健康檢查失敗）
+
+2. **redis-secret**（僅 Token APIs）
+   - 使用 `envFrom` 注入
+   - 包含 Redis 連接配置
+
+**各服務的環境變數注入方式：**
+
+```yaml
+# Token APIs (token-admin-api, token-app-api)
+envFrom:
+  - configMapRef:
+      name: <service>-config  # 所有配置
+  - secretRef:
+      name: redis-secret      # 僅 Redis 配置
+
+# POS APIs (pos-backend-api, pos-merchant-api)
+envFrom:
+  - configMapRef:
+      name: <service>-config  # 所有配置
+```
 
 #### 🚀 如何使用？
 
 **各服務的 `kustomization.yaml`**
 
 ```yaml
+# 現在只需要這些 patches
 patchesStrategicMerge:
   - ../../base/common-patches.yaml       # ← 所有服務必須
-  - ../../base/common-secrets-env.yaml   # ← 所有服務必須
   - ../../base/redis-secrets-env.yaml    # ← 僅 Token APIs 需要
 ```
 
 **服務分類**
 
-| 服務類型 | common-patches | common-secrets-env | redis-secrets-env |
-|---------|----------------|-------------------|-------------------|
-| Token Admin API | ✅ | ✅ | ✅ |
-| Token App API | ✅ | ✅ | ✅ |
-| POS Backend | ✅ | ✅ | ❌ |
-| POS Merchant | ✅ | ✅ | ❌ |
+| 服務類型 | common-patches | ConfigMap | redis-secret |
+|---------|----------------|-----------|--------------|
+| Token Admin API | ✅ | admin-api-config | ✅ |
+| Token App API | ✅ | app-api-config | ✅ |
+| POS Backend API | ✅ | pos-backend-config | ❌ |
+| POS Merchant API | ✅ | pos-merchant-config | ❌ |
 
 #### 🔧 常見操作
 
@@ -240,9 +270,9 @@ spec:
 # kustomization.yaml - 引用 base
 patchesStrategicMerge:
   - ../../base/common-patches.yaml      # ✅ 一次定義
-  - ../../base/common-secrets-env.yaml  # ✅ 所有服務共用
 
 # deployment.yaml - 只需服務特定配置
+# 環境變數通過 ConfigMap 注入（envFrom）
 spec:
   template:
     spec:
@@ -296,20 +326,27 @@ spec:
 | `resources.requests` | `128Mi / 100m` | 資源請求（內存/CPU）|
 | `resources.limits` | `512Mi / 500m` | 資源限制（內存/CPU）|
 
-**`common-secrets-env.yaml`**
+**`common-secrets-env.yaml` ⚠️ 已棄用**
 
-共用的 Secret 環境變量，應用到所有服務：
+此文件已於 2024-11-24 棄用（見 `common-secrets-env.yaml.deprecated`）
 
-**Database Secret**
-- `DB_HOST` - 數據庫主機
-- `DB_PORT` - 數據庫端口
-- `DB_USER` - 數據庫用戶
-- `DB_PASSWORD` - 數據庫密碼
-- `DB_NAME` - 數據庫名稱
-- `DB_SSL_MODE` - SSL 模式
+**棄用原因：**
+- database-secret 和 jwt-secret 為空值，會覆蓋 ConfigMap 配置
+- 導致服務無法連接資料庫
 
-**JWT Secret**
+**新架構：ConfigMap**
+
+所有環境變量（包括敏感信息）現在存儲在各服務的 ConfigMap 中：
+- `admin-api-config` - Token Admin API
+- `app-api-config` - Token App API
+- `pos-backend-config` - POS Backend API
+- `pos-merchant-config` - POS Merchant API
+
+ConfigMap 由 CI/CD 從 GitHub Secrets 自動同步，包含：
+- `DB_*` - 數據庫配置
 - `JWT_SECRET` - JWT 簽名密鑰
+- `HTTP_HOST` - 必須設置為 `0.0.0.0`
+- 其他服務特定配置
 
 **`redis-secrets-env.yaml`**
 
@@ -329,8 +366,8 @@ Redis Secret 環境變量，僅應用到 Token APIs：
 ```yaml
 patchesStrategicMerge:
   - ../../base/common-patches.yaml       # 所有服務都需要
-  - ../../base/common-secrets-env.yaml   # 所有服務都需要
   - ../../base/redis-secrets-env.yaml    # 僅 Token APIs 需要
+  # common-secrets-env.yaml 已棄用 - 使用 ConfigMap 替代
 ```
 
 **2. 服務分類**
@@ -342,7 +379,6 @@ patchesStrategicMerge:
 ```yaml
 patchesStrategicMerge:
   - ../../base/common-patches.yaml
-  - ../../base/common-secrets-env.yaml
   - ../../base/redis-secrets-env.yaml  # ✅ 使用 Redis
 ```
 
@@ -353,8 +389,7 @@ patchesStrategicMerge:
 ```yaml
 patchesStrategicMerge:
   - ../../base/common-patches.yaml
-  - ../../base/common-secrets-env.yaml
-  # ❌ 不使用 redis-secrets-env.yaml
+  # ❌ 不使用 redis-secrets-env.yaml（POS 服務不需要 Redis）
 ```
 
 #### ✨ 優勢
@@ -564,9 +599,10 @@ kustomize build . | grep -A 10 "imagePullSecrets"
 kustomize build . | grep -A 50 "env:"
 
 # 應該看到：
-# - DB_HOST, DB_PORT, etc. (來自 common-secrets-env.yaml)
-# - JWT_SECRET (來自 common-secrets-env.yaml)
-# - REDIS_HOST, etc. (來自 redis-secrets-env.yaml，僅 Token APIs)
+# - DB_HOST, DB_PORT, etc. (來自 ConfigMap)
+# - JWT_SECRET (來自 ConfigMap)
+# - HTTP_HOST=0.0.0.0 (來自 ConfigMap，必須設置)
+# - REDIS_HOST, etc. (來自 redis-secret envFrom，僅 Token APIs)
 ```
 
 #### 📝 修改共用配置

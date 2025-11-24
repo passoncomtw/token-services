@@ -6,8 +6,13 @@ kind: Kustomization
 
 # 说明：
 # - common-patches.yaml: 共用的安全设置、资源限制
-# - common-secrets-env.yaml: 共用的 Secret 环境变量（Database, JWT）
 # - redis-secrets-env.yaml: Redis 环境变量（仅 Token APIs 使用）
+# 
+# 配置架構 (2024-11-24 更新)：
+# ✅ 所有環境變數（包括敏感信息）都存儲在各服務的 ConfigMap 中
+# ✅ ConfigMap 由 CI/CD 從 GitHub Secrets 自動同步
+# ✅ Token APIs 額外使用 redis-secret（envFrom）
+# ❌ database-secret 和 jwt-secret 已棄用（見 common-secrets-env.yaml.deprecated）
 
 # 注意：这个 base 不直接包含任何 resources
 # 它只提供 patches 供各服务使用
