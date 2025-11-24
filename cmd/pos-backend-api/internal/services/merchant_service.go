@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"strings"
 
-	"passontw-backend-services/cmd/pos-backend-service/internal/models"
+	"passontw-backend-services/cmd/pos-backend-api/internal/models"
 )
 
 /**

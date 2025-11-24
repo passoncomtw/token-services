@@ -3,7 +3,7 @@ package modules
 import (
 	"go.uber.org/fx"
 
-	"passontw-backend-services/cmd/pos-backend-service/internal/services"
+	"passontw-backend-services/cmd/pos-backend-api/internal/services"
 )
 
 // ServicesModule 服務模組 (遵循 SRP)

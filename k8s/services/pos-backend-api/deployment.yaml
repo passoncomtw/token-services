@@ -1,0 +1,88 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pos-backend-api
+  labels:
+    app: pos-backend-api
+    version: v1
+spec:
+  replicas: 2
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  selector:
+    matchLabels:
+      app: pos-backend-api
+  template:
+    metadata:
+      labels:
+        app: pos-backend-api
+        version: v1
+    spec:
+      imagePullSecrets:
+        - name: ghcr-pull-secret
+      
+      containers:
+      - name: pos-backend-api
+        # 镜像标签由 Kustomize 在部署时动态设置
+        image: ghcr.io/passoncomtw/pos-backend-api:placeholder
+        imagePullPolicy: Always
+        
+        ports:
+        - name: http
+          containerPort: 8080
+          protocol: TCP
+        
+        # 使用 envFrom 自動載入 ConfigMap 的所有環境變數
+        # ConfigMap 由 CI/CD 自動更新 (from GitHub Secrets)
+        envFrom:
+        - configMapRef:
+            name: pos-backend-config
+        
+        # 健康檢查
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8080
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+        
+        readinessProbe:
+          httpGet:
+            path: /ready
+            port: 8080
+          initialDelaySeconds: 10
+          periodSeconds: 5
+          timeoutSeconds: 3
+          failureThreshold: 3
+        
+        # 資源限制
+        resources:
+          requests:
+            memory: "128Mi"
+            cpu: "100m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+        
+        # 安全上下文
+        securityContext:
+          runAsNonRoot: true
+          runAsUser: 65534
+          readOnlyRootFilesystem: true
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+              - ALL
+      
+      # Pod 安全策略
+      securityContext:
+        fsGroup: 65534
+      
+      # 重啟策略
+      restartPolicy: Always
+

@@ -66,7 +66,7 @@ spec:
             port:
               number: 80
   
-  # POS Backend Service
+  # POS Backend API
   - host: pos-backend-api.passon.tw
     http:
       paths:
@@ -74,7 +74,7 @@ spec:
         pathType: Prefix
         backend:
           service:
-            name: pos-backend-service
+            name: pos-backend-api
             port:
               number: 80
   

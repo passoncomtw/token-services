@@ -25,7 +25,7 @@ func GenerateToken(secret string, userID, account, name, role, email string) (st
 		Email:   email,
 		RegisteredClaims: jwt.RegisteredClaims{
 			IssuedAt: jwt.NewNumericDate(time.Now()),
-			Issuer:   "pos-backend-service",
+			Issuer:   "pos-backend-api",
 			// 不設定 ExpiresAt，永不過期
 		},
 	}

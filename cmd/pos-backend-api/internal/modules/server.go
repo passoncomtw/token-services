@@ -10,10 +10,10 @@ import (
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 
-	"passontw-backend-services/cmd/pos-backend-service/internal/config"
-	"passontw-backend-services/cmd/pos-backend-service/internal/handlers"
-	"passontw-backend-services/cmd/pos-backend-service/internal/server"
-	"passontw-backend-services/cmd/pos-backend-service/internal/services"
+	"passontw-backend-services/cmd/pos-backend-api/internal/config"
+	"passontw-backend-services/cmd/pos-backend-api/internal/handlers"
+	"passontw-backend-services/cmd/pos-backend-api/internal/server"
+	"passontw-backend-services/cmd/pos-backend-api/internal/services"
 	"passontw-backend-services/pkg/logger"
 )
 

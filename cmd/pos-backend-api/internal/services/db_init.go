@@ -4,8 +4,8 @@ import (
 	"go.uber.org/zap"
 	"gorm.io/gorm"
 
-	"passontw-backend-services/cmd/pos-backend-service/internal/models"
-	"passontw-backend-services/cmd/pos-backend-service/internal/utils"
+	"passontw-backend-services/cmd/pos-backend-api/internal/models"
+	"passontw-backend-services/cmd/pos-backend-api/internal/utils"
 	"passontw-backend-services/pkg/logger"
 )
 

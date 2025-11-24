@@ -1,22 +1,22 @@
-name: Build POS Backend Service
+name: Build POS Backend API
 
 on:
   push:
     branches: [develop]
     paths:
-      - '.github/workflows/cicd-pos-backend-service.yaml'
-      - 'cmd/pos-backend-service/**'
+      - '.github/workflows/cicd-pos-backend-api.yaml'
+      - 'cmd/pos-backend-api/**'
       - 'pkg/**'
-      - 'deploy/pos-backend-service/**'
-      - 'k8s/services/pos-backend-service/**'
+      - 'deploy/pos-backend-api/**'
+      - 'k8s/services/pos-backend-api/**'
       - 'k8s/overlays/**'
       - 'go.mod'
       - 'go.sum'
 
 env:
   REGISTRY: ghcr.io
-  IMAGE_NAME: ${{ github.repository_owner }}/pos-backend-service
-  SERVICE_NAME: pos-backend-service
+  IMAGE_NAME: ${{ github.repository_owner }}/pos-backend-api
+  SERVICE_NAME: pos-backend-api
   NAMESPACE: passontw-services-staging
 
 permissions:
@@ -54,7 +54,7 @@ jobs:
           echo "Building image: $IMAGE_FULL:$TAG"
           
           docker build \
-            --file ./deploy/pos-backend-service/Dockerfile \
+            --file ./deploy/pos-backend-api/Dockerfile \
             --tag "$IMAGE_FULL:$TAG" \
             .
           
@@ -124,13 +124,13 @@ jobs:
       - name: Deploy to Kubernetes
         id: deploy
         run: |
-          echo "🚀 開始部署 pos-backend-service..."
-          echo "📦 Image: ghcr.io/passoncomtw/pos-backend-service:develop"
+          echo "🚀 開始部署 pos-backend-api..."
+          echo "📦 Image: ghcr.io/passoncomtw/pos-backend-api:develop"
           echo "📍 Namespace: ${{ env.NAMESPACE }}"
           
           # 更新鏡像並觸發滾動更新
-          kubectl set image deployment/pos-backend-service \
-            pos-backend-service=ghcr.io/passoncomtw/pos-backend-service:develop \
+          kubectl set image deployment/pos-backend-api \
+            pos-backend-api=ghcr.io/passoncomtw/pos-backend-api:develop \
             -n ${{ env.NAMESPACE }}
           
           echo "✅ 鏡像已更新，滾動更新已觸發"
@@ -226,4 +226,5 @@ jobs:
           kubectl get svc -n ${{ env.NAMESPACE }} ${{ env.SERVICE_NAME }}
           echo ""
           echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+
 

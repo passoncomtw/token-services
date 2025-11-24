@@ -7,10 +7,10 @@ import (
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
 
-	"passontw-backend-services/cmd/pos-backend-service/internal/config"
-	"passontw-backend-services/cmd/pos-backend-service/internal/docs"
-	"passontw-backend-services/cmd/pos-backend-service/internal/handlers"
-	"passontw-backend-services/cmd/pos-backend-service/internal/middleware"
+	"passontw-backend-services/cmd/pos-backend-api/internal/config"
+	"passontw-backend-services/cmd/pos-backend-api/internal/docs"
+	"passontw-backend-services/cmd/pos-backend-api/internal/handlers"
+	"passontw-backend-services/cmd/pos-backend-api/internal/middleware"
 	"passontw-backend-services/pkg/logger"
 
 	swaggerFiles "github.com/swaggo/files"

@@ -4,8 +4,8 @@ import (
 	"net/http"
 	"strings"
 
-	"passontw-backend-services/cmd/pos-backend-service/internal/config"
-	"passontw-backend-services/cmd/pos-backend-service/internal/utils"
+	"passontw-backend-services/cmd/pos-backend-api/internal/config"
+	"passontw-backend-services/cmd/pos-backend-api/internal/utils"
 
 	"github.com/gin-gonic/gin"
 )

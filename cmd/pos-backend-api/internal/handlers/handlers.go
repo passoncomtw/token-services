@@ -1,8 +1,8 @@
 package handlers
 
 import (
-	"passontw-backend-services/cmd/pos-backend-service/internal/handlers/admin"
-	"passontw-backend-services/cmd/pos-backend-service/internal/services"
+	"passontw-backend-services/cmd/pos-backend-api/internal/handlers/admin"
+	"passontw-backend-services/cmd/pos-backend-api/internal/services"
 	"passontw-backend-services/pkg/logger"
 )
 

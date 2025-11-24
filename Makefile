@@ -2,7 +2,7 @@
 GOPATH := $(shell go env GOPATH)
 DOCS_DIR_ADMIN := cmd/token-admin-api/internal/docs
 DOCS_DIR_APP := cmd/token-app-api/internal/docs
-DOCS_DIR_POS := cmd/pos-backend-service/internal/docs
+DOCS_DIR_POS := cmd/pos-backend-api/internal/docs
 DOCS_DIR_MERCHANT := cmd/pos-merchant-service/internal/docs
 
 # ==================== Swagger 文檔 ====================
@@ -47,7 +47,7 @@ build-pos-backend-swagger: ## 生成 pos-backend-api 的 Swagger 文檔
 		go install github.com/swaggo/swag/cmd/swag@latest; \
 	fi
 	@mkdir -p $(DOCS_DIR_POS)
-	@cd cmd/pos-backend-service && $(GOPATH)/bin/swag init \
+	@cd cmd/pos-backend-api && $(GOPATH)/bin/swag init \
 		-g main.go \
 		-o internal/docs \
 		--parseDependency \
@@ -113,7 +113,7 @@ run-pos-backend-api: ## 使用 air 執行 pos-backend-api
 		echo "⚠️  air 未安裝，正在安裝..."; \
 		go install github.com/air-verse/air@latest; \
 	fi
-	@cd cmd/pos-backend-service && $(GOPATH)/bin/air
+	@cd cmd/pos-backend-api && $(GOPATH)/bin/air
 
 .PHONY: run-pos-merchant-service
 run-pos-merchant-service: ## 使用 air 執行 pos-merchant-service

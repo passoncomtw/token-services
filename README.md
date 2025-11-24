@@ -957,7 +957,7 @@ gh workflow run "CI/CD - Admin API" -f skip_build=true
 |------|---------------|----------------|
 | **token-admin-api** | `DEV_TOKEN_ADMIN` | `admin-api-config` |
 | **token-app-api** | `DEV_TOKEN_APP` | `app-api-config` |
-| **pos-backend-service** | `DEV_POS_BACKEND` | `pos-backend-config` |
+| **pos-backend-api** | `DEV_POS_BACKEND` | `pos-backend-config` |
 | **pos-merchant-service** | `DEV_POS_MERCHANT` | `pos-merchant-config` |
 
 ### 🎯 核心功能
@@ -1007,7 +1007,7 @@ SWAGGER_BASE_DOMAIN=token-app-api.passon.tw
 # ... 其他非敏感配置
 ```
 
-**POS Backend Service: `DEV_POS_BACKEND`**
+**POS Backend API: `DEV_POS_BACKEND`**
 ```bash
 APP_ENV=staging
 HTTP_PORT=8080
@@ -1103,7 +1103,7 @@ Pod 自動載入新配置
 
 1. **更新本地 .env**
 ```bash
-# cmd/pos-backend-service/.env
+# cmd/pos-backend-api/.env
 NEW_FEATURE_ENABLED=true
 ```
 
@@ -1189,7 +1189,7 @@ kubectl create secret generic pos-backend-secrets \
 
 #### 在 Deployment 中使用 Secret
 
-如果需要添加新的敏感配置，需要更新 `k8s/services/pos-backend-service/deployment.yaml`：
+如果需要添加新的敏感配置，需要更新 `k8s/services/pos-backend-api/deployment.yaml`：
 
 ```yaml
 env:
@@ -1222,7 +1222,7 @@ git push origin develop
 kubectl get configmap pos-backend-config -n passontw-services-staging -o yaml
 
 # 5. 檢查 Pod 是否使用新配置
-kubectl get pods -n passontw-services-staging -l app=pos-backend-service
+kubectl get pods -n passontw-services-staging -l app=pos-backend-api
 kubectl logs <pod-name> -n passontw-services-staging | head -20
 ```
 
@@ -1285,10 +1285,10 @@ kubectl get configmap pos-backend-config -n passontw-services-staging -o yaml
 **解決方法**：
 ```bash
 # 強制重啟 Pod
-kubectl rollout restart deployment/pos-backend-service -n passontw-services-staging
+kubectl rollout restart deployment/pos-backend-api -n passontw-services-staging
 
 # 等待重啟完成
-kubectl rollout status deployment/pos-backend-service -n passontw-services-staging
+kubectl rollout status deployment/pos-backend-api -n passontw-services-staging
 
 # 驗證新 Pod
 kubectl exec -it <new-pod-name> -n passontw-services-staging -- env | grep YOUR_VAR
@@ -1328,11 +1328,11 @@ kubectl exec -it <new-pod-name> -n passontw-services-staging -- env | grep YOUR_
 6. `k8s/services/token-app-api/configmap.yaml` - 添加說明註釋
 
 **POS Services**：
-7. `.github/workflows/cicd-pos-backend-service.yaml` - 添加 ConfigMap 同步步驟
+7. `.github/workflows/cicd-pos-backend-api.yaml` - 添加 ConfigMap 同步步驟
 8. `.github/workflows/cicd-pos-merchant-service.yaml` - 添加 ConfigMap 同步步驟
-9. `k8s/services/pos-backend-service/deployment.yaml` - 改用 envFrom
+9. `k8s/services/pos-backend-api/deployment.yaml` - 改用 envFrom
 10. `k8s/services/pos-merchant-service/deployment.yaml` - 改用 envFrom
-11. `k8s/services/pos-backend-service/configmap.yaml` - 添加說明註釋
+11. `k8s/services/pos-backend-api/configmap.yaml` - 添加說明註釋
 12. `k8s/services/pos-merchant-service/configmap.yaml` - 添加說明註釋
 
 ### ✅ 驗證檢查清單
@@ -1342,7 +1342,7 @@ kubectl exec -it <new-pod-name> -n passontw-services-staging -- env | grep YOUR_
 - [ ] GitHub Secrets 已設定
   - [ ] `DEV_TOKEN_ADMIN`（Token Admin API）
   - [ ] `DEV_TOKEN_APP`（Token App API）
-  - [ ] `DEV_POS_BACKEND`（POS Backend Service）
+  - [ ] `DEV_POS_BACKEND`（POS Backend API）
   - [ ] `DEV_POS_MERCHANT`（POS Merchant Service）
 - [ ] CI/CD 執行成功
 - [ ] ConfigMap 已更新（`kubectl get configmap -n passontw-services-staging`）

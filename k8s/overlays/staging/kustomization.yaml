@@ -6,7 +6,7 @@ resources:
 - namespace.yaml
 - ../../services/token-admin-api
 - ../../services/token-app-api
-- ../../services/pos-backend-service
+- ../../services/pos-backend-api
 - ../../services/pos-merchant-service
 - ingress.yaml
 
@@ -19,7 +19,7 @@ images:
     newTag: develop
   - name: ghcr.io/passoncomtw/token-app-api
     newTag: develop
-  - name: ghcr.io/passoncomtw/pos-backend-service
+  - name: ghcr.io/passoncomtw/pos-backend-api
     newTag: develop
   - name: ghcr.io/passoncomtw/pos-merchant-service
     newTag: develop
@@ -54,7 +54,7 @@ patches:
       value: 2
   target:
     kind: Deployment
-    name: pos-backend-service
+    name: pos-backend-api
 - patch: |-
     - op: replace
       path: /spec/replicas

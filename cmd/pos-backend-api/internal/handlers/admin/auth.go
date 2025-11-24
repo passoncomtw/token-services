@@ -3,8 +3,8 @@ package admin
 import (
 	"net/http"
 
-	"passontw-backend-services/cmd/pos-backend-service/internal/models"
-	"passontw-backend-services/cmd/pos-backend-service/internal/services"
+	"passontw-backend-services/cmd/pos-backend-api/internal/models"
+	"passontw-backend-services/cmd/pos-backend-api/internal/services"
 	"passontw-backend-services/pkg/logger"
 
 	"github.com/gin-gonic/gin"

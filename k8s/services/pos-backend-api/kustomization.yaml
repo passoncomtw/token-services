@@ -1,0 +1,19 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+# 本地资源
+resources:
+  - deployment.yaml
+  - service.yaml
+  - configmap.yaml
+
+# 注意：共用配置补丁现在在 overlays/staging 层级应用
+# - common-patches.yaml（安全设置、资源限制）
+# - common-secrets-env.yaml（Database + JWT）
+# POS Services 不需要 Redis
+
+# 镜像配置（将被 overlay 覆盖）
+images:
+  - name: ghcr.io/passoncomtw/pos-backend-api
+    newTag: placeholder
+
