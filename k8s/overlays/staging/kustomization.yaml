@@ -7,7 +7,7 @@ resources:
 - ../../services/token-admin-api
 - ../../services/token-app-api
 - ../../services/pos-backend-api
-- ../../services/pos-merchant-service
+- ../../services/pos-merchant-api
 - ingress.yaml
 
 # Staging 命名空间
@@ -21,44 +21,44 @@ images:
     newTag: develop
   - name: ghcr.io/passoncomtw/pos-backend-api
     newTag: develop
-  - name: ghcr.io/passoncomtw/pos-merchant-service
+  - name: ghcr.io/passoncomtw/pos-merchant-api
     newTag: develop
 
 # Staging 环境的资源配置
 # 使用 JSON Patch 语法来修改副本数
-  # Token Admin API - 2 副本
+  # Token Admin API - 1 副本
   
-  # Token App API - 2 副本
+  # Token App API - 1 副本
   
-  # POS Backend Service - 2 副本
+  # POS Backend API - 1 副本
   
-  # POS Merchant Service - 2 副本
+  # POS Merchant API - 1 副本
 patches:
 - patch: |-
     - op: replace
       path: /spec/replicas
-      value: 2
+      value: 1
   target:
     kind: Deployment
     name: token-admin-api
 - patch: |-
     - op: replace
       path: /spec/replicas
-      value: 2
+      value: 1
   target:
     kind: Deployment
     name: token-app-api
 - patch: |-
     - op: replace
       path: /spec/replicas
-      value: 2
+      value: 1
   target:
     kind: Deployment
     name: pos-backend-api
 - patch: |-
     - op: replace
       path: /spec/replicas
-      value: 2
+      value: 1
   target:
     kind: Deployment
-    name: pos-merchant-service
+    name: pos-merchant-api

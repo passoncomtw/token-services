@@ -78,7 +78,7 @@ spec:
             port:
               number: 80
   
-  # POS Merchant Service
+  # POS Merchant API
   - host: pos-merchant-api.passon.tw
     http:
       paths:
@@ -86,7 +86,7 @@ spec:
         pathType: Prefix
         backend:
           service:
-            name: pos-merchant-service
+            name: pos-merchant-api
             port:
               number: 80
 

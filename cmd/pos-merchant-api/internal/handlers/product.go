@@ -6,10 +6,10 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 
-	"passontw-backend-services/cmd/pos-merchant-service/internal/config"
-	"passontw-backend-services/cmd/pos-merchant-service/internal/models"
-	"passontw-backend-services/cmd/pos-merchant-service/internal/services"
-	"passontw-backend-services/cmd/pos-merchant-service/internal/utils"
+	"passontw-backend-services/cmd/pos-merchant-api/internal/config"
+	"passontw-backend-services/cmd/pos-merchant-api/internal/models"
+	"passontw-backend-services/cmd/pos-merchant-api/internal/services"
+	"passontw-backend-services/cmd/pos-merchant-api/internal/utils"
 )
 
 // contains 檢查字串切片是否包含指定值

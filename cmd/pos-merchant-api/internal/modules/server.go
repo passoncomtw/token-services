@@ -1,7 +1,7 @@
 package modules
 
 import (
-	"passontw-backend-services/cmd/pos-merchant-service/internal/server"
+	"passontw-backend-services/cmd/pos-merchant-api/internal/server"
 
 	"go.uber.org/fx"
 )

@@ -1,22 +1,22 @@
-name: Build POS Merchant Service
+name: Build POS Merchant API
 
 on:
   push:
     branches: [develop]
     paths:
-      - '.github/workflows/cicd-pos-merchant-service.yaml'
-      - 'cmd/pos-merchant-service/**'
+      - '.github/workflows/cicd-pos-merchant-api.yaml'
+      - 'cmd/pos-merchant-api/**'
       - 'pkg/**'
-      - 'deploy/pos-merchant-service/**'
-      - 'k8s/services/pos-merchant-service/**'
+      - 'deploy/pos-merchant-api/**'
+      - 'k8s/services/pos-merchant-api/**'
       - 'k8s/overlays/**'
       - 'go.mod'
       - 'go.sum'
 
 env:
   REGISTRY: ghcr.io
-  IMAGE_NAME: ${{ github.repository_owner }}/pos-merchant-service
-  SERVICE_NAME: pos-merchant-service
+  IMAGE_NAME: ${{ github.repository_owner }}/pos-merchant-api
+  SERVICE_NAME: pos-merchant-api
   NAMESPACE: passontw-services-staging
 
 permissions:
@@ -55,7 +55,7 @@ jobs:
           echo "Building image: $IMAGE_FULL:$TAG"
           
           docker build \
-            --file ./deploy/pos-merchant-service/Dockerfile \
+            --file ./deploy/pos-merchant-api/Dockerfile \
             --tag "$IMAGE_FULL:$TAG" \
             .
           
@@ -102,13 +102,13 @@ jobs:
       - name: Deploy to Kubernetes
         id: deploy
         run: |
-          echo "🚀 開始部署 pos-merchant-service..."
-          echo "📦 Image: ghcr.io/passoncomtw/pos-merchant-service:develop"
+          echo "🚀 開始部署 pos-merchant-api..."
+          echo "📦 Image: ghcr.io/passoncomtw/pos-merchant-api:develop"
           echo "📍 Namespace: ${{ env.NAMESPACE }}"
           
           # 更新鏡像並觸發滾動更新
-          kubectl set image deployment/pos-merchant-service \
-            pos-merchant-service=ghcr.io/passoncomtw/pos-merchant-service:develop \
+          kubectl set image deployment/pos-merchant-api \
+            pos-merchant-api=ghcr.io/passoncomtw/pos-merchant-api:develop \
             -n ${{ env.NAMESPACE }}
           
           echo "✅ 鏡像已更新，滾動更新已觸發"
@@ -191,3 +191,4 @@ jobs:
           kubectl get svc -n ${{ env.NAMESPACE }} ${{ env.SERVICE_NAME }}
           echo ""
           echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+

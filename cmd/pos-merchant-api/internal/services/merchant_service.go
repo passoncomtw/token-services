@@ -7,8 +7,8 @@ import (
 	"go.uber.org/zap"
 	"gorm.io/gorm"
 
-	"passontw-backend-services/cmd/pos-merchant-service/internal/config"
-	"passontw-backend-services/cmd/pos-merchant-service/internal/models"
+	"passontw-backend-services/cmd/pos-merchant-api/internal/config"
+	"passontw-backend-services/cmd/pos-merchant-api/internal/models"
 )
 
 // gRPC 請求與回應結構

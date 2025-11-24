@@ -7,8 +7,8 @@ import (
 	"fmt"
 	"time"
 
-	"passontw-backend-services/cmd/pos-merchant-service/internal/models"
-	"passontw-backend-services/cmd/pos-merchant-service/internal/repository"
+	"passontw-backend-services/cmd/pos-merchant-api/internal/models"
+	"passontw-backend-services/cmd/pos-merchant-api/internal/repository"
 
 	"github.com/google/uuid"
 )

@@ -13,13 +13,13 @@ import (
 	"go.uber.org/fx"
 	"go.uber.org/zap"
 
-	"passontw-backend-services/cmd/pos-merchant-service/internal/config"
+	"passontw-backend-services/cmd/pos-merchant-api/internal/config"
 	"passontw-backend-services/pkg/logger"
-	"passontw-backend-services/cmd/pos-merchant-service/internal/docs"
-	"passontw-backend-services/cmd/pos-merchant-service/internal/handlers"
-	"passontw-backend-services/cmd/pos-merchant-service/internal/middleware"
-	"passontw-backend-services/cmd/pos-merchant-service/internal/repository"
-	"passontw-backend-services/cmd/pos-merchant-service/internal/services"
+	"passontw-backend-services/cmd/pos-merchant-api/internal/docs"
+	"passontw-backend-services/cmd/pos-merchant-api/internal/handlers"
+	"passontw-backend-services/cmd/pos-merchant-api/internal/middleware"
+	"passontw-backend-services/cmd/pos-merchant-api/internal/repository"
+	"passontw-backend-services/cmd/pos-merchant-api/internal/services"
 )
 
 func StartHTTPServer(lc fx.Lifecycle, log logger.Logger, db *gorm.DB, productSvc services.ProductService) {

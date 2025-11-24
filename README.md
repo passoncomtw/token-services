@@ -958,7 +958,7 @@ gh workflow run "CI/CD - Admin API" -f skip_build=true
 | **token-admin-api** | `DEV_TOKEN_ADMIN` | `admin-api-config` |
 | **token-app-api** | `DEV_TOKEN_APP` | `app-api-config` |
 | **pos-backend-api** | `DEV_POS_BACKEND` | `pos-backend-config` |
-| **pos-merchant-service** | `DEV_POS_MERCHANT` | `pos-merchant-config` |
+| **pos-merchant-api** | `DEV_POS_MERCHANT` | `pos-merchant-config` |
 
 ### 🎯 核心功能
 
@@ -1016,7 +1016,7 @@ SWAGGER_BASE_DOMAIN=pos-backend-api.passon.tw
 # ... 其他非敏感配置
 ```
 
-**POS Merchant Service: `DEV_POS_MERCHANT`**
+**POS Merchant API: `DEV_POS_MERCHANT`**
 ```bash
 APP_ENV=staging
 HTTP_PORT=8080
@@ -1049,7 +1049,7 @@ kubectl get configmap pos-merchant-config -n passontw-services-staging -o yaml
 kubectl get pods -n passontw-services-staging -l app=token-admin-api
 kubectl get pods -n passontw-services-staging -l app=token-app-api
 kubectl get pods -n passontw-services-staging -l app=pos-backend-service
-kubectl get pods -n passontw-services-staging -l app=pos-merchant-service
+kubectl get pods -n passontw-services-staging -l app=pos-merchant-api
 ```
 
 ### ⚠️ 重要注意事項
@@ -1329,11 +1329,11 @@ kubectl exec -it <new-pod-name> -n passontw-services-staging -- env | grep YOUR_
 
 **POS Services**：
 7. `.github/workflows/cicd-pos-backend-api.yaml` - 添加 ConfigMap 同步步驟
-8. `.github/workflows/cicd-pos-merchant-service.yaml` - 添加 ConfigMap 同步步驟
+8. `.github/workflows/cicd-pos-merchant-api.yaml` - 添加 ConfigMap 同步步驟
 9. `k8s/services/pos-backend-api/deployment.yaml` - 改用 envFrom
-10. `k8s/services/pos-merchant-service/deployment.yaml` - 改用 envFrom
+10. `k8s/services/pos-merchant-api/deployment.yaml` - 改用 envFrom
 11. `k8s/services/pos-backend-api/configmap.yaml` - 添加說明註釋
-12. `k8s/services/pos-merchant-service/configmap.yaml` - 添加說明註釋
+12. `k8s/services/pos-merchant-api/configmap.yaml` - 添加說明註釋
 
 ### ✅ 驗證檢查清單
 
@@ -1343,7 +1343,7 @@ kubectl exec -it <new-pod-name> -n passontw-services-staging -- env | grep YOUR_
   - [ ] `DEV_TOKEN_ADMIN`（Token Admin API）
   - [ ] `DEV_TOKEN_APP`（Token App API）
   - [ ] `DEV_POS_BACKEND`（POS Backend API）
-  - [ ] `DEV_POS_MERCHANT`（POS Merchant Service）
+  - [ ] `DEV_POS_MERCHANT`（POS Merchant API）
 - [ ] CI/CD 執行成功
 - [ ] ConfigMap 已更新（`kubectl get configmap -n passontw-services-staging`）
 - [ ] Pod 正常運行（`kubectl get pods -n passontw-services-staging`）

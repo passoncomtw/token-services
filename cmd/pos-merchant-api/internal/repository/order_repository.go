@@ -1,7 +1,7 @@
 package repository
 
 import (
-	"passontw-backend-services/cmd/pos-merchant-service/internal/models"
+	"passontw-backend-services/cmd/pos-merchant-api/internal/models"
 
 	"gorm.io/gorm"
 )

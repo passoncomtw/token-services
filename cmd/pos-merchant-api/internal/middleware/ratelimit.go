@@ -8,8 +8,8 @@ import (
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 
-	"passontw-backend-services/cmd/pos-merchant-service/internal/models"
-	"passontw-backend-services/cmd/pos-merchant-service/internal/utils"
+	"passontw-backend-services/cmd/pos-merchant-api/internal/models"
+	"passontw-backend-services/cmd/pos-merchant-api/internal/utils"
 )
 
 // LoginAttempt 登入嘗試記錄

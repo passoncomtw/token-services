@@ -36,7 +36,7 @@ RUN --mount=type=cache,target=/go/pkg/mod \
     --mount=type=cache,target=/root/.cache/go-tmp \
     mkdir -p /root/.cache/go-tmp && \
     go install github.com/swaggo/swag/cmd/swag@latest && \
-    cd cmd/pos-backend-service && \
+    cd cmd/pos-merchant-api && \
     swag init -g main.go \
       -o internal/docs \
       --parseDependency --parseInternal
@@ -48,8 +48,8 @@ RUN --mount=type=cache,target=/go/pkg/mod \
     mkdir -p /root/.cache/go-tmp && \
     go build -v -trimpath \
     -ldflags="-w -s -X main.version=${VERSION:-dev}" \
-    -o pos-backend-service \
-    ./cmd/pos-backend-service
+    -o pos-merchant-api \
+    ./cmd/pos-merchant-api
 
 # ===================================
 # 第二階段：建立最小化執行映像
@@ -60,7 +60,7 @@ FROM scratch
 WORKDIR /app
 
 # 從 builder 階段複製建置好的執行檔
-COPY --from=builder /app/pos-backend-service ./
+COPY --from=builder /app/pos-merchant-api ./
 
 # 複製 SSL 憑證（用於 HTTPS 連線）
 COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
@@ -69,5 +69,6 @@ COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
 EXPOSE 8080
 
 # 設定啟動指令
-ENTRYPOINT ["./pos-backend-service"]
+ENTRYPOINT ["./pos-merchant-api"]
+
 

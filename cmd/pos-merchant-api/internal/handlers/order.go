@@ -2,8 +2,8 @@ package handlers
 
 import (
 	"net/http"
-	"passontw-backend-services/cmd/pos-merchant-service/internal/services"
-	"passontw-backend-services/cmd/pos-merchant-service/internal/utils"
+	"passontw-backend-services/cmd/pos-merchant-api/internal/services"
+	"passontw-backend-services/cmd/pos-merchant-api/internal/utils"
 
 	"github.com/gin-gonic/gin"
 )

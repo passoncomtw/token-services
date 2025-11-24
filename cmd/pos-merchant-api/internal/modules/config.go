@@ -9,7 +9,7 @@ import (
 
 	"go.uber.org/fx"
 
-	"passontw-backend-services/cmd/pos-merchant-service/internal/config"
+	"passontw-backend-services/cmd/pos-merchant-api/internal/config"
 	pkgConfig "passontw-backend-services/pkg/config"
 	"passontw-backend-services/pkg/logger"
 )

@@ -2,7 +2,7 @@ package repository
 
 import (
 	"context"
-	"passontw-backend-services/cmd/pos-merchant-service/internal/models"
+	"passontw-backend-services/cmd/pos-merchant-api/internal/models"
 
 	"github.com/google/uuid"
 	"gorm.io/gorm"
