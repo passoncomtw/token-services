@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>後台管理系統 - 登入</title>
+    <title>商家總後台 - 登入</title>
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&display=swap" rel="stylesheet">
     <style>
@@ -13,7 +13,6 @@
             --error-color: #f13a59;
             --text-color: #000000;
             --background-color: #F5F5F5;
-            --card-color: #FFFFFF;
             --border-color: #E0E0E0;
         }
         
@@ -21,7 +20,7 @@
             font-family: 'Noto Sans TC', sans-serif;
             margin: 0;
             padding: 0;
-            background-color: var(--background-color);
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             display: flex;
             justify-content: center;
             align-items: center;
@@ -30,35 +29,42 @@
         
         .login-container {
             background-color: white;
-            border-radius: 12px;
-            padding: 40px;
+            border-radius: 16px;
+            padding: 48px;
             width: 100%;
-            max-width: 400px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            max-width: 420px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
         }
         
         .login-header {
             text-align: center;
-            margin-bottom: 32px;
+            margin-bottom: 40px;
         }
         
         .login-header .logo {
-            width: 64px;
-            height: 64px;
+            width: 72px;
+            height: 72px;
             background-color: var(--primary-color);
-            border-radius: 12px;
+            border-radius: 16px;
             display: flex;
             justify-content: center;
             align-items: center;
-            margin: 0 auto 16px;
+            margin: 0 auto 20px;
             color: white;
+            font-size: 36px;
         }
         
         .login-header h1 {
-            margin: 0;
-            font-size: 24px;
-            font-weight: 500;
+            margin: 0 0 8px 0;
+            font-size: 26px;
+            font-weight: 600;
             color: var(--text-color);
+        }
+        
+        .login-header p {
+            margin: 0;
+            font-size: 14px;
+            color: var(--secondary-color);
         }
         
         .form-group {
@@ -69,16 +75,18 @@
             display: block;
             margin-bottom: 8px;
             font-size: 14px;
-            color: var(--secondary-color);
+            font-weight: 500;
+            color: var(--text-color);
         }
         
         .form-group input {
             width: 100%;
-            padding: 12px;
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
+            padding: 14px 16px;
+            border: 2px solid var(--border-color);
+            border-radius: 10px;
             font-size: 16px;
             box-sizing: border-box;
+            transition: border-color 0.3s ease;
         }
         
         .form-group input:focus {
@@ -88,26 +96,26 @@
         
         .login-button {
             width: 100%;
-            padding: 12px;
+            padding: 14px;
             background-color: var(--primary-color);
             color: white;
             border: none;
-            border-radius: 8px;
+            border-radius: 10px;
             font-size: 16px;
-            font-weight: 500;
+            font-weight: 600;
             cursor: pointer;
-            transition: background-color 0.3s ease;
+            transition: all 0.3s ease;
+            margin-top: 8px;
         }
         
         .login-button:hover {
             background-color: #4A0BB4;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(86, 12, 206, 0.3);
         }
         
-        .error-message {
-            color: var(--error-color);
-            font-size: 14px;
-            margin-top: 8px;
-            display: none;
+        .login-button:active {
+            transform: translateY(0);
         }
     </style>
 </head>
@@ -115,25 +123,24 @@
     <div class="login-container">
         <div class="login-header">
             <div class="logo">
-                <span class="material-icons">shopping_cart</span>
+                <span class="material-icons">storefront</span>
             </div>
-            <h1>後台管理系統</h1>
+            <h1>商家總後台</h1>
+            <p>管理您的所有商家與訂單</p>
         </div>
         
-        <form>
+        <form action="merchants.html">
             <div class="form-group">
                 <label for="email">電子郵件</label>
-                <input type="email" id="email" name="email" required>
-                <div class="error-message">請輸入有效的電子郵件地址</div>
+                <input type="email" id="email" name="email" placeholder="admin@example.com" value="admin@shoppingcar.com" required>
             </div>
             
             <div class="form-group">
                 <label for="password">密碼</label>
-                <input type="password" id="password" name="password" required>
-                <div class="error-message">請輸入密碼</div>
+                <input type="password" id="password" name="password" placeholder="請輸入密碼" value="password123" required>
             </div>
             
-            <button type="submit" class="login-button">登入</button>
+            <button type="submit" class="login-button">登入系統</button>
         </form>
     </div>
 </body>
