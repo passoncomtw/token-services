@@ -1,0 +1,586 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>購物車應用 - 結帳</title>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #560CCE;
+            --secondary-color: #414757;
+            --error-color: #f13a59;
+            --text-color: #000000;
+            --background-color: #F5F5F5;
+            --card-color: #FFFFFF;
+            --border-color: #E0E0E0;
+        }
+        
+        body {
+            font-family: 'Noto Sans TC', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: var(--background-color);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        
+        .ios-frame {
+            width: 375px;
+            height: 812px;
+            background-color: white;
+            border-radius: 40px;
+            overflow: hidden;
+            position: relative;
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.2);
+            border: 10px solid black;
+            box-sizing: content-box;
+        }
+        
+        .ios-notch {
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 180px;
+            height: 30px;
+            background-color: black;
+            border-bottom-left-radius: 15px;
+            border-bottom-right-radius: 15px;
+            z-index: 10;
+        }
+        
+        .app-container {
+            width: 100%;
+            height: 100%;
+            overflow-y: auto;
+            background-color: var(--background-color);
+            position: relative;
+        }
+        
+        .status-bar {
+            height: 44px;
+            background-color: var(--primary-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 15px;
+            padding-top: 15px;
+            color: white;
+        }
+        
+        .status-bar .time {
+            font-weight: bold;
+        }
+        
+        .status-bar .icons {
+            display: flex;
+        }
+        
+        .status-bar .icons .icon {
+            margin-left: 8px;
+        }
+        
+        .app-header {
+            background-color: var(--primary-color);
+            padding: 0 20px;
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            height: 56px;
+        }
+        
+        .app-header h1 {
+            font-size: 20px;
+            margin: 0;
+        }
+        
+        .app-header .back-button {
+            display: flex;
+            align-items: center;
+            margin-right: 16px;
+        }
+        
+        .checkout-content {
+            padding-bottom: 80px;
+        }
+        
+        .section-card {
+            background-color: white;
+            margin-bottom: 12px;
+            padding: 16px;
+        }
+        
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+        
+        .section-title {
+            font-size: 16px;
+            font-weight: 500;
+            margin: 0;
+            display: flex;
+            align-items: center;
+        }
+        
+        .section-title .material-icons {
+            margin-right: 8px;
+            color: var(--primary-color);
+        }
+        
+        .section-action {
+            font-size: 14px;
+            color: var(--primary-color);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+        }
+        
+        .address-info {
+            display: flex;
+            margin-top: 12px;
+        }
+        
+        .address-icon {
+            margin-right: 12px;
+            color: var(--secondary-color);
+        }
+        
+        .address-details {
+            flex: 1;
+        }
+        
+        .address-name {
+            font-weight: 500;
+            margin-bottom: 4px;
+        }
+        
+        .address-phone {
+            color: var(--secondary-color);
+            margin-bottom: 4px;
+            font-size: 14px;
+        }
+        
+        .address-text {
+            font-size: 14px;
+            color: var(--secondary-color);
+        }
+        
+        .payment-option {
+            display: flex;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+        
+        .payment-option:last-child {
+            margin-bottom: 0;
+        }
+        
+        .payment-radio {
+            margin-right: 16px;
+        }
+        
+        .payment-icon {
+            margin-right: 12px;
+            color: var(--secondary-color);
+        }
+        
+        .payment-name {
+            flex: 1;
+        }
+        
+        .order-items {
+            margin-top: 12px;
+        }
+        
+        .order-item {
+            display: flex;
+            padding: 12px 0;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .order-item:last-child {
+            border-bottom: none;
+            padding-bottom: 0;
+        }
+        
+        .item-image {
+            width: 64px;
+            height: 64px;
+            background-size: cover;
+            background-position: center;
+            border-radius: 4px;
+            margin-right: 12px;
+            flex-shrink: 0;
+        }
+        
+        .item-details {
+            flex: 1;
+        }
+        
+        .item-name {
+            font-size: 14px;
+            font-weight: 500;
+            margin-bottom: 4px;
+        }
+        
+        .item-variant {
+            font-size: 12px;
+            color: var(--secondary-color);
+            margin-bottom: 8px;
+        }
+        
+        .item-price-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .item-price {
+            font-size: 14px;
+            font-weight: 500;
+        }
+        
+        .item-quantity {
+            font-size: 12px;
+            color: var(--secondary-color);
+        }
+        
+        .order-summary {
+            margin-top: 16px;
+            padding-top: 16px;
+            border-top: 1px dashed var(--border-color);
+        }
+        
+        .summary-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+        
+        .summary-row:last-child {
+            margin-bottom: 0;
+        }
+        
+        .summary-label {
+            color: var(--secondary-color);
+        }
+        
+        .summary-total {
+            font-weight: 500;
+            color: var(--error-color);
+        }
+        
+        .promo-input {
+            display: flex;
+            margin-top: 12px;
+        }
+        
+        .promo-input input {
+            flex: 1;
+            height: 40px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px 0 0 4px;
+            padding: 0 12px;
+            outline: none;
+            font-size: 14px;
+        }
+        
+        .promo-input button {
+            height: 42px;
+            border: none;
+            border-radius: 0 4px 4px 0;
+            background-color: var(--primary-color);
+            color: white;
+            padding: 0 16px;
+            font-weight: 500;
+            cursor: pointer;
+        }
+        
+        .delivery-option {
+            display: flex;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+        
+        .delivery-option:last-child {
+            margin-bottom: 0;
+        }
+        
+        .delivery-radio {
+            margin-right: 16px;
+        }
+        
+        .delivery-info {
+            flex: 1;
+        }
+        
+        .delivery-name {
+            font-weight: 500;
+            margin-bottom: 2px;
+        }
+        
+        .delivery-description {
+            font-size: 12px;
+            color: var(--secondary-color);
+        }
+        
+        .delivery-price {
+            font-weight: 500;
+        }
+        
+        .checkout-button {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 16px;
+            height: 64px;
+            background-color: white;
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            box-shadow: 0 -2px 5px rgba(0,0,0,0.1);
+            border-top: 1px solid var(--border-color);
+            z-index: 100;
+        }
+        
+        .checkout-total {
+            font-size: 14px;
+            color: var(--secondary-color);
+        }
+        
+        .checkout-price {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--error-color);
+        }
+        
+        .pay-button {
+            height: 44px;
+            width: 140px;
+            border-radius: 22px;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div class="ios-frame">
+        <div class="ios-notch"></div>
+        <div class="app-container">
+            <div class="status-bar">
+                <span class="time">9:41</span>
+                <div class="icons">
+                    <span class="icon">📶</span>
+                    <span class="icon">📳</span>
+                    <span class="icon">🔋</span>
+                </div>
+            </div>
+            
+            <div class="app-header">
+                <div class="back-button">
+                    <span class="material-icons">arrow_back</span>
+                </div>
+                <h1>結帳</h1>
+                <div></div>
+            </div>
+            
+            <div class="checkout-content">
+                <div class="section-card">
+                    <div class="section-header">
+                        <h2 class="section-title">
+                            <span class="material-icons">location_on</span>
+                            收貨地址
+                        </h2>
+                        <a href="#" class="section-action">
+                            修改
+                            <span class="material-icons" style="font-size: 16px;">chevron_right</span>
+                        </a>
+                    </div>
+                    
+                    <div class="address-info">
+                        <div class="address-details">
+                            <div class="address-name">張小明</div>
+                            <div class="address-phone">0912-345-678</div>
+                            <div class="address-text">台北市信義區忠孝東路100號 5樓</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="section-card">
+                    <div class="section-header">
+                        <h2 class="section-title">
+                            <span class="material-icons">local_shipping</span>
+                            配送方式
+                        </h2>
+                    </div>
+                    
+                    <div class="delivery-option">
+                        <input type="radio" name="delivery" class="delivery-radio" checked>
+                        <div class="delivery-info">
+                            <div class="delivery-name">標準宅配</div>
+                            <div class="delivery-description">2-3 個工作天送達</div>
+                        </div>
+                        <div class="delivery-price">NT$60</div>
+                    </div>
+                    
+                    <div class="delivery-option">
+                        <input type="radio" name="delivery" class="delivery-radio">
+                        <div class="delivery-info">
+                            <div class="delivery-name">超商取貨</div>
+                            <div class="delivery-description">2-3 個工作天送達</div>
+                        </div>
+                        <div class="delivery-price">NT$50</div>
+                    </div>
+                    
+                    <div class="delivery-option">
+                        <input type="radio" name="delivery" class="delivery-radio">
+                        <div class="delivery-info">
+                            <div class="delivery-name">快速宅配</div>
+                            <div class="delivery-description">24 小時內送達</div>
+                        </div>
+                        <div class="delivery-price">NT$120</div>
+                    </div>
+                </div>
+                
+                <div class="section-card">
+                    <div class="section-header">
+                        <h2 class="section-title">
+                            <span class="material-icons">payment</span>
+                            付款方式
+                        </h2>
+                    </div>
+                    
+                    <div class="payment-option">
+                        <input type="radio" name="payment" class="payment-radio" checked>
+                        <span class="material-icons payment-icon">credit_card</span>
+                        <div class="payment-name">信用卡支付</div>
+                    </div>
+                    
+                    <div class="payment-option">
+                        <input type="radio" name="payment" class="payment-radio">
+                        <span class="material-icons payment-icon">account_balance</span>
+                        <div class="payment-name">銀行轉帳</div>
+                    </div>
+                    
+                    <div class="payment-option">
+                        <input type="radio" name="payment" class="payment-radio">
+                        <span class="material-icons payment-icon">smartphone</span>
+                        <div class="payment-name">行動支付</div>
+                    </div>
+                    
+                    <div class="payment-option">
+                        <input type="radio" name="payment" class="payment-radio">
+                        <span class="material-icons payment-icon">store</span>
+                        <div class="payment-name">超商付款</div>
+                    </div>
+                </div>
+                
+                <div class="section-card">
+                    <div class="section-header">
+                        <h2 class="section-title">
+                            <span class="material-icons">redeem</span>
+                            優惠碼
+                        </h2>
+                    </div>
+                    
+                    <div class="promo-input">
+                        <input type="text" placeholder="請輸入優惠碼">
+                        <button>套用</button>
+                    </div>
+                </div>
+                
+                <div class="section-card">
+                    <div class="section-header">
+                        <h2 class="section-title">
+                            <span class="material-icons">list</span>
+                            訂單明細
+                        </h2>
+                    </div>
+                    
+                    <div class="order-items">
+                        <div class="order-item">
+                            <div class="item-image" style="background-image: url('https://via.placeholder.com/200x200/FF5722/FFFFFF?text=巧克力');"></div>
+                            <div class="item-details">
+                                <div class="item-name">巧克力怪獸餅乾</div>
+                                <div class="item-variant">規格：大包裝</div>
+                                <div class="item-price-row">
+                                    <div class="item-price">NT$350</div>
+                                    <div class="item-quantity">x2</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="order-item">
+                            <div class="item-image" style="background-image: url('https://via.placeholder.com/200x200/2196F3/FFFFFF?text=香蕉');"></div>
+                            <div class="item-details">
+                                <div class="item-name">香蕉口味糖果棒</div>
+                                <div class="item-variant">規格：20支裝</div>
+                                <div class="item-price-row">
+                                    <div class="item-price">NT$200</div>
+                                    <div class="item-quantity">x1</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="order-item">
+                            <div class="item-image" style="background-image: url('https://via.placeholder.com/200x200/4CAF50/FFFFFF?text=抹茶');"></div>
+                            <div class="item-details">
+                                <div class="item-name">抹茶夾心餅乾</div>
+                                <div class="item-variant">規格：12片裝</div>
+                                <div class="item-price-row">
+                                    <div class="item-price">NT$280</div>
+                                    <div class="item-quantity">x1</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="order-summary">
+                        <div class="summary-row">
+                            <div class="summary-label">商品金額</div>
+                            <div>NT$1,180</div>
+                        </div>
+                        
+                        <div class="summary-row">
+                            <div class="summary-label">配送費用</div>
+                            <div>NT$60</div>
+                        </div>
+                        
+                        <div class="summary-row">
+                            <div class="summary-label">優惠折扣</div>
+                            <div>-NT$100</div>
+                        </div>
+                        
+                        <div class="summary-row summary-total">
+                            <div class="summary-label">訂單總額</div>
+                            <div>NT$1,140</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="checkout-button">
+                <div>
+                    <div class="checkout-total">訂單總額</div>
+                    <div class="checkout-price">NT$1,140</div>
+                </div>
+                <a href="order-success.html"><button class="pay-button">確認付款</button></a>
+            </div>
+        </div>
+    </div>
+</body>
+</html> 

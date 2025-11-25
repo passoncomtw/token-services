@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>購物車應用 - 訂單</title>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link href="common.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #560CCE;
+            --secondary-color: #414757;
+            --error-color: #f13a59;
+            --text-color: #000000;
+            --background-color: #F5F5F5;
+            --card-color: #FFFFFF;
+            --border-color: #E0E0E0;
+        }
+        
+        body {
+            font-family: 'Noto Sans TC', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: var(--background-color);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        
+        .ios-frame {
+            width: 375px;
+            height: 812px;
+            background-color: white;
+            border-radius: 40px;
+            overflow: hidden;
+            position: relative;
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.2);
+            border: 10px solid black;
+            box-sizing: content-box;
+        }
+        
+        .ios-notch {
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 180px;
+            height: 30px;
+            background-color: black;
+            border-bottom-left-radius: 15px;
+            border-bottom-right-radius: 15px;
+            z-index: 10;
+        }
+        
+        .app-container {
+            width: 100%;
+            height: 100%;
+            overflow-y: auto;
+            background-color: var(--background-color);
+            position: relative;
+        }
+        
+        .status-bar {
+            height: 44px;
+            background-color: var(--primary-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 15px;
+            padding-top: 15px;
+            color: white;
+        }
+        
+        .status-bar .time {
+            font-weight: bold;
+        }
+        
+        .status-bar .icons {
+            display: flex;
+        }
+        
+        .status-bar .icons .icon {
+            margin-left: 8px;
+        }
+        
+        .header {
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 56px;
+            padding: 0 20px;
+            background-color: var(--background-color);
+        }
+        
+        .header h1 {
+            font-size: 18px;
+            font-weight: 500;
+            margin: 0;
+        }
+        
+        .back-button {
+            position: absolute;
+            left: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-color);
+            text-decoration: none;
+        }
+        
+        .order-tabs {
+            display: flex;
+            background-color: white;
+            padding: 0 16px;
+            border-bottom: 1px solid var(--background-color);
+        }
+        
+        .order-tab {
+            padding: 12px 16px;
+            font-size: 14px;
+            color: var(--secondary-color);
+            position: relative;
+            cursor: pointer;
+        }
+        
+        .order-tab.active {
+            color: var(--primary-color);
+            font-weight: 500;
+        }
+        
+        .order-tab.active::after {
+            content: '';
+            position: absolute;
+            bottom: -1px;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background-color: var(--primary-color);
+        }
+        
+        .order-list {
+            padding: 16px;
+        }
+        
+        .order-card {
+            background-color: white;
+            border-radius: 12px;
+            margin-bottom: 16px;
+            overflow: hidden;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        
+        .order-header {
+            padding: 12px 16px;
+            border-bottom: 1px solid var(--background-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .order-header .merchant {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .order-header .merchant .icon {
+            color: var(--primary-color);
+        }
+        
+        .order-header .status {
+            font-size: 14px;
+            color: var(--primary-color);
+        }
+        
+        .order-content {
+            padding: 12px 16px;
+        }
+        
+        .product-item {
+            display: flex;
+            margin-bottom: 12px;
+        }
+        
+        .product-item:last-child {
+            margin-bottom: 0;
+        }
+        
+        .product-item .image {
+            width: 60px;
+            height: 60px;
+            border-radius: 8px;
+            overflow: hidden;
+            margin-right: 12px;
+        }
+        
+        .product-item .image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .product-item .info {
+            flex: 1;
+        }
+        
+        .product-item .info .title {
+            font-size: 14px;
+            font-weight: 500;
+            margin: 0 0 4px;
+        }
+        
+        .product-item .info .price {
+            color: var(--primary-color);
+            font-weight: 600;
+            font-size: 14px;
+            margin: 0;
+        }
+        
+        .order-footer {
+            padding: 12px 16px;
+            border-top: 1px solid var(--background-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .order-footer .total {
+            font-size: 14px;
+            color: var(--secondary-color);
+        }
+        
+        .order-footer .total .amount {
+            color: var(--primary-color);
+            font-weight: 600;
+            margin-left: 4px;
+        }
+        
+        .order-footer .actions {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .order-footer .action-button {
+            padding: 6px 12px;
+            border-radius: 16px;
+            font-size: 14px;
+            cursor: pointer;
+        }
+        
+        .order-footer .action-button.outline {
+            border: 1px solid var(--primary-color);
+            color: var(--primary-color);
+            background-color: white;
+        }
+        
+        .order-footer .action-button.primary {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+        }
+        
+        .empty-orders {
+            text-align: center;
+            padding: 40px 16px;
+            color: var(--secondary-color);
+        }
+        
+        .empty-orders .material-icons {
+            font-size: 48px;
+            margin-bottom: 16px;
+        }
+        
+        .empty-orders .message {
+            font-size: 16px;
+            margin-bottom: 24px;
+        }
+        
+        .empty-orders .button {
+            display: inline-block;
+            background-color: var(--primary-color);
+            color: white;
+            padding: 12px 24px;
+            border-radius: 24px;
+            text-decoration: none;
+            font-weight: 500;
+        }
+        
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 56px;
+            background-color: white;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            box-shadow: 0 -2px 5px rgba(0,0,0,0.1);
+            z-index: 100;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            color: var(--secondary-color);
+            text-decoration: none;
+            flex: 1;
+        }
+        
+        .nav-item.active {
+            color: var(--primary-color);
+        }
+        
+        .nav-item .material-icons {
+            font-size: 24px;
+        }
+        
+        .nav-item span {
+            font-size: 12px;
+            margin-top: 2px;
+        }
+        
+        .order-date {
+            font-size: 12px;
+            color: var(--secondary-color);
+            margin-bottom: 8px;
+        }
+        
+        .order-number {
+            font-size: 12px;
+            color: var(--secondary-color);
+            margin-top: 4px;
+        }
+    </style>
+</head>
+<body>
+    <div class="ios-frame">
+        <div class="ios-notch"></div>
+        <div class="app-container">
+            <div class="status-bar">
+                <div class="time">14:30</div>
+                <div class="icons">
+                    <div class="icon">📶</div>
+                    <div class="icon">📡</div>
+                    <div class="icon">🔋</div>
+                </div>
+            </div>
+            
+            <div class="header">
+                <a href="home.html" class="back-button">
+                    <span class="material-icons">arrow_back</span>
+                </a>
+                <h1>訂單</h1>
+            </div>
+            
+            <div class="order-tabs">
+                <div class="order-tab active">全部</div>
+                <div class="order-tab">待付款</div>
+                <div class="order-tab">待出貨</div>
+                <div class="order-tab">待收貨</div>
+                <div class="order-tab">已完成</div>
+            </div>
+            
+            <div class="order-list">
+                <div class="order-card">
+                    <div class="order-header">
+                        <div class="merchant">
+                            <span class="material-icons icon">storefront</span>
+                            <span>範例咖啡廳</span>
+                        </div>
+                        <div class="status">待付款</div>
+                    </div>
+                    
+                    <div class="order-content">
+                        <div class="product-item">
+                            <div class="image">
+                                <img src="https://via.placeholder.com/60x60/FFC107/FFFFFF?text=產品1" alt="產品1">
+                            </div>
+                            <div class="info">
+                                <div class="title">經典手工陶瓷咖啡杯組</div>
+                                <div class="price">NT$ 450</div>
+                            </div>
+                        </div>
+                        
+                        <div class="product-item">
+                            <div class="image">
+                                <img src="https://via.placeholder.com/60x60/4CAF50/FFFFFF?text=產品2" alt="產品2">
+                            </div>
+                            <div class="info">
+                                <div class="title">精選咖啡豆禮盒裝</div>
+                                <div class="price">NT$ 580</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="order-footer">
+                        <div class="total">
+                            共2件商品，總計：<span class="amount">NT$ 1,030</span>
+                        </div>
+                        <div class="actions">
+                            <button class="action-button outline">取消訂單</button>
+                            <button class="action-button primary">付款</button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="order-card">
+                    <div class="order-header">
+                        <div class="merchant">
+                            <span class="material-icons icon">storefront</span>
+                            <span>優質餐具店</span>
+                        </div>
+                        <div class="status">待出貨</div>
+                    </div>
+                    
+                    <div class="order-content">
+                        <div class="product-item">
+                            <div class="image">
+                                <img src="https://via.placeholder.com/60x60/009688/FFFFFF?text=產品3" alt="產品3">
+                            </div>
+                            <div class="info">
+                                <div class="title">北歐風格餐桌墊四件組</div>
+                                <div class="price">NT$ 320</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="order-footer">
+                        <div class="total">
+                            共1件商品，總計：<span class="amount">NT$ 320</span>
+                        </div>
+                        <div class="actions">
+                            <button class="action-button outline">查看物流</button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="order-card">
+                    <div class="order-header">
+                        <div class="merchant">
+                            <span class="material-icons icon">storefront</span>
+                            <span>生活雜貨鋪</span>
+                        </div>
+                        <div class="status">已完成</div>
+                    </div>
+                    
+                    <div class="order-content">
+                        <div class="product-item">
+                            <div class="image">
+                                <img src="https://via.placeholder.com/60x60/E91E63/FFFFFF?text=產品4" alt="產品4">
+                            </div>
+                            <div class="info">
+                                <div class="title">多功能廚房剪刀</div>
+                                <div class="price">NT$ 220</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="order-footer">
+                        <div class="total">
+                            共1件商品，總計：<span class="amount">NT$ 220</span>
+                        </div>
+                        <div class="actions">
+                            <button class="action-button outline">評價</button>
+                            <button class="action-button outline">再次購買</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div style="height: 80px;"></div>
+            
+            <div class="bottom-nav">
+                <a href="home.html" class="nav-item">
+                    <span class="material-icons icon">home</span>
+                    <span>首頁</span>
+                </a>
+                <a href="merchants.html" class="nav-item">
+                    <span class="material-icons icon">search</span>
+                    <span>搜尋</span>
+                </a>
+                <a href="shoppingcar.html" class="nav-item">
+                    <span class="material-icons icon">shopping_cart</span>
+                    <span>購物車</span>
+                </a>
+                <a href="orders.html" class="nav-item active">
+                    <span class="material-icons icon">receipt</span>
+                    <span>訂單</span>
+                </a>
+                <a href="setting.html" class="nav-item">
+                    <span class="material-icons icon">person</span>
+                    <span>我的</span>
+                    <span class="member-badge">銀卡</span>
+                </a>
+            </div>
+        </div>
+    </div>
+</body>
+</html> 

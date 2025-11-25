@@ -1,0 +1,605 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>購物車應用 - 首頁</title>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link href="common.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #560CCE;
+            --secondary-color: #414757;
+            --error-color: #f13a59;
+            --text-color: #000000;
+            --background-color: #F5F5F5;
+            --card-color: #FFFFFF;
+            --border-color: #E0E0E0;
+        }
+        
+        body {
+            font-family: 'Noto Sans TC', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: var(--background-color);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        
+        .ios-frame {
+            width: 375px;
+            height: 812px;
+            background-color: white;
+            border-radius: 40px;
+            overflow: hidden;
+            position: relative;
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.2);
+            border: 10px solid black;
+            box-sizing: content-box;
+        }
+        
+        .ios-notch {
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 180px;
+            height: 30px;
+            background-color: black;
+            border-bottom-left-radius: 15px;
+            border-bottom-right-radius: 15px;
+            z-index: 10;
+        }
+        
+        .app-container {
+            width: 100%;
+            height: 100%;
+            overflow-y: auto;
+            background-color: var(--background-color);
+            position: relative;
+        }
+        
+        .status-bar {
+            height: 44px;
+            background-color: var(--primary-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 15px;
+            padding-top: 15px;
+            color: white;
+        }
+        
+        .status-bar .time {
+            font-weight: bold;
+        }
+        
+        .status-bar .icons {
+            display: flex;
+        }
+        
+        .status-bar .icons .icon {
+            margin-left: 8px;
+        }
+        
+        .app-header {
+            background-color: var(--primary-color);
+            padding: 0 20px;
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            height: 56px;
+        }
+        
+        .app-header h1 {
+            font-size: 20px;
+            margin: 0;
+            font-weight: 500;
+        }
+        
+        .app-header .header-action {
+            display: flex;
+            align-items: center;
+        }
+        
+        .app-header .header-action .icon {
+            margin-left: 16px;
+            cursor: pointer;
+        }
+        
+        .banner {
+            padding: 16px;
+            height: 150px;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .banner img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 12px;
+        }
+        
+        .banner .indicator {
+            position: absolute;
+            bottom: 26px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+        }
+        
+        .banner .indicator .dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background-color: rgba(255, 255, 255, 0.5);
+            margin: 0 4px;
+        }
+        
+        .banner .indicator .dot.active {
+            background-color: white;
+        }
+        
+        .section-title {
+            padding: 0 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 16px;
+        }
+        
+        .section-title h2 {
+            font-size: 18px;
+            margin: 0;
+            font-weight: 600;
+        }
+        
+        .section-title .more {
+            color: var(--primary-color);
+            font-size: 14px;
+            text-decoration: none;
+        }
+        
+        .categories {
+            padding: 16px;
+            display: flex;
+            justify-content: space-between;
+        }
+        
+        .category {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 60px;
+        }
+        
+        .category .icon {
+            width: 48px;
+            height: 48px;
+            background-color: var(--primary-color);
+            border-radius: 12px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+        }
+        
+        .category span {
+            margin-top: 8px;
+            font-size: 12px;
+            text-align: center;
+        }
+        
+        .product-cards {
+            padding: 8px 16px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+        
+        .product-card {
+            background-color: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            text-decoration: none;
+            color: inherit;
+        }
+        
+        .product-card .image {
+            height: 120px;
+            background-color: #f0f0f0;
+            position: relative;
+        }
+        
+        .product-card .image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .product-card .image .favorite {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background-color: rgba(255, 255, 255, 0.8);
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .product-card .info {
+            padding: 12px;
+        }
+        
+        .product-card .info .title {
+            font-size: 14px;
+            font-weight: 500;
+            margin: 0 0 4px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        .product-card .info .merchant {
+            font-size: 12px;
+            color: #666;
+            margin: 0 0 5px;
+        }
+        
+        .product-card .info .price {
+            color: var(--primary-color);
+            font-weight: 600;
+            font-size: 16px;
+            margin: 0;
+        }
+        
+        .merchant-row {
+            padding: 8px 16px;
+            display: flex;
+            overflow-x: auto;
+            gap: 12px;
+            scrollbar-width: none;
+        }
+        
+        .merchant-row::-webkit-scrollbar {
+            display: none;
+        }
+        
+        .merchant-card {
+            width: 140px;
+            flex-shrink: 0;
+            background-color: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            text-decoration: none;
+            color: inherit;
+        }
+        
+        .merchant-card .image {
+            height: 80px;
+            background-color: #f0f0f0;
+        }
+        
+        .merchant-card .image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .merchant-card .info {
+            padding: 12px;
+        }
+        
+        .merchant-card .info .title {
+            font-size: 14px;
+            font-weight: 500;
+            margin: 0 0 4px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        .merchant-card .info .category {
+            font-size: 12px;
+            color: #666;
+            margin: 0;
+            width: auto;
+            align-items: flex-start;
+        }
+        
+        .notification-badge {
+            position: relative;
+        }
+        
+        .notification-badge .badge {
+            position: absolute;
+            top: -3px;
+            right: -3px;
+            background-color: red;
+            color: white;
+            font-size: 10px;
+            border-radius: 50%;
+            width: 16px;
+            height: 16px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .bottom-nav {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 60px;
+            background-color: white;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            border-top: 1px solid var(--border-color);
+        }
+        
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-decoration: none;
+            color: #666;
+        }
+        
+        .nav-item.active {
+            color: var(--primary-color);
+        }
+        
+        .nav-item .icon {
+            font-size: 24px;
+        }
+        
+        .nav-item span {
+            font-size: 11px;
+            margin-top: 2px;
+        }
+        
+        .member-badge {
+            background-color: #FFC107;
+            color: #7B4E00;
+            font-size: 10px;
+            padding: 2px 6px;
+            border-radius: 10px;
+            margin-left: 6px;
+        }
+    </style>
+</head>
+<body>
+    <div class="ios-frame">
+        <div class="ios-notch"></div>
+        <div class="app-container">
+            <div class="status-bar">
+                <div class="time">14:30</div>
+                <div class="icons">
+                    <div class="icon">📶</div>
+                    <div class="icon">📡</div>
+                    <div class="icon">🔋</div>
+                </div>
+            </div>
+            
+            <div class="app-header">
+                <h1>購物商城</h1>
+                <div class="header-action">
+                    <div class="notification-badge">
+                        <span class="material-icons icon">notifications</span>
+                        <div class="badge">2</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="banner">
+                <img src="https://via.placeholder.com/350x150/560CCE/FFFFFF?text=特價活動" alt="特價活動">
+                <div class="indicator">
+                    <div class="dot active"></div>
+                    <div class="dot"></div>
+                    <div class="dot"></div>
+                </div>
+            </div>
+            
+            <div class="categories">
+                <div class="category">
+                    <div class="icon">
+                        <span class="material-icons">shopping_bag</span>
+                    </div>
+                    <span>全部商品</span>
+                </div>
+                <div class="category">
+                    <div class="icon">
+                        <span class="material-icons">fastfood</span>
+                    </div>
+                    <span>美食</span>
+                </div>
+                <div class="category">
+                    <div class="icon">
+                        <span class="material-icons">checkroom</span>
+                    </div>
+                    <span>服飾</span>
+                </div>
+                <div class="category">
+                    <div class="icon">
+                        <span class="material-icons">devices</span>
+                    </div>
+                    <span>3C產品</span>
+                </div>
+                <div class="category">
+                    <div class="icon">
+                        <span class="material-icons">more_horiz</span>
+                    </div>
+                    <span>更多</span>
+                </div>
+            </div>
+            
+            <div class="section-title">
+                <h2>熱門商品</h2>
+                <a href="#" class="more">查看更多</a>
+            </div>
+            
+            <div class="product-cards">
+                <a href="product-detail.html" class="product-card">
+                    <div class="image">
+                        <img src="https://via.placeholder.com/160x120/FFC107/FFFFFF?text=產品1" alt="產品1">
+                        <div class="favorite">
+                            <span class="material-icons" style="color: red;">favorite</span>
+                        </div>
+                    </div>
+                    <div class="info">
+                        <h3 class="title">經典手工陶瓷咖啡杯組</h3>
+                        <p class="merchant">範例咖啡廳</p>
+                        <p class="price">NT$ 450</p>
+                    </div>
+                </a>
+                <div class="product-card">
+                    <div class="image">
+                        <img src="https://via.placeholder.com/160x120/4CAF50/FFFFFF?text=產品2" alt="產品2">
+                        <div class="favorite">
+                            <span class="material-icons" style="color: #ddd;">favorite_border</span>
+                        </div>
+                    </div>
+                    <div class="info">
+                        <h3 class="title">北歐風格餐桌墊四件組</h3>
+                        <p class="merchant">優質餐具店</p>
+                        <p class="price">NT$ 320</p>
+                    </div>
+                </div>
+                <div class="product-card">
+                    <div class="image">
+                        <img src="https://via.placeholder.com/160x120/2196F3/FFFFFF?text=產品3" alt="產品3">
+                        <div class="favorite">
+                            <span class="material-icons" style="color: #ddd;">favorite_border</span>
+                        </div>
+                    </div>
+                    <div class="info">
+                        <h3 class="title">精選咖啡豆禮盒裝</h3>
+                        <p class="merchant">範例咖啡廳</p>
+                        <p class="price">NT$ 580</p>
+                    </div>
+                </div>
+                <div class="product-card">
+                    <div class="image">
+                        <img src="https://via.placeholder.com/160x120/E91E63/FFFFFF?text=產品4" alt="產品4">
+                        <div class="favorite">
+                            <span class="material-icons" style="color: #ddd;">favorite_border</span>
+                        </div>
+                    </div>
+                    <div class="info">
+                        <h3 class="title">多功能廚房剪刀</h3>
+                        <p class="merchant">生活雜貨鋪</p>
+                        <p class="price">NT$ 220</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="section-title">
+                <h2>人氣商家</h2>
+                <a href="#" class="more">查看更多</a>
+            </div>
+            
+            <div class="merchant-row">
+                <a href="merchant-detail.html" class="merchant-card">
+                    <div class="image">
+                        <img src="https://via.placeholder.com/140x80/560CCE/FFFFFF?text=商家1" alt="商家1">
+                    </div>
+                    <div class="info">
+                        <h3 class="title">範例咖啡廳</h3>
+                        <p class="category">咖啡廳 • 4.8⭐</p>
+                    </div>
+                </a>
+                <div class="merchant-card">
+                    <div class="image">
+                        <img src="https://via.placeholder.com/140x80/009688/FFFFFF?text=商家2" alt="商家2">
+                    </div>
+                    <div class="info">
+                        <h3 class="title">優質餐具店</h3>
+                        <p class="category">零售 • 4.5⭐</p>
+                    </div>
+                </div>
+                <div class="merchant-card">
+                    <div class="image">
+                        <img src="https://via.placeholder.com/140x80/FF5722/FFFFFF?text=商家3" alt="商家3">
+                    </div>
+                    <div class="info">
+                        <h3 class="title">生活雜貨鋪</h3>
+                        <p class="category">零售 • 4.7⭐</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="section-title">
+                <h2>限時特惠</h2>
+                <a href="#" class="more">查看更多</a>
+            </div>
+            
+            <div class="product-cards">
+                <div class="product-card">
+                    <div class="image">
+                        <img src="https://via.placeholder.com/160x120/FF5722/FFFFFF?text=特惠1" alt="特惠1">
+                        <div class="favorite">
+                            <span class="material-icons" style="color: #ddd;">favorite_border</span>
+                        </div>
+                    </div>
+                    <div class="info">
+                        <h3 class="title">竹製收納盒三入組</h3>
+                        <p class="merchant">生活雜貨鋪</p>
+                        <p class="price"><del style="color: #999; font-size: 12px;">NT$ 450</del> NT$ 360</p>
+                    </div>
+                </div>
+                <div class="product-card">
+                    <div class="image">
+                        <img src="https://via.placeholder.com/160x120/795548/FFFFFF?text=特惠2" alt="特惠2">
+                        <div class="favorite">
+                            <span class="material-icons" style="color: #ddd;">favorite_border</span>
+                        </div>
+                    </div>
+                    <div class="info">
+                        <h3 class="title">手工餅乾禮盒</h3>
+                        <p class="merchant">範例咖啡廳</p>
+                        <p class="price"><del style="color: #999; font-size: 12px;">NT$ 300</del> NT$ 230</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div style="height: 80px;"></div>
+            
+            <div class="bottom-nav">
+                <a href="home.html" class="nav-item active">
+                    <span class="material-icons icon">home</span>
+                    <span>首頁</span>
+                </a>
+                <a href="merchants.html" class="nav-item">
+                    <span class="material-icons icon">search</span>
+                    <span>搜尋</span>
+                </a>
+                <a href="shoppingcar.html" class="nav-item">
+                    <span class="material-icons icon">shopping_cart</span>
+                    <span>購物車</span>
+                </a>
+                <a href="orders.html" class="nav-item">
+                    <span class="material-icons icon">receipt</span>
+                    <span>訂單</span>
+                </a>
+                <a href="setting.html" class="nav-item">
+                    <span class="material-icons icon">person</span>
+                    <span>我的</span>
+                    <span class="member-badge">銀卡</span>
+                </a>
+            </div>
+        </div>
+    </div>
+</body>
+</html> 

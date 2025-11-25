@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>購物車管理後台 - 新增/編輯產品</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #560CCE;
+            --secondary-color: #414757;
+            --error-color: #f13a59;
+            --text-color: #000000;
+            --background-color: #F5F5F5;
+            --card-color: #FFFFFF;
+            --border-color: #E0E0E0;
+        }
+        
+        body {
+            font-family: 'Noto Sans TC', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: var(--background-color);
+            display: flex;
+        }
+        
+        .sidebar {
+            width: 250px;
+            height: 100vh;
+            background-color: white;
+            box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+            position: fixed;
+            left: 0;
+            top: 0;
+            overflow-y: auto;
+        }
+        
+        .sidebar-header {
+            padding: 20px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .sidebar-header .logo {
+            width: 40px;
+            height: 40px;
+            background-color: var(--primary-color);
+            border-radius: 8px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+        }
+        
+        .sidebar-header h1 {
+            margin: 0;
+            font-size: 18px;
+            font-weight: 500;
+        }
+        
+        .sidebar-menu {
+            padding: 16px 0;
+        }
+        
+        .menu-item {
+            display: flex;
+            align-items: center;
+            padding: 12px 20px;
+            color: var(--secondary-color);
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+        
+        .menu-item:hover {
+            background-color: var(--background-color);
+        }
+        
+        .menu-item.active {
+            background-color: var(--primary-color);
+            color: white;
+        }
+        
+        .menu-item .icon {
+            margin-right: 12px;
+        }
+        
+        .menu-item .label {
+            font-size: 14px;
+        }
+        
+        .main-content {
+            margin-left: 250px;
+            flex: 1;
+            padding: 20px;
+        }
+        
+        body {
+            font-family: 'Noto Sans TC', sans-serif;
+        }
+    </style>
+</head>
+<body class="bg-gray-100">
+    <div class="sidebar">
+        <div class="sidebar-header">
+            <div class="logo">
+                <span class="material-icons">shopping_cart</span>
+            </div>
+            <h1>後台管理系統</h1>
+        </div>
+        
+        <div class="sidebar-menu">
+            <a href="dashboard.html" class="menu-item">
+                <span class="material-icons icon">dashboard</span>
+                <span class="label">儀表板</span>
+            </a>
+            <a href="orders.html" class="menu-item">
+                <span class="material-icons icon">receipt</span>
+                <span class="label">訂單管理</span>
+            </a>
+            <a href="merchants.html" class="menu-item">
+                <span class="material-icons icon">storefront</span>
+                <span class="label">商家管理</span>
+            </a>
+            <a href="products.html" class="menu-item active">
+                <span class="material-icons icon">inventory_2</span>
+                <span class="label">商品管理</span>
+            </a>
+            <a href="users.html" class="menu-item">
+                <span class="material-icons icon">people</span>
+                <span class="label">會員管理</span>
+            </a>
+            <a href="settings.html" class="menu-item">
+                <span class="material-icons icon">settings</span>
+                <span class="label">系統設定</span>
+            </a>
+        </div>
+    </div>
+    
+    <!-- 瀏覽器模擬框架 開始 -->
+    <div class="mx-auto my-4 w-full max-w-6xl overflow-hidden rounded-lg border border-gray-300 shadow-lg">
+        <!-- 瀏覽器頂部 -->
+        <div class="flex items-center justify-between bg-gray-200 px-4 py-2">
+            <div class="flex space-x-2">
+                <div class="h-3 w-3 rounded-full bg-red-500"></div>
+                <div class="h-3 w-3 rounded-full bg-yellow-500"></div>
+                <div class="h-3 w-3 rounded-full bg-green-500"></div>
+            </div>
+            <div class="flex w-2/3 items-center rounded-md bg-white px-3 py-1">
+                <span class="text-gray-500 material-icons text-sm">lock</span>
+                <span class="ml-2 text-sm text-gray-600">https://admin.shoppingcar.com/products/edit/10001</span>
+            </div>
+            <div class="flex space-x-2">
+                <span class="text-gray-500 material-icons">account_circle</span>
+                <span class="text-gray-500 material-icons">more_vert</span>
+            </div>
+        </div>
+
+        <!-- 頁面內容 -->
+        <div class="bg-white">
+            <!-- 側邊欄和主內容區 -->
+            <div class="flex">
+                <!-- 側邊欄 -->
+                <div class="w-64 bg-blue-800 text-white min-h-screen">
+                    <div class="p-4">
+                        <h1 class="text-xl font-bold">購物車管理後台</h1>
+                    </div>
+                    <nav class="mt-4">
+                        <a href="dashboard.html" class="block px-4 py-2 hover:bg-blue-700">
+                            <span class="material-icons align-middle mr-2">dashboard</span> 儀表板
+                        </a>
+                        <a href="orders.html" class="block px-4 py-2 hover:bg-blue-700">
+                            <span class="material-icons align-middle mr-2">shopping_cart</span> 訂單管理
+                        </a>
+                        <a href="merchants.html" class="block px-4 py-2 hover:bg-blue-700">
+                            <span class="material-icons align-middle mr-2">store</span> 商家管理
+                        </a>
+                        <a href="products.html" class="block px-4 py-2 bg-blue-700">
+                            <span class="material-icons align-middle mr-2">inventory_2</span> 產品管理
+                        </a>
+                        <a href="#" class="block px-4 py-2 hover:bg-blue-700">
+                            <span class="material-icons align-middle mr-2">person</span> 會員管理
+                        </a>
+                        <a href="#" class="block px-4 py-2 hover:bg-blue-700">
+                            <span class="material-icons align-middle mr-2">settings</span> 系統設定
+                        </a>
+                    </nav>
+                </div>
+
+                <!-- 主內容區 -->
+                <div class="flex-1 p-8">
+                    <!-- 麵包屑導航 -->
+                    <div class="flex items-center text-sm mb-6">
+                        <a href="dashboard.html" class="text-gray-500 hover:text-blue-600">首頁</a>
+                        <span class="material-icons text-gray-400 mx-1 text-sm">chevron_right</span>
+                        <a href="products.html" class="text-gray-500 hover:text-blue-600">產品管理</a>
+                        <span class="material-icons text-gray-400 mx-1 text-sm">chevron_right</span>
+                        <span class="text-gray-700 font-medium">編輯產品</span>
+                    </div>
+
+                    <!-- 頁面標題 -->
+                    <div class="flex justify-between items-center mb-6">
+                        <div>
+                            <h1 class="text-2xl font-bold text-gray-800">編輯產品資料</h1>
+                            <p class="text-gray-600 mt-1">更新產品的詳細資訊和銷售設定</p>
+                        </div>
+                        <div class="flex space-x-3">
+                            <a href="products.html" class="flex items-center px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50">
+                                <span class="material-icons mr-1 text-sm">arrow_back</span>
+                                返回列表
+                            </a>
+                            <button class="flex items-center px-4 py-2 bg-red-50 border border-red-300 rounded-md text-red-700 hover:bg-red-100">
+                                <span class="material-icons mr-1 text-sm">delete</span>
+                                刪除產品
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- 標籤頁選項 -->
+                    <div class="border-b border-gray-200 mb-6">
+                        <div class="flex -mb-px">
+                            <button class="text-blue-600 border-b-2 border-blue-600 py-2 px-4 font-medium">基本資料</button>
+                            <button class="text-gray-500 hover:text-gray-700 py-2 px-4 font-medium">產品描述</button>
+                            <button class="text-gray-500 hover:text-gray-700 py-2 px-4 font-medium">圖片管理</button>
+                            <button class="text-gray-500 hover:text-gray-700 py-2 px-4 font-medium">價格與庫存</button>
+                        </div>
+                    </div>
+
+                    <!-- 產品基本資料卡片 -->
+                    <div class="bg-white rounded-lg shadow-sm border border-gray-200 mb-6 overflow-hidden">
+                        <!-- 卡片標題 -->
+                        <div class="flex justify-between items-center px-6 py-4 border-b border-gray-200">
+                            <h2 class="text-lg font-semibold text-gray-800">基本資料</h2>
+                            <div class="bg-green-100 text-green-800 text-xs font-medium px-2.5 py-0.5 rounded">上架中</div>
+                        </div>
+
+                        <!-- 表單內容 -->
+                        <div class="p-6">
+                            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                                <!-- 產品名稱 (佔滿整行) -->
+                                <div class="lg:col-span-2">
+                                    <label for="product-name" class="block text-sm font-medium text-gray-700 mb-1">產品名稱 <span class="text-red-500">*</span></label>
+                                    <input type="text" id="product-name" value="精品咖啡杯組" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500">
+                                </div>
+
+                                <!-- 產品編號 (SKU) -->
+                                <div>
+                                    <label for="product-sku" class="block text-sm font-medium text-gray-700 mb-1">產品編號 (SKU) <span class="text-red-500">*</span></label>
+                                    <input type="text" id="product-sku" value="CFE-CP-001" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500">
+                                </div>
+
+                                <!-- 商家 (賣家) -->
+                                <div>
+                                    <label for="product-merchant" class="block text-sm font-medium text-gray-700 mb-1">商家 <span class="text-red-500">*</span></label>
+                                    <select id="product-merchant" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500">
+                                        <option value="">選擇商家</option>
+                                        <option value="1001" selected>範例咖啡廳</option>
+                                        <option value="1002">優質餐具店</option>
+                                        <option value="1003">生活雜貨鋪</option>
+                                    </select>
+                                </div>
+
+                                <!-- 產品分類 -->
+                                <div>
+                                    <label for="product-category" class="block text-sm font-medium text-gray-700 mb-1">產品分類 <span class="text-red-500">*</span></label>
+                                    <select id="product-category" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500">
+                                        <option value="">選擇分類</option>
+                                        <option value="kitchenware" selected>廚房用品</option>
+                                        <option value="tableware">餐具</option>
+                                        <option value="coffee">咖啡相關</option>
+                                        <option value="home">家居用品</option>
+                                    </select>
+                                </div>
+
+                                <!-- 品牌 -->
+                                <div>
+                                    <label for="product-brand" class="block text-sm font-medium text-gray-700 mb-1">品牌</label>
+                                    <input type="text" id="product-brand" value="CafeCulture" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500">
+                                </div>
+
+                                <!-- 規格 -->
+                                <div class="lg:col-span-2">
+                                    <label for="product-specs" class="block text-sm font-medium text-gray-700 mb-1">產品規格</label>
+                                    <input type="text" id="product-specs" value="一組4個，250ml/個，陶瓷材質" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500">
+                                </div>
+
+                                <!-- 產品標籤 -->
+                                <div class="lg:col-span-2">
+                                    <label for="product-tags" class="block text-sm font-medium text-gray-700 mb-1">產品標籤</label>
+                                    <input type="text" id="product-tags" value="咖啡杯,禮品,廚房,杯具" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500">
+                                    <p class="text-xs text-gray-500 mt-1">多個標籤請用逗號分隔</p>
+                                </div>
+
+                                <!-- 產品狀態 -->
+                                <div class="lg:col-span-2 flex justify-between items-center">
+                                    <div>
+                                        <span class="text-sm font-medium text-gray-700">產品狀態</span>
+                                        <p class="text-xs text-gray-500 mt-1">設定產品是否在網站上顯示並可購買</p>
+                                    </div>
+                                    <label class="relative inline-flex items-center cursor-pointer">
+                                        <input type="checkbox" value="" class="sr-only peer" checked>
+                                        <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-green-600"></div>
+                                        <span class="ml-3 text-sm font-medium text-gray-700">上架中</span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 價格與庫存卡片 -->
+                    <div class="bg-white rounded-lg shadow-sm border border-gray-200 mb-6 overflow-hidden">
+                        <!-- 卡片標題 -->
+                        <div class="px-6 py-4 border-b border-gray-200">
+                            <h2 class="text-lg font-semibold text-gray-800">價格與庫存</h2>
+                        </div>
+
+                        <!-- 表單內容 -->
+                        <div class="p-6">
+                            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                                <!-- 售價 -->
+                                <div>
+                                    <label for="product-price" class="block text-sm font-medium text-gray-700 mb-1">售價 (NT$) <span class="text-red-500">*</span></label>
+                                    <div class="relative">
+                                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                            <span class="text-gray-500">$</span>
+                                        </div>
+                                        <input type="number" id="product-price" value="1200" class="w-full pl-7 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500">
+                                    </div>
+                                </div>
+
+                                <!-- 成本 -->
+                                <div>
+                                    <label for="product-cost" class="block text-sm font-medium text-gray-700 mb-1">成本 (NT$)</label>
+                                    <div class="relative">
+                                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                            <span class="text-gray-500">$</span>
+                                        </div>
+                                        <input type="number" id="product-cost" value="500" class="w-full pl-7 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500">
+                                    </div>
+                                </div>
+
+                                <!-- 促銷價 -->
+                                <div>
+                                    <label for="product-sale-price" class="block text-sm font-medium text-gray-700 mb-1">促銷價 (NT$)</label>
+                                    <div class="relative">
+                                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                            <span class="text-gray-500">$</span>
+                                        </div>
+                                        <input type="number" id="product-sale-price" value="999" class="w-full pl-7 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500">
+                                    </div>
+                                </div>
+
+                                <!-- 庫存數量 -->
+                                <div>
+                                    <label for="product-stock" class="block text-sm font-medium text-gray-700 mb-1">庫存數量 <span class="text-red-500">*</span></label>
+                                    <input type="number" id="product-stock" value="50" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500">
+                                </div>
+
+                                <!-- 庫存警告值 -->
+                                <div>
+                                    <label for="product-stock-alert" class="block text-sm font-medium text-gray-700 mb-1">庫存警告值</label>
+                                    <input type="number" id="product-stock-alert" value="10" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500">
+                                    <p class="text-xs text-gray-500 mt-1">當庫存低於此值時系統將發出警告</p>
+                                </div>
+
+                                <!-- 是否追蹤庫存 -->
+                                <div class="flex items-center">
+                                    <input id="track-inventory" type="checkbox" class="w-4 h-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500" checked>
+                                    <label for="track-inventory" class="ml-2 text-sm font-medium text-gray-700">追蹤庫存</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 產品圖片卡片 -->
+                    <div class="bg-white rounded-lg shadow-sm border border-gray-200 mb-6 overflow-hidden">
+                        <!-- 卡片標題 -->
+                        <div class="px-6 py-4 border-b border-gray-200">
+                            <h2 class="text-lg font-semibold text-gray-800">產品圖片</h2>
+                        </div>
+
+                        <!-- 表單內容 -->
+                        <div class="p-6">
+                            <div class="space-y-4">
+                                <!-- 圖片上傳區域 -->
+                                <div class="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
+                                    <span class="material-icons text-gray-400 text-4xl mb-2">cloud_upload</span>
+                                    <p class="text-sm text-gray-700 mb-2">拖曳或點擊上傳產品圖片</p>
+                                    <p class="text-xs text-gray-500 mb-4">支援 JPG, PNG, GIF 格式，最大 5MB</p>
+                                    <button class="px-4 py-2 bg-blue-600 rounded-md text-white text-sm hover:bg-blue-700">
+                                        選擇圖片
+                                    </button>
+                                </div>
+
+                                <!-- 已上傳圖片預覽 -->
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">已上傳圖片</label>
+                                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                                        <!-- 圖片1 -->
+                                        <div class="relative group">
+                                            <img src="https://images.unsplash.com/photo-1514228742587-6b1558fcca3d?ixlib=rb-1.2.1&auto=format&fit=crop&w=300&q=80" alt="產品圖片1" class="w-full h-32 object-cover rounded-md border border-gray-200">
+                                            <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-40 transition-all rounded-md flex items-center justify-center">
+                                                <div class="hidden group-hover:flex space-x-2">
+                                                    <button class="bg-white p-1 rounded-full">
+                                                        <span class="material-icons text-gray-700 text-sm">delete</span>
+                                                    </button>
+                                                    <button class="bg-white p-1 rounded-full">
+                                                        <span class="material-icons text-gray-700 text-sm">star</span>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                            <div class="absolute top-2 left-2">
+                                                <span class="bg-blue-500 text-white text-xs font-medium px-2 py-0.5 rounded">主圖</span>
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- 圖片2 -->
+                                        <div class="relative group">
+                                            <img src="https://images.unsplash.com/photo-1551655510-555dc3be8633?ixlib=rb-1.2.1&auto=format&fit=crop&w=300&q=80" alt="產品圖片2" class="w-full h-32 object-cover rounded-md border border-gray-200">
+                                            <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-40 transition-all rounded-md flex items-center justify-center">
+                                                <div class="hidden group-hover:flex space-x-2">
+                                                    <button class="bg-white p-1 rounded-full">
+                                                        <span class="material-icons text-gray-700 text-sm">delete</span>
+                                                    </button>
+                                                    <button class="bg-white p-1 rounded-full">
+                                                        <span class="material-icons text-gray-700 text-sm">star_outline</span>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- 圖片3 -->
+                                        <div class="relative group">
+                                            <img src="https://images.unsplash.com/photo-1572119752777-2a0b6d58b285?ixlib=rb-1.2.1&auto=format&fit=crop&w=300&q=80" alt="產品圖片3" class="w-full h-32 object-cover rounded-md border border-gray-200">
+                                            <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-40 transition-all rounded-md flex items-center justify-center">
+                                                <div class="hidden group-hover:flex space-x-2">
+                                                    <button class="bg-white p-1 rounded-full">
+                                                        <span class="material-icons text-gray-700 text-sm">delete</span>
+                                                    </button>
+                                                    <button class="bg-white p-1 rounded-full">
+                                                        <span class="material-icons text-gray-700 text-sm">star_outline</span>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <p class="text-xs text-gray-500 mt-2">提示：懸停在圖片上可編輯或設為主圖</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 產品描述卡片 -->
+                    <div class="bg-white rounded-lg shadow-sm border border-gray-200 mb-6 overflow-hidden">
+                        <!-- 卡片標題 -->
+                        <div class="px-6 py-4 border-b border-gray-200">
+                            <h2 class="text-lg font-semibold text-gray-800">產品描述</h2>
+                        </div>
+
+                        <!-- 表單內容 -->
+                        <div class="p-6">
+                            <!-- 簡短描述 -->
+                            <div class="mb-6">
+                                <label for="product-short-desc" class="block text-sm font-medium text-gray-700 mb-1">簡短描述</label>
+                                <input type="text" id="product-short-desc" value="高質感手工製作陶瓷咖啡杯組，完美展現您的精緻品味" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500">
+                                <p class="text-xs text-gray-500 mt-1">簡短介紹產品的主要特點（100字以內）</p>
+                            </div>
+
+                            <!-- 詳細描述 -->
+                            <div>
+                                <label for="product-description" class="block text-sm font-medium text-gray-700 mb-1">詳細描述</label>
+                                <textarea id="product-description" rows="8" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500">這款精品咖啡杯組由專業陶藝師手工製作，採用高級陶瓷材質，耐熱防燙，杯身輕薄但堅固耐用。每組包含4個不同顏色的杯子，容量為250ml，適合各類熱飲使用。
+
+特點：
+- 優質陶瓷材質，保溫效果佳
+- 簡約北歐風格設計，適合各種居家裝飾風格
+- 手工製作，每個杯子都獨一無二
+- 不含有害物質，安全健康
+- 適合洗碗機與微波爐使用
+
+清潔與保養：
+建議手洗以延長使用壽命，請避免使用堅硬的清潔工具刮傷表面。</textarea>
+                                <div class="flex justify-end mt-2">
+                                    <button class="text-sm text-blue-600 hover:text-blue-800">開啟編輯器</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 表單按鈕 -->
+                    <div class="flex justify-end space-x-3">
+                        <a href="products.html" class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50">
+                            取消
+                        </a>
+                        <button class="px-4 py-2 bg-blue-600 rounded-md text-white hover:bg-blue-700">
+                            儲存變更
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- 瀏覽器模擬框架 結束 -->
+</body>
+</html> 

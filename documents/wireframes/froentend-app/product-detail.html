@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>購物車應用 - 產品詳情</title>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #560CCE;
+            --secondary-color: #414757;
+            --error-color: #f13a59;
+            --text-color: #000000;
+            --background-color: #F5F5F5;
+            --card-color: #FFFFFF;
+            --border-color: #E0E0E0;
+        }
+        
+        body {
+            font-family: 'Noto Sans TC', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: var(--background-color);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        
+        .ios-frame {
+            width: 375px;
+            height: 812px;
+            background-color: white;
+            border-radius: 40px;
+            overflow: hidden;
+            position: relative;
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.2);
+            border: 10px solid black;
+            box-sizing: content-box;
+        }
+        
+        .ios-notch {
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 180px;
+            height: 30px;
+            background-color: black;
+            border-bottom-left-radius: 15px;
+            border-bottom-right-radius: 15px;
+            z-index: 10;
+        }
+        
+        .app-container {
+            width: 100%;
+            height: 100%;
+            overflow-y: auto;
+            background-color: var(--background-color);
+            position: relative;
+        }
+        
+        .status-bar {
+            height: 44px;
+            background-color: var(--background-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 15px;
+            padding-top: 15px;
+        }
+        
+        .status-bar .time {
+            font-weight: bold;
+        }
+        
+        .status-bar .icons {
+            display: flex;
+        }
+        
+        .status-bar .icons .icon {
+            margin-left: 8px;
+        }
+        
+        .header {
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 56px;
+            padding: 0 20px;
+            background-color: var(--background-color);
+        }
+        
+        .header h1 {
+            font-size: 18px;
+            font-weight: 500;
+            margin: 0;
+        }
+        
+        .back-button {
+            position: absolute;
+            left: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-color);
+            text-decoration: none;
+        }
+        
+        .share-button {
+            position: absolute;
+            right: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-color);
+        }
+        
+        .product-image-gallery {
+            position: relative;
+            height: 300px;
+            background-color: white;
+            padding: 20px;
+        }
+        
+        .main-image {
+            width: 100%;
+            height: 100%;
+            background-image: url('https://via.placeholder.com/800x800/FF5722/FFFFFF?text=巧克力怪獸餅乾');
+            background-size: contain;
+            background-position: center;
+            background-repeat: no-repeat;
+        }
+        
+        .image-thumbs {
+            display: flex;
+            justify-content: center;
+            padding: 16px 0;
+            background-color: white;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .thumb {
+            width: 48px;
+            height: 48px;
+            border-radius: 4px;
+            background-size: cover;
+            background-position: center;
+            margin: 0 4px;
+            background-image: url('https://via.placeholder.com/100x100/FF5722/FFFFFF?text=圖');
+            border: 2px solid transparent;
+        }
+        
+        .thumb.active {
+            border-color: var(--primary-color);
+        }
+        
+        .product-info {
+            background-color: white;
+            padding: 16px;
+            margin-bottom: 8px;
+        }
+        
+        .product-price {
+            font-size: 24px;
+            font-weight: 600;
+            color: var(--error-color);
+            margin: 0 0 8px 0;
+        }
+        
+        .product-name {
+            font-size: 18px;
+            font-weight: 500;
+            margin: 0 0 4px 0;
+        }
+        
+        .product-rating {
+            display: flex;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+        
+        .stars {
+            color: #FFC107;
+            font-size: 14px;
+            margin-right: 4px;
+        }
+        
+        .rating-count {
+            color: var(--secondary-color);
+            font-size: 14px;
+        }
+        
+        .product-tags {
+            display: flex;
+            margin-top: 12px;
+        }
+        
+        .tag {
+            background-color: var(--background-color);
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            color: var(--secondary-color);
+            margin-right: 8px;
+        }
+        
+        .section {
+            background-color: white;
+            padding: 16px;
+            margin-bottom: 8px;
+        }
+        
+        .section-title {
+            font-size: 16px;
+            font-weight: 500;
+            margin: 0 0 12px 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .section-title .more {
+            font-size: 12px;
+            color: var(--secondary-color);
+            font-weight: 400;
+        }
+        
+        .quantity-selector {
+            display: flex;
+            align-items: center;
+            margin-top: 12px;
+        }
+        
+        .quantity-btn {
+            width: 32px;
+            height: 32px;
+            border-radius: 16px;
+            background-color: var(--background-color);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: var(--secondary-color);
+            font-weight: 500;
+            cursor: pointer;
+            user-select: none;
+        }
+        
+        .quantity-input {
+            width: 40px;
+            text-align: center;
+            margin: 0 8px;
+            font-size: 16px;
+        }
+        
+        .merchant-info {
+            display: flex;
+            align-items: center;
+        }
+        
+        .merchant-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 20px;
+            background-image: url('https://via.placeholder.com/100x100/FF5722/FFFFFF?text=店');
+            background-size: cover;
+            background-position: center;
+            margin-right: 12px;
+        }
+        
+        .merchant-name {
+            font-weight: 500;
+            margin: 0;
+            font-size: 16px;
+        }
+        
+        .merchant-link {
+            font-size: 12px;
+            color: var(--primary-color);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            margin-top: 4px;
+        }
+        
+        .product-description-text {
+            font-size: 14px;
+            line-height: 1.5;
+            color: var(--secondary-color);
+            white-space: pre-line;
+        }
+        
+        .related-products {
+            display: flex;
+            overflow-x: auto;
+            white-space: nowrap;
+            padding: 8px 0;
+        }
+        
+        .related-product {
+            width: 100px;
+            margin-right: 12px;
+            flex-shrink: 0;
+        }
+        
+        .related-image {
+            width: 100px;
+            height: 100px;
+            background-size: cover;
+            background-position: center;
+            border-radius: 4px;
+            margin-bottom: 4px;
+        }
+        
+        .related-name {
+            font-size: 12px;
+            font-weight: 500;
+            margin: 0;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        
+        .related-price {
+            font-size: 12px;
+            color: var(--error-color);
+            font-weight: 500;
+            margin: 2px 0 0 0;
+        }
+        
+        .bottom-action {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 64px;
+            background-color: white;
+            display: flex;
+            padding: 0 16px;
+            align-items: center;
+            border-top: 1px solid var(--border-color);
+            z-index: 100;
+        }
+        
+        .action-icons {
+            display: flex;
+            margin-right: 16px;
+        }
+        
+        .action-icon {
+            width: 40px;
+            text-align: center;
+            margin-right: 8px;
+        }
+        
+        .action-icon .material-icons {
+            font-size: 24px;
+            color: var(--secondary-color);
+        }
+        
+        .action-icon span {
+            display: block;
+            font-size: 10px;
+            color: var(--secondary-color);
+            margin-top: 2px;
+        }
+        
+        .action-buttons {
+            display: flex;
+            flex: 1;
+        }
+        
+        .add-to-cart-btn, .buy-now-btn {
+            flex: 1;
+            height: 44px;
+            border-radius: 22px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-weight: 500;
+            font-size: 14px;
+            border: none;
+            cursor: pointer;
+        }
+        
+        .add-to-cart-btn {
+            background-color: #FFC107;
+            color: white;
+            margin-right: 8px;
+        }
+        
+        .buy-now-btn {
+            background-color: var(--error-color);
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="ios-frame">
+        <div class="ios-notch"></div>
+        <div class="app-container">
+            <div class="status-bar">
+                <span class="time">9:41</span>
+                <div class="icons">
+                    <span class="icon">📶</span>
+                    <span class="icon">📳</span>
+                    <span class="icon">🔋</span>
+                </div>
+            </div>
+            
+            <div class="header">
+                <a href="merchant-detail.html" class="back-button">
+                    <span class="material-icons">arrow_back</span>
+                </a>
+                <h1>產品詳情</h1>
+                <div class="share-button">
+                    <span class="material-icons">share</span>
+                </div>
+            </div>
+            
+            <div class="product-image-gallery">
+                <div class="main-image"></div>
+            </div>
+            
+            <div class="image-thumbs">
+                <div class="thumb active" style="background-image: url('https://via.placeholder.com/100x100/FF5722/FFFFFF?text=圖1');"></div>
+                <div class="thumb" style="background-image: url('https://via.placeholder.com/100x100/4CAF50/FFFFFF?text=圖2');"></div>
+                <div class="thumb" style="background-image: url('https://via.placeholder.com/100x100/2196F3/FFFFFF?text=圖3');"></div>
+                <div class="thumb" style="background-image: url('https://via.placeholder.com/100x100/9C27B0/FFFFFF?text=圖4');"></div>
+            </div>
+            
+            <div class="product-info">
+                <div class="product-price">NT$350</div>
+                <h1 class="product-name">巧克力怪獸餅乾</h1>
+                <div class="product-rating">
+                    <div class="stars">★★★★☆</div>
+                    <div class="rating-count">4.7 (328)</div>
+                </div>
+                <div>銷量: 2,456件 | 剩餘: 120件</div>
+                
+                <div class="product-tags">
+                    <div class="tag">巧克力味</div>
+                    <div class="tag">餅乾</div>
+                    <div class="tag">怪獸造型</div>
+                </div>
+                
+                <div class="quantity-selector">
+                    <label style="font-size: 14px; margin-right: 8px;">數量:</label>
+                    <div class="quantity-btn">-</div>
+                    <input type="text" value="1" class="quantity-input">
+                    <div class="quantity-btn">+</div>
+                </div>
+            </div>
+            
+            <div class="section">
+                <div class="merchant-info">
+                    <div class="merchant-avatar"></div>
+                    <div>
+                        <h3 class="merchant-name">怪物糖果</h3>
+                        <a href="merchant-detail.html" class="merchant-link">
+                            查看全部商品 <span class="material-icons" style="font-size: 14px;">chevron_right</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="section">
+                <h2 class="section-title">產品描述</h2>
+                <p class="product-description-text">
+巧克力怪獸餅乾是我們最受歡迎的產品之一，採用高級進口巧克力製作，口感香脆可口。外型設計成可愛的怪獸造型，非常適合派對、節日或日常享用。
+
+成分：麵粉、雞蛋、奶油、砂糖、巧克力(35%)、香料等。
+保存期限：常溫保存30天，開封後建議7天內食用完畢。
+淨重：每包10片，總重量150公克。
+                </p>
+            </div>
+            
+            <div class="section">
+                <h2 class="section-title">
+                    相關推薦
+                    <span class="more">查看更多</span>
+                </h2>
+                <div class="related-products">
+                    <div class="related-product">
+                        <div class="related-image" style="background-image: url('https://via.placeholder.com/200x200/2196F3/FFFFFF?text=香蕉');"></div>
+                        <h3 class="related-name">香蕉口味糖果棒</h3>
+                        <p class="related-price">NT$200</p>
+                    </div>
+                    <div class="related-product">
+                        <div class="related-image" style="background-image: url('https://via.placeholder.com/200x200/E91E63/FFFFFF?text=草莓');"></div>
+                        <h3 class="related-name">草莓味泡泡糖</h3>
+                        <p class="related-price">NT$100</p>
+                    </div>
+                    <div class="related-product">
+                        <div class="related-image" style="background-image: url('https://via.placeholder.com/200x200/4CAF50/FFFFFF?text=抹茶');"></div>
+                        <h3 class="related-name">抹茶夾心餅乾</h3>
+                        <p class="related-price">NT$280</p>
+                    </div>
+                    <div class="related-product">
+                        <div class="related-image" style="background-image: url('https://via.placeholder.com/200x200/FF9800/FFFFFF?text=芒果');"></div>
+                        <h3 class="related-name">芒果軟糖</h3>
+                        <p class="related-price">NT$150</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div style="height: 80px;"></div>
+            
+            <div class="bottom-action">
+                <div class="action-icons">
+                    <div class="action-icon">
+                        <span class="material-icons">store</span>
+                        <span>店鋪</span>
+                    </div>
+                    <div class="action-icon">
+                        <span class="material-icons">favorite_border</span>
+                        <span>收藏</span>
+                    </div>
+                </div>
+                <div class="action-buttons">
+                    <button class="add-to-cart-btn">加入購物車</button>
+                    <button class="buy-now-btn">立即購買</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html> 

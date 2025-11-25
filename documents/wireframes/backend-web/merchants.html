@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>後台管理系統 - 商家管理</title>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #560CCE;
+            --secondary-color: #414757;
+            --error-color: #f13a59;
+            --text-color: #000000;
+            --background-color: #F5F5F5;
+            --card-color: #FFFFFF;
+            --border-color: #E0E0E0;
+        }
+        
+        body {
+            font-family: 'Noto Sans TC', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: var(--background-color);
+            display: flex;
+        }
+        
+        .sidebar {
+            width: 250px;
+            height: 100vh;
+            background-color: white;
+            box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+            position: fixed;
+            left: 0;
+            top: 0;
+            overflow-y: auto;
+        }
+        
+        .sidebar-header {
+            padding: 20px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .sidebar-header .logo {
+            width: 40px;
+            height: 40px;
+            background-color: var(--primary-color);
+            border-radius: 8px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+        }
+        
+        .sidebar-header h1 {
+            margin: 0;
+            font-size: 18px;
+            font-weight: 500;
+        }
+        
+        .sidebar-menu {
+            padding: 16px 0;
+        }
+        
+        .menu-item {
+            display: flex;
+            align-items: center;
+            padding: 12px 20px;
+            color: var(--secondary-color);
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+        
+        .menu-item:hover {
+            background-color: var(--background-color);
+        }
+        
+        .menu-item.active {
+            background-color: var(--primary-color);
+            color: white;
+        }
+        
+        .menu-item .icon {
+            margin-right: 12px;
+        }
+        
+        .menu-item .label {
+            font-size: 14px;
+        }
+        
+        .main-content {
+            margin-left: 250px;
+            flex: 1;
+            padding: 20px;
+        }
+        
+        .top-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+        
+        .page-title {
+            font-size: 24px;
+            font-weight: 500;
+            margin: 0;
+        }
+        
+        .user-menu {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+        
+        .user-menu .icon {
+            color: var(--secondary-color);
+            cursor: pointer;
+        }
+        
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: var(--primary-color);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            cursor: pointer;
+        }
+        
+        .search-section {
+            background-color: white;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 24px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .search-form {
+            display: grid;
+            grid-template-columns: 1fr auto;
+            gap: 16px;
+            align-items: end;
+        }
+        
+        .search-input {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+        }
+        
+        .search-input input {
+            border: none;
+            outline: none;
+            width: 100%;
+            font-size: 14px;
+        }
+        
+        .search-button {
+            padding: 8px 16px;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .merchants-table {
+            background-color: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        
+        .table-header {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr auto;
+            padding: 16px;
+            background-color: var(--background-color);
+            font-weight: 500;
+        }
+        
+        .table-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr auto;
+            padding: 16px;
+            border-bottom: 1px solid var(--border-color);
+            align-items: center;
+        }
+        
+        .table-row:last-child {
+            border-bottom: none;
+        }
+        
+        .merchant-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .merchant-logo {
+            width: 48px;
+            height: 48px;
+            border-radius: 8px;
+            object-fit: cover;
+        }
+        
+        .merchant-details {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+        
+        .merchant-name {
+            font-weight: 500;
+        }
+        
+        .merchant-email {
+            font-size: 14px;
+            color: var(--secondary-color);
+        }
+        
+        .status-badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+        
+        .status-badge.active {
+            background-color: #E8F5E9;
+            color: #2E7D32;
+        }
+        
+        .status-badge.inactive {
+            background-color: #FFEBEE;
+            color: #C62828;
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .action-button {
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 14px;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+        
+        .action-button.edit {
+            background-color: #E3F2FD;
+            color: #1565C0;
+        }
+        
+        .action-button.view {
+            background-color: #F3E5F5;
+            color: #6A1B9A;
+        }
+        
+        .pagination {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 24px;
+        }
+        
+        .pagination-info {
+            font-size: 14px;
+            color: var(--secondary-color);
+        }
+        
+        .pagination-buttons {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .pagination-button {
+            padding: 6px 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            background-color: white;
+            color: var(--secondary-color);
+            cursor: pointer;
+        }
+        
+        .pagination-button.active {
+            background-color: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+        }
+        
+        .pagination-button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+    </style>
+</head>
+<body>
+    <div class="sidebar">
+        <div class="sidebar-header">
+            <div class="logo">
+                <span class="material-icons">shopping_cart</span>
+            </div>
+            <h1>後台管理系統</h1>
+        </div>
+        
+        <div class="sidebar-menu">
+            <a href="dashboard.html" class="menu-item">
+                <span class="material-icons icon">dashboard</span>
+                <span class="label">儀表板</span>
+            </a>
+            <a href="orders.html" class="menu-item">
+                <span class="material-icons icon">receipt</span>
+                <span class="label">訂單管理</span>
+            </a>
+            <a href="merchants.html" class="menu-item active">
+                <span class="material-icons icon">storefront</span>
+                <span class="label">商家管理</span>
+            </a>
+            <a href="products.html" class="menu-item">
+                <span class="material-icons icon">inventory_2</span>
+                <span class="label">商品管理</span>
+            </a>
+            <a href="users.html" class="menu-item">
+                <span class="material-icons icon">people</span>
+                <span class="label">會員管理</span>
+            </a>
+            <a href="settings.html" class="menu-item">
+                <span class="material-icons icon">settings</span>
+                <span class="label">系統設定</span>
+            </a>
+        </div>
+    </div>
+    
+    <div class="main-content">
+        <div class="top-bar">
+            <h1 class="page-title">商家管理</h1>
+            <div class="user-menu">
+                <span class="material-icons icon">notifications</span>
+                <div class="user-avatar">
+                    <span class="material-icons">person</span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="search-section">
+            <div class="search-form">
+                <div class="search-input">
+                    <span class="material-icons">search</span>
+                    <input type="text" placeholder="搜尋商家名稱或聯絡人">
+                </div>
+                <a href="merchant-create.html" class="search-button">
+                    <span class="material-icons">add</span>
+                    新增商家
+                </a>
+            </div>
+        </div>
+        
+        <div class="merchants-table">
+            <div class="table-header">
+                <div>商家資訊</div>
+                <div>聯絡人</div>
+                <div>狀態</div>
+                <div>操作</div>
+            </div>
+            
+            <div class="table-row">
+                <div class="merchant-info">
+                    <img src="https://images.unsplash.com/photo-1514228742587-6b1558fcca3d" alt="商家Logo" class="merchant-logo">
+                    <div class="merchant-details">
+                        <div class="merchant-name">範例咖啡廳</div>
+                        <div class="merchant-email">cafe@example.com</div>
+                    </div>
+                </div>
+                <div>王小明 (0912-345-678)</div>
+                <div>
+                    <span class="status-badge active">營業中</span>
+                </div>
+                <div class="action-buttons">
+                    <a href="merchant-edit.html" class="action-button edit">編輯</a>
+                    <a href="merchant-detail.html" class="action-button view">查看</a>
+                </div>
+            </div>
+            
+            <div class="table-row">
+                <div class="merchant-info">
+                    <img src="https://images.unsplash.com/photo-1551655510-555dc3be8633" alt="商家Logo" class="merchant-logo">
+                    <div class="merchant-details">
+                        <div class="merchant-name">優質餐具店</div>
+                        <div class="merchant-email">tableware@example.com</div>
+                    </div>
+                </div>
+                <div>李美玲 (0923-456-789)</div>
+                <div>
+                    <span class="status-badge active">營業中</span>
+                </div>
+                <div class="action-buttons">
+                    <a href="merchant-edit.html" class="action-button edit">編輯</a>
+                    <a href="merchant-detail.html" class="action-button view">查看</a>
+                </div>
+            </div>
+            
+            <div class="table-row">
+                <div class="merchant-info">
+                    <img src="https://images.unsplash.com/photo-1572119752777-2a0b6d58b285" alt="商家Logo" class="merchant-logo">
+                    <div class="merchant-details">
+                        <div class="merchant-name">生活雜貨鋪</div>
+                        <div class="merchant-email">lifestyle@example.com</div>
+                    </div>
+                </div>
+                <div>張大華 (0934-567-890)</div>
+                <div>
+                    <span class="status-badge inactive">已停業</span>
+                </div>
+                <div class="action-buttons">
+                    <a href="merchant-edit.html" class="action-button edit">編輯</a>
+                    <a href="merchant-detail.html" class="action-button view">查看</a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="pagination">
+            <div class="pagination-info">
+                顯示 1 到 3 筆，共 25 筆資料
+            </div>
+            <div class="pagination-buttons">
+                <button class="pagination-button" disabled>上一頁</button>
+                <button class="pagination-button active">1</button>
+                <button class="pagination-button">2</button>
+                <button class="pagination-button">3</button>
+                <button class="pagination-button">下一頁</button>
+            </div>
+        </div>
+    </div>
+</body>
+</html> 

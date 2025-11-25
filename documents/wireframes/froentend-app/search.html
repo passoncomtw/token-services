@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>購物車應用 - 搜尋</title>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #560CCE;
+            --secondary-color: #414757;
+            --error-color: #f13a59;
+            --text-color: #000000;
+            --background-color: #F5F5F5;
+            --card-color: #FFFFFF;
+            --border-color: #E0E0E0;
+        }
+        
+        body {
+            font-family: 'Noto Sans TC', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: var(--background-color);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        
+        .ios-frame {
+            width: 375px;
+            height: 812px;
+            background-color: white;
+            border-radius: 40px;
+            overflow: hidden;
+            position: relative;
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.2);
+            border: 10px solid black;
+            box-sizing: content-box;
+        }
+        
+        .ios-notch {
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 180px;
+            height: 30px;
+            background-color: black;
+            border-bottom-left-radius: 15px;
+            border-bottom-right-radius: 15px;
+            z-index: 10;
+        }
+        
+        .app-container {
+            width: 100%;
+            height: 100%;
+            overflow-y: auto;
+            background-color: var(--background-color);
+            position: relative;
+        }
+        
+        .status-bar {
+            height: 44px;
+            background-color: var(--primary-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 15px;
+            padding-top: 15px;
+            color: white;
+        }
+        
+        .status-bar .time {
+            font-weight: bold;
+        }
+        
+        .status-bar .icons {
+            display: flex;
+        }
+        
+        .status-bar .icons .icon {
+            margin-left: 8px;
+        }
+        
+        .app-header {
+            background-color: var(--primary-color);
+            padding: 0 20px;
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            height: 56px;
+        }
+        
+        .app-header h1 {
+            font-size: 20px;
+            margin: 0;
+        }
+        
+        .app-header .back-button {
+            display: flex;
+            align-items: center;
+        }
+        
+        .search-bar {
+            background-color: var(--primary-color);
+            padding: 8px 16px 16px;
+        }
+        
+        .search-input {
+            background-color: white;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            padding: 0 10px;
+            height: 40px;
+            position: relative;
+        }
+        
+        .search-input input {
+            border: none;
+            outline: none;
+            width: 100%;
+            margin-left: 8px;
+            font-size: 16px;
+        }
+        
+        .search-input .clear-button {
+            cursor: pointer;
+            color: #999;
+        }
+        
+        .search-filters {
+            padding: 12px 16px;
+            background-color: white;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .filter-row {
+            display: flex;
+            overflow-x: auto;
+            white-space: nowrap;
+            margin-bottom: 10px;
+        }
+        
+        .filter-row:last-child {
+            margin-bottom: 0;
+        }
+        
+        .filter-tag {
+            display: inline-block;
+            padding: 6px 12px;
+            border-radius: 16px;
+            margin-right: 8px;
+            font-size: 14px;
+            color: var(--secondary-color);
+            border: 1px solid var(--border-color);
+            background-color: var(--background-color);
+        }
+        
+        .filter-tag.active {
+            background-color: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+        }
+        
+        .search-content {
+            padding: 16px;
+        }
+        
+        .search-history {
+            margin-bottom: 24px;
+        }
+        
+        .section-title {
+            font-size: 16px;
+            font-weight: 500;
+            margin: 0 0 12px 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .section-title .action {
+            font-size: 14px;
+            color: var(--secondary-color);
+            font-weight: 400;
+        }
+        
+        .history-tags {
+            display: flex;
+            flex-wrap: wrap;
+        }
+        
+        .history-tag {
+            display: flex;
+            align-items: center;
+            padding: 6px 12px;
+            border-radius: 16px;
+            margin-right: 8px;
+            margin-bottom: 8px;
+            font-size: 14px;
+            color: var(--secondary-color);
+            background-color: white;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        
+        .history-tag .material-icons {
+            font-size: 16px;
+            margin-right: 4px;
+        }
+        
+        .popular-searches .history-tag {
+            margin-bottom: 8px;
+        }
+        
+        .search-results {
+            padding-bottom: 70px;
+        }
+        
+        .product-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+        
+        .product-card {
+            background-color: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            text-decoration: none;
+            color: var(--text-color);
+        }
+        
+        .product-image {
+            height: 150px;
+            background-size: cover;
+            background-position: center;
+        }
+        
+        .product-info {
+            padding: 12px;
+        }
+        
+        .product-name {
+            font-size: 14px;
+            font-weight: 500;
+            margin: 0 0 4px 0;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+        }
+        
+        .product-merchant {
+            font-size: 12px;
+            color: var(--secondary-color);
+            margin-bottom: 4px;
+        }
+        
+        .product-price {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--error-color);
+        }
+        
+        .search-result-message {
+            text-align: center;
+            padding: 40px 0;
+            color: var(--secondary-color);
+        }
+        
+        .recent-search {
+            margin-bottom: 24px;
+        }
+        
+        .recent-search-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .recent-search-text {
+            display: flex;
+            align-items: center;
+        }
+        
+        .recent-search-text .material-icons {
+            font-size: 20px;
+            margin-right: 12px;
+            color: var(--secondary-color);
+        }
+        
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 56px;
+            background-color: white;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            box-shadow: 0 -2px 5px rgba(0,0,0,0.1);
+            z-index: 100;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            color: var(--secondary-color);
+            text-decoration: none;
+            flex: 1;
+        }
+        
+        .nav-item.active {
+            color: var(--primary-color);
+        }
+        
+        .nav-item .material-icons {
+            font-size: 24px;
+        }
+        
+        .nav-item span {
+            font-size: 12px;
+            margin-top: 2px;
+        }
+    </style>
+</head>
+<body>
+    <div class="ios-frame">
+        <div class="ios-notch"></div>
+        <div class="app-container">
+            <div class="status-bar">
+                <span class="time">9:41</span>
+                <div class="icons">
+                    <span class="icon">📶</span>
+                    <span class="icon">📳</span>
+                    <span class="icon">🔋</span>
+                </div>
+            </div>
+            
+            <div class="search-bar">
+                <div class="search-input">
+                    <span class="material-icons" style="color: #999;">search</span>
+                    <input type="text" placeholder="搜尋商品、品牌..." autofocus>
+                    <span class="material-icons clear-button">close</span>
+                </div>
+            </div>
+            
+            <!-- 搜尋過濾器 -->
+            <div class="search-filters">
+                <div class="filter-row">
+                    <div class="filter-tag active">綜合排序</div>
+                    <div class="filter-tag">銷量優先</div>
+                    <div class="filter-tag">價格低到高</div>
+                    <div class="filter-tag">價格高到低</div>
+                    <div class="filter-tag">最新上架</div>
+                </div>
+                <div class="filter-row">
+                    <div class="filter-tag">全部分類</div>
+                    <div class="filter-tag">糖果</div>
+                    <div class="filter-tag">餅乾</div>
+                    <div class="filter-tag">零食</div>
+                    <div class="filter-tag">飲料</div>
+                </div>
+            </div>
+            
+            <!-- 搜尋內容容器 -->
+            <div class="search-content">
+                <!-- 最近搜尋歷史 -->
+                <div class="search-history">
+                    <h2 class="section-title">
+                        最近搜尋
+                        <span class="action">清除</span>
+                    </h2>
+                    <div class="recent-search">
+                        <div class="recent-search-item">
+                            <div class="recent-search-text">
+                                <span class="material-icons">history</span>
+                                <span>巧克力</span>
+                            </div>
+                            <span class="material-icons" style="color: #999; font-size: 18px;">close</span>
+                        </div>
+                        <div class="recent-search-item">
+                            <div class="recent-search-text">
+                                <span class="material-icons">history</span>
+                                <span>餅乾</span>
+                            </div>
+                            <span class="material-icons" style="color: #999; font-size: 18px;">close</span>
+                        </div>
+                        <div class="recent-search-item">
+                            <div class="recent-search-text">
+                                <span class="material-icons">history</span>
+                                <span>香蕉口味</span>
+                            </div>
+                            <span class="material-icons" style="color: #999; font-size: 18px;">close</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 熱門搜尋 -->
+                <div class="popular-searches">
+                    <h2 class="section-title">熱門搜尋</h2>
+                    <div class="history-tags">
+                        <div class="history-tag">
+                            <span class="material-icons">trending_up</span>
+                            巧克力
+                        </div>
+                        <div class="history-tag">
+                            <span class="material-icons">trending_up</span>
+                            草莓
+                        </div>
+                        <div class="history-tag">
+                            <span class="material-icons">trending_up</span>
+                            抹茶
+                        </div>
+                        <div class="history-tag">
+                            <span class="material-icons">trending_up</span>
+                            香蕉口味
+                        </div>
+                        <div class="history-tag">
+                            <span class="material-icons">trending_up</span>
+                            夾心餅乾
+                        </div>
+                        <div class="history-tag">
+                            <span class="material-icons">trending_up</span>
+                            蛋糕
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 搜尋結果 (預設不顯示) -->
+                <div class="search-results" style="display: none;">
+                    <div class="section-title">搜尋結果 (24)</div>
+                    
+                    <div class="product-grid">
+                        <a href="product-detail.html" class="product-card">
+                            <div class="product-image" style="background-image: url('https://via.placeholder.com/300x300/FF5722/FFFFFF?text=巧克力');"></div>
+                            <div class="product-info">
+                                <h3 class="product-name">巧克力怪獸餅乾</h3>
+                                <div class="product-merchant">怪物糖果</div>
+                                <div class="product-price">NT$350</div>
+                            </div>
+                        </a>
+                        
+                        <a href="product-detail.html" class="product-card">
+                            <div class="product-image" style="background-image: url('https://via.placeholder.com/300x300/795548/FFFFFF?text=巧克力');"></div>
+                            <div class="product-info">
+                                <h3 class="product-name">巧克力脆皮冰淇淋</h3>
+                                <div class="product-merchant">甜點天堂</div>
+                                <div class="product-price">NT$280</div>
+                            </div>
+                        </a>
+                        
+                        <a href="product-detail.html" class="product-card">
+                            <div class="product-image" style="background-image: url('https://via.placeholder.com/300x300/8D6E63/FFFFFF?text=巧克力');"></div>
+                            <div class="product-info">
+                                <h3 class="product-name">特濃巧克力軟糖</h3>
+                                <div class="product-merchant">怪物糖果</div>
+                                <div class="product-price">NT$120</div>
+                            </div>
+                        </a>
+                        
+                        <a href="product-detail.html" class="product-card">
+                            <div class="product-image" style="background-image: url('https://via.placeholder.com/300x300/5D4037/FFFFFF?text=巧克力');"></div>
+                            <div class="product-info">
+                                <h3 class="product-name">巧克力夾心餅乾</h3>
+                                <div class="product-merchant">美味餅乾</div>
+                                <div class="product-price">NT$180</div>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+                
+                <!-- 無搜尋結果 (預設不顯示) -->
+                <div class="search-result-message" style="display: none;">
+                    找不到符合「XXX」的搜尋結果<br>
+                    請嘗試其他關鍵字
+                </div>
+            </div>
+            
+            <!-- 底部導航 -->
+            <div class="bottom-nav">
+                <a href="merchants.html" class="nav-item">
+                    <span class="material-icons">home</span>
+                    <span>首頁</span>
+                </a>
+                <a href="search.html" class="nav-item active">
+                    <span class="material-icons">search</span>
+                    <span>搜尋</span>
+                </a>
+                <a href="shoppingcar.html" class="nav-item">
+                    <span class="material-icons">shopping_cart</span>
+                    <span>購物車</span>
+                </a>
+                <a href="orders.html" class="nav-item">
+                    <span class="material-icons">receipt</span>
+                    <span>訂單</span>
+                </a>
+                <a href="setting.html" class="nav-item">
+                    <span class="material-icons">person</span>
+                    <span>我的</span>
+                </a>
+            </div>
+        </div>
+    </div>
+</body>
+</html> 

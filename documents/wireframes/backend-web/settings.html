@@ -1,0 +1,629 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>後台管理系統 - 系統設定</title>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #560CCE;
+            --secondary-color: #414757;
+            --error-color: #f13a59;
+            --text-color: #000000;
+            --background-color: #F5F5F5;
+            --card-color: #FFFFFF;
+            --border-color: #E0E0E0;
+        }
+        
+        body {
+            font-family: 'Noto Sans TC', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: var(--background-color);
+            display: flex;
+        }
+        
+        .sidebar {
+            width: 250px;
+            height: 100vh;
+            background-color: white;
+            box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+            position: fixed;
+            left: 0;
+            top: 0;
+            overflow-y: auto;
+        }
+        
+        .sidebar-header {
+            padding: 20px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .sidebar-header .logo {
+            width: 40px;
+            height: 40px;
+            background-color: var(--primary-color);
+            border-radius: 8px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+        }
+        
+        .sidebar-header h1 {
+            margin: 0;
+            font-size: 18px;
+            font-weight: 500;
+        }
+        
+        .sidebar-menu {
+            padding: 16px 0;
+        }
+        
+        .menu-item {
+            display: flex;
+            align-items: center;
+            padding: 12px 20px;
+            color: var(--secondary-color);
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+        
+        .menu-item:hover {
+            background-color: var(--background-color);
+        }
+        
+        .menu-item.active {
+            background-color: var(--primary-color);
+            color: white;
+        }
+        
+        .menu-item .material-icons {
+            margin-right: 12px;
+        }
+        
+        .menu-item .label {
+            font-size: 14px;
+        }
+        
+        .main-content {
+            margin-left: 250px;
+            flex: 1;
+            padding: 20px;
+        }
+        
+        .top-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+        
+        .page-title {
+            font-size: 24px;
+            font-weight: 500;
+            margin: 0;
+        }
+        
+        .user-menu {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+        
+        .user-menu .material-icons {
+            color: var(--secondary-color);
+            cursor: pointer;
+        }
+        
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: var(--primary-color);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            cursor: pointer;
+        }
+        
+        .settings-tab {
+            display: flex;
+            margin-bottom: 20px;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .tab-item {
+            padding: 12px 20px;
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--secondary-color);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .tab-item.active {
+            color: var(--primary-color);
+            border-bottom: 2px solid var(--primary-color);
+        }
+        
+        .settings-card {
+            background-color: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        
+        .settings-card .header {
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .settings-card .title {
+            font-size: 18px;
+            font-weight: 500;
+            margin: 0;
+        }
+        
+        .settings-section {
+            margin-bottom: 24px;
+        }
+        
+        .settings-section:last-child {
+            margin-bottom: 0;
+        }
+        
+        .settings-section-title {
+            font-size: 16px;
+            font-weight: 500;
+            margin: 0 0 15px 0;
+        }
+        
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px;
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        .form-label {
+            display: block;
+            font-size: 14px;
+            font-weight: 500;
+            margin-bottom: 8px;
+            color: var(--secondary-color);
+        }
+        
+        .form-description {
+            font-size: 12px;
+            color: var(--secondary-color);
+            margin-top: 4px;
+        }
+        
+        .form-select, .form-input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            font-family: 'Noto Sans TC', sans-serif;
+            font-size: 14px;
+        }
+        
+        .form-select:focus, .form-input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 2px rgba(86, 12, 206, 0.1);
+        }
+        
+        .switch-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .switch-item:last-child {
+            margin-bottom: 0;
+        }
+        
+        .switch-label {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .switch-title {
+            font-size: 14px;
+            font-weight: 500;
+        }
+        
+        .switch-description {
+            font-size: 12px;
+            color: var(--secondary-color);
+            margin-top: 4px;
+        }
+        
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 50px;
+            height: 24px;
+        }
+        
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 24px;
+        }
+        
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 18px;
+            width: 18px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+        
+        input:checked + .slider {
+            background-color: var(--primary-color);
+        }
+        
+        input:checked + .slider:before {
+            transform: translateX(26px);
+        }
+        
+        .status-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+        
+        .status-indicator {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+        
+        .status-indicator.active {
+            background-color: #4CAF50;
+        }
+        
+        .status-label {
+            font-size: 14px;
+        }
+        
+        .export-options {
+            margin-top: 15px;
+        }
+        
+        .checkbox-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        
+        .checkbox-input {
+            margin-right: 10px;
+        }
+        
+        .checkbox-label {
+            font-size: 14px;
+        }
+        
+        .export-controls {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        
+        .form-select.export-select {
+            width: auto;
+        }
+        
+        .actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        
+        .btn {
+            padding: 10px 16px;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            border: none;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-outline {
+            background-color: transparent;
+            border: 1px solid var(--border-color);
+            color: var(--secondary-color);
+        }
+        
+        .btn-outline:hover {
+            background-color: var(--background-color);
+        }
+        
+        .btn-primary {
+            background-color: var(--primary-color);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background-color: #480aad;
+        }
+        
+        .btn-export {
+            background-color: var(--primary-color);
+            color: white;
+        }
+        
+        .btn-export:hover {
+            background-color: #480aad;
+        }
+        
+        .update-btn {
+            color: var(--primary-color);
+            background: none;
+            border: none;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            padding: 0;
+        }
+        
+        .update-btn:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="sidebar">
+        <div class="sidebar-header">
+            <div class="logo">
+                <span class="material-icons">shopping_cart</span>
+            </div>
+            <h1>後台管理系統</h1>
+        </div>
+        
+        <div class="sidebar-menu">
+            <a href="dashboard.html" class="menu-item">
+                <span class="material-icons">dashboard</span>
+                <span class="label">儀表板</span>
+            </a>
+            <a href="orders.html" class="menu-item">
+                <span class="material-icons">receipt</span>
+                <span class="label">訂單管理</span>
+            </a>
+            <a href="merchants.html" class="menu-item">
+                <span class="material-icons">storefront</span>
+                <span class="label">商家管理</span>
+            </a>
+            <a href="products.html" class="menu-item">
+                <span class="material-icons">inventory_2</span>
+                <span class="label">商品管理</span>
+            </a>
+            <a href="users.html" class="menu-item">
+                <span class="material-icons">people</span>
+                <span class="label">會員管理</span>
+            </a>
+            <a href="settings.html" class="menu-item active">
+                <span class="material-icons">settings</span>
+                <span class="label">系統設定</span>
+            </a>
+        </div>
+    </div>
+    
+    <div class="main-content">
+        <div class="top-bar">
+            <h1 class="page-title">系統設定</h1>
+            <div class="user-menu">
+                <span class="material-icons">notifications</span>
+                <div class="user-avatar">
+                    <span class="material-icons">person</span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="settings-tab">
+            <div class="tab-item active">一般設定</div>
+            <div class="tab-item">安全設定</div>
+            <div class="tab-item">個人資料</div>
+        </div>
+        
+        <!-- 一般設定卡片 -->
+        <div class="settings-card">
+            <div class="header">
+                <h2 class="title">一般設定</h2>
+            </div>
+            
+            <div class="settings-section">
+                <h3 class="settings-section-title">語言與地區</h3>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label class="form-label" for="language">系統語言</label>
+                        <select id="language" class="form-select">
+                            <option value="zh-TW" selected>繁體中文</option>
+                            <option value="en-US">English (US)</option>
+                            <option value="ja-JP">日本語</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="timezone">時區</label>
+                        <select id="timezone" class="form-select">
+                            <option value="Asia/Taipei" selected>(GMT+8) 台北</option>
+                            <option value="Asia/Tokyo">(GMT+9) 東京</option>
+                            <option value="America/Los_Angeles">(GMT-8) 洛杉磯</option>
+                            <option value="Europe/London">(GMT+0) 倫敦</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="settings-section">
+                <h3 class="settings-section-title">通知設定</h3>
+                <div class="switch-item">
+                    <div class="switch-label">
+                        <span class="switch-title">電子郵件通知</span>
+                        <span class="switch-description">接收系統更新和重要通知的電子郵件</span>
+                    </div>
+                    <label class="switch">
+                        <input type="checkbox" checked>
+                        <span class="slider"></span>
+                    </label>
+                </div>
+                <div class="switch-item">
+                    <div class="switch-label">
+                        <span class="switch-title">訂單通知</span>
+                        <span class="switch-description">當有新訂單時收到通知</span>
+                    </div>
+                    <label class="switch">
+                        <input type="checkbox" checked>
+                        <span class="slider"></span>
+                    </label>
+                </div>
+                <div class="switch-item">
+                    <div class="switch-label">
+                        <span class="switch-title">產品庫存警告</span>
+                        <span class="switch-description">當產品庫存低於警告值時收到通知</span>
+                    </div>
+                    <label class="switch">
+                        <input type="checkbox" checked>
+                        <span class="slider"></span>
+                    </label>
+                </div>
+            </div>
+            
+            <div class="settings-section">
+                <h3 class="settings-section-title">介面設定</h3>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label class="form-label" for="theme">介面主題</label>
+                        <select id="theme" class="form-select">
+                            <option value="light" selected>亮色主題</option>
+                            <option value="dark">暗色主題</option>
+                            <option value="system">跟隨系統</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="display-density">顯示密度</label>
+                        <select id="display-density" class="form-select">
+                            <option value="comfortable">舒適 (寬鬆)</option>
+                            <option value="standard" selected>標準</option>
+                            <option value="compact">緊湊 (顯示更多)</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 系統資訊卡片 -->
+        <div class="settings-card">
+            <div class="header">
+                <h2 class="title">系統資訊</h2>
+            </div>
+            
+            <div class="form-grid">
+                <div class="form-group">
+                    <label class="form-label">系統版本</label>
+                    <p>購物車管理系統 v2.5.1</p>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">上次更新</label>
+                    <p>2023/09/18 14:30</p>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">資料庫狀態</label>
+                    <div class="status-item">
+                        <div class="status-indicator active"></div>
+                        <div class="status-label">運行中</div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">API 狀態</label>
+                    <div class="status-item">
+                        <div class="status-indicator active"></div>
+                        <div class="status-label">運行中</div>
+                    </div>
+                </div>
+            </div>
+            
+            <button class="update-btn">檢查更新</button>
+        </div>
+        
+        <!-- 匯出資料卡片 -->
+        <div class="settings-card">
+            <div class="header">
+                <h2 class="title">資料匯出</h2>
+            </div>
+            
+            <p>匯出系統資料以進行備份或資料分析</p>
+            
+            <div class="export-options">
+                <div class="checkbox-item">
+                    <input type="checkbox" id="export-orders" class="checkbox-input" checked>
+                    <label for="export-orders" class="checkbox-label">訂單資料</label>
+                </div>
+                <div class="checkbox-item">
+                    <input type="checkbox" id="export-products" class="checkbox-input" checked>
+                    <label for="export-products" class="checkbox-label">產品資料</label>
+                </div>
+                <div class="checkbox-item">
+                    <input type="checkbox" id="export-customers" class="checkbox-input" checked>
+                    <label for="export-customers" class="checkbox-label">客戶資料</label>
+                </div>
+                <div class="checkbox-item">
+                    <input type="checkbox" id="export-merchants" class="checkbox-input" checked>
+                    <label for="export-merchants" class="checkbox-label">商家資料</label>
+                </div>
+            </div>
+            
+            <div class="export-controls">
+                <select class="form-select export-select">
+                    <option value="csv" selected>CSV 格式</option>
+                    <option value="xlsx">Excel 格式</option>
+                    <option value="json">JSON 格式</option>
+                </select>
+                <button class="btn btn-export">匯出資料</button>
+            </div>
+        </div>
+        
+        <!-- 表單按鈕 -->
+        <div class="actions">
+            <button class="btn btn-outline">重置設定</button>
+            <button class="btn btn-primary">儲存設定</button>
+        </div>
+    </div>
+</body>
+</html>

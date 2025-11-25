@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>購物車應用 - 編輯個人資料</title>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #560CCE;
+            --secondary-color: #414757;
+            --error-color: #f13a59;
+            --text-color: #000000;
+            --background-color: #F5F5F5;
+            --card-color: #FFFFFF;
+            --border-color: #E0E0E0;
+        }
+        
+        body {
+            font-family: 'Noto Sans TC', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: var(--background-color);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        
+        .ios-frame {
+            width: 375px;
+            height: 812px;
+            background-color: white;
+            border-radius: 40px;
+            overflow: hidden;
+            position: relative;
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.2);
+            border: 10px solid black;
+            box-sizing: content-box;
+        }
+        
+        .ios-notch {
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 180px;
+            height: 30px;
+            background-color: black;
+            border-bottom-left-radius: 15px;
+            border-bottom-right-radius: 15px;
+            z-index: 10;
+        }
+        
+        .app-container {
+            width: 100%;
+            height: 100%;
+            overflow-y: auto;
+            background-color: var(--background-color);
+            position: relative;
+        }
+        
+        .status-bar {
+            height: 44px;
+            background-color: var(--primary-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 15px;
+            padding-top: 15px;
+            color: white;
+        }
+        
+        .status-bar .time {
+            font-weight: bold;
+        }
+        
+        .status-bar .icons {
+            display: flex;
+        }
+        
+        .status-bar .icons .icon {
+            margin-left: 8px;
+        }
+        
+        .app-header {
+            background-color: var(--primary-color);
+            padding: 0 20px;
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            height: 56px;
+        }
+        
+        .app-header h1 {
+            font-size: 20px;
+            margin: 0;
+        }
+        
+        .app-header .back-button {
+            display: flex;
+            align-items: center;
+            margin-right: 16px;
+        }
+        
+        .app-header .save-button {
+            color: white;
+            background: none;
+            border: none;
+            font-weight: 500;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        
+        .profile-avatar-container {
+            display: flex;
+            justify-content: center;
+            padding: 24px 0;
+            position: relative;
+        }
+        
+        .profile-avatar {
+            width: 100px;
+            height: 100px;
+            border-radius: 50px;
+            background-image: url('https://via.placeholder.com/200x200/FFFFFF/560CCE?text=頭像');
+            background-size: cover;
+            background-position: center;
+            position: relative;
+            border: 2px solid white;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        
+        .camera-icon {
+            position: absolute;
+            bottom: 0;
+            right: 0;
+            width: 32px;
+            height: 32px;
+            background-color: var(--primary-color);
+            border-radius: 16px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            cursor: pointer;
+        }
+        
+        .camera-icon .material-icons {
+            font-size: 18px;
+        }
+        
+        .form-section {
+            background-color: white;
+            margin-bottom: 16px;
+        }
+        
+        .section-header {
+            padding: 16px;
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--secondary-color);
+            background-color: var(--background-color);
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .form-group {
+            display: flex;
+            padding: 16px;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .form-group:last-child {
+            border-bottom: none;
+        }
+        
+        .form-label {
+            width: 80px;
+            font-size: 16px;
+            color: var(--text-color);
+            padding-top: 8px;
+        }
+        
+        .form-input {
+            flex: 1;
+        }
+        
+        .form-input input, .form-input select {
+            width: 100%;
+            height: 40px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            padding: 0 12px;
+            font-size: 16px;
+            outline: none;
+            box-sizing: border-box;
+        }
+        
+        .form-input input:focus, .form-input select:focus {
+            border-color: var(--primary-color);
+        }
+        
+        .form-input .radio-group {
+            display: flex;
+            margin-top: 8px;
+        }
+        
+        .radio-option {
+            display: flex;
+            align-items: center;
+            margin-right: 24px;
+        }
+        
+        .radio-option input[type="radio"] {
+            width: auto;
+            height: auto;
+            margin-right: 8px;
+        }
+        
+        .form-input textarea {
+            width: 100%;
+            height: 80px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            padding: 12px;
+            font-size: 16px;
+            outline: none;
+            box-sizing: border-box;
+            resize: none;
+            font-family: inherit;
+        }
+        
+        .form-hint {
+            font-size: 12px;
+            color: var(--secondary-color);
+            margin-top: 4px;
+        }
+        
+        .save-button-container {
+            padding: 16px;
+            margin-bottom: 16px;
+        }
+        
+        .save-button-large {
+            width: 100%;
+            height: 48px;
+            border-radius: 24px;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div class="ios-frame">
+        <div class="ios-notch"></div>
+        <div class="app-container">
+            <div class="status-bar">
+                <span class="time">9:41</span>
+                <div class="icons">
+                    <span class="icon">📶</span>
+                    <span class="icon">📳</span>
+                    <span class="icon">🔋</span>
+                </div>
+            </div>
+            
+            <div class="app-header">
+                <a href="setting.html" class="back-button">
+                    <span class="material-icons">arrow_back</span>
+                </a>
+                <h1>編輯個人資料</h1>
+                <button class="save-button">儲存</button>
+            </div>
+            
+            <div class="profile-avatar-container">
+                <div class="profile-avatar">
+                    <div class="camera-icon">
+                        <span class="material-icons">camera_alt</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="form-section">
+                <div class="section-header">基本資料</div>
+                
+                <div class="form-group">
+                    <div class="form-label">姓名</div>
+                    <div class="form-input">
+                        <input type="text" value="張小明">
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <div class="form-label">暱稱</div>
+                    <div class="form-input">
+                        <input type="text" value="小明">
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <div class="form-label">性別</div>
+                    <div class="form-input">
+                        <div class="radio-group">
+                            <label class="radio-option">
+                                <input type="radio" name="gender" checked>
+                                男性
+                            </label>
+                            <label class="radio-option">
+                                <input type="radio" name="gender">
+                                女性
+                            </label>
+                            <label class="radio-option">
+                                <input type="radio" name="gender">
+                                其他
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <div class="form-label">生日</div>
+                    <div class="form-input">
+                        <input type="date" value="1995-05-15">
+                    </div>
+                </div>
+            </div>
+            
+            <div class="form-section">
+                <div class="section-header">聯絡資訊</div>
+                
+                <div class="form-group">
+                    <div class="form-label">手機</div>
+                    <div class="form-input">
+                        <input type="tel" value="0912-345-678">
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <div class="form-label">Email</div>
+                    <div class="form-input">
+                        <input type="email" value="xiaoming@example.com">
+                    </div>
+                </div>
+            </div>
+            
+            <div class="form-section">
+                <div class="section-header">地址資訊</div>
+                
+                <div class="form-group">
+                    <div class="form-label">縣市</div>
+                    <div class="form-input">
+                        <select>
+                            <option>請選擇縣市</option>
+                            <option selected>台北市</option>
+                            <option>新北市</option>
+                            <option>桃園市</option>
+                            <option>台中市</option>
+                            <option>高雄市</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <div class="form-label">區域</div>
+                    <div class="form-input">
+                        <select>
+                            <option>請選擇區域</option>
+                            <option>中正區</option>
+                            <option>大安區</option>
+                            <option selected>信義區</option>
+                            <option>松山區</option>
+                            <option>內湖區</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <div class="form-label">郵遞區號</div>
+                    <div class="form-input">
+                        <input type="text" value="110">
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <div class="form-label">詳細地址</div>
+                    <div class="form-input">
+                        <input type="text" value="忠孝東路100號 5樓">
+                    </div>
+                </div>
+            </div>
+            
+            <div class="save-button-container">
+                <a href="setting.html"><button class="save-button-large">儲存變更</button></a>
+            </div>
+        </div>
+    </div>
+</body>
+</html> 

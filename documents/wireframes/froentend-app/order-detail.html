@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>購物車應用 - 訂單詳情</title>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #560CCE;
+            --secondary-color: #414757;
+            --error-color: #f13a59;
+            --text-color: #000000;
+            --background-color: #F5F5F5;
+            --card-color: #FFFFFF;
+            --border-color: #E0E0E0;
+        }
+        
+        body {
+            font-family: 'Noto Sans TC', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: var(--background-color);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        
+        .ios-frame {
+            width: 375px;
+            height: 812px;
+            background-color: white;
+            border-radius: 40px;
+            overflow: hidden;
+            position: relative;
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.2);
+            border: 10px solid black;
+            box-sizing: content-box;
+        }
+        
+        .ios-notch {
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 180px;
+            height: 30px;
+            background-color: black;
+            border-bottom-left-radius: 15px;
+            border-bottom-right-radius: 15px;
+            z-index: 10;
+        }
+        
+        .app-container {
+            width: 100%;
+            height: 100%;
+            overflow-y: auto;
+            background-color: var(--background-color);
+            position: relative;
+        }
+        
+        .status-bar {
+            height: 44px;
+            background-color: var(--primary-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 15px;
+            padding-top: 15px;
+            color: white;
+        }
+        
+        .status-bar .time {
+            font-weight: bold;
+        }
+        
+        .status-bar .icons {
+            display: flex;
+        }
+        
+        .status-bar .icons .icon {
+            margin-left: 8px;
+        }
+        
+        .app-header {
+            background-color: var(--primary-color);
+            padding: 0 20px;
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            height: 56px;
+        }
+        
+        .app-header h1 {
+            font-size: 20px;
+            margin: 0;
+        }
+        
+        .app-header .back-button {
+            display: flex;
+            align-items: center;
+            margin-right: 16px;
+        }
+        
+        .app-header .header-action {
+            display: flex;
+            align-items: center;
+        }
+        
+        .app-header .header-action .icon {
+            margin-left: 16px;
+            cursor: pointer;
+        }
+        
+        .order-status-container {
+            background-color: white;
+            padding: 20px;
+        }
+        
+        .order-id {
+            font-size: 14px;
+            color: var(--secondary-color);
+            margin-bottom: 12px;
+        }
+        
+        .status-text {
+            font-size: 18px;
+            font-weight: 500;
+            margin-bottom: 16px;
+        }
+        
+        .status-timeline {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 20px;
+            position: relative;
+        }
+        
+        .status-timeline:before {
+            content: '';
+            position: absolute;
+            top: 24px;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background-color: var(--border-color);
+            z-index: 1;
+        }
+        
+        .timeline-step {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+            z-index: 2;
+            width: 60px;
+        }
+        
+        .step-icon {
+            width: 28px;
+            height: 28px;
+            border-radius: 14px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 8px;
+            background-color: white;
+            border: 2px solid var(--border-color);
+        }
+        
+        .step-label {
+            font-size: 12px;
+            text-align: center;
+            color: var(--secondary-color);
+        }
+        
+        .timeline-step.active .step-icon {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+            color: white;
+        }
+        
+        .timeline-step.active .step-label {
+            color: var(--primary-color);
+            font-weight: 500;
+        }
+        
+        .timeline-step.completed .step-icon {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+            color: white;
+        }
+        
+        .section-card {
+            background-color: white;
+            margin: 12px 0;
+            padding: 16px;
+        }
+        
+        .section-title {
+            font-size: 16px;
+            font-weight: 500;
+            margin-bottom: 16px;
+        }
+        
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 12px;
+        }
+        
+        .info-row:last-child {
+            margin-bottom: 0;
+        }
+        
+        .info-label {
+            font-size: 14px;
+            color: var(--secondary-color);
+        }
+        
+        .info-value {
+            font-size: 14px;
+            text-align: right;
+        }
+        
+        .address-row {
+            margin-bottom: 12px;
+        }
+        
+        .address-row:last-child {
+            margin-bottom: 0;
+        }
+        
+        .address-label {
+            font-size: 14px;
+            color: var(--secondary-color);
+            margin-bottom: 4px;
+        }
+        
+        .address-value {
+            font-size: 14px;
+        }
+        
+        .order-items {
+            margin-top: 16px;
+        }
+        
+        .order-item {
+            display: flex;
+            padding: 12px 0;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .order-item:last-child {
+            border-bottom: none;
+        }
+        
+        .item-image {
+            width: 64px;
+            height: 64px;
+            background-size: cover;
+            background-position: center;
+            border-radius: 4px;
+            margin-right: 12px;
+            flex-shrink: 0;
+        }
+        
+        .item-details {
+            flex: 1;
+        }
+        
+        .item-name {
+            font-size: 14px;
+            font-weight: 500;
+            margin-bottom: 4px;
+        }
+        
+        .item-variant {
+            font-size: 12px;
+            color: var(--secondary-color);
+            margin-bottom: 8px;
+        }
+        
+        .item-price-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .item-price {
+            font-size: 14px;
+            font-weight: 500;
+        }
+        
+        .item-quantity {
+            font-size: 12px;
+            color: var(--secondary-color);
+        }
+        
+        .price-summary {
+            margin-top: 16px;
+            padding-top: 16px;
+            border-top: 1px dashed var(--border-color);
+        }
+        
+        .total-row {
+            font-weight: 500;
+            color: var(--primary-color);
+        }
+        
+        .order-actions {
+            padding: 16px;
+            display: flex;
+            justify-content: space-between;
+            position: sticky;
+            bottom: 0;
+            background-color: white;
+            box-shadow: 0 -2px 5px rgba(0,0,0,0.1);
+        }
+        
+        .action-button {
+            flex: 1;
+            height: 44px;
+            border-radius: 22px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-weight: 500;
+            font-size: 14px;
+            cursor: pointer;
+        }
+        
+        .primary-button {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            margin-left: 8px;
+        }
+        
+        .secondary-button {
+            background-color: white;
+            color: var(--secondary-color);
+            border: 1px solid var(--border-color);
+        }
+        
+        .tracking-info {
+            padding: 12px;
+            background-color: #E3F2FD;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            margin-top: 16px;
+        }
+        
+        .tracking-icon {
+            color: #2196F3;
+            margin-right: 12px;
+        }
+        
+        .tracking-details {
+            flex: 1;
+        }
+        
+        .tracking-status {
+            font-size: 14px;
+            font-weight: 500;
+            margin-bottom: 4px;
+        }
+        
+        .tracking-text {
+            font-size: 12px;
+            color: var(--secondary-color);
+        }
+    </style>
+</head>
+<body>
+    <div class="ios-frame">
+        <div class="ios-notch"></div>
+        <div class="app-container">
+            <div class="status-bar">
+                <span class="time">9:41</span>
+                <div class="icons">
+                    <span class="icon">📶</span>
+                    <span class="icon">📳</span>
+                    <span class="icon">🔋</span>
+                </div>
+            </div>
+            
+            <div class="app-header">
+                <div class="back-button">
+                    <span class="material-icons">arrow_back</span>
+                </div>
+                <h1>訂單詳情</h1>
+                <div class="header-action">
+                    <span class="material-icons icon">more_vert</span>
+                </div>
+            </div>
+            
+            <div class="order-status-container">
+                <div class="order-id">訂單號：#2023111501</div>
+                <div class="status-text">目前狀態：待付款</div>
+                
+                <div class="status-timeline">
+                    <div class="timeline-step completed">
+                        <div class="step-icon">
+                            <span class="material-icons" style="font-size: 16px;">check</span>
+                        </div>
+                        <div class="step-label">已下單</div>
+                    </div>
+                    
+                    <div class="timeline-step active">
+                        <div class="step-icon">
+                            <span class="material-icons" style="font-size: 16px;">payments</span>
+                        </div>
+                        <div class="step-label">待付款</div>
+                    </div>
+                    
+                    <div class="timeline-step">
+                        <div class="step-icon">
+                            <span class="material-icons" style="font-size: 16px;">inventory_2</span>
+                        </div>
+                        <div class="step-label">備貨中</div>
+                    </div>
+                    
+                    <div class="timeline-step">
+                        <div class="step-icon">
+                            <span class="material-icons" style="font-size: 16px;">local_shipping</span>
+                        </div>
+                        <div class="step-label">運送中</div>
+                    </div>
+                    
+                    <div class="timeline-step">
+                        <div class="step-icon">
+                            <span class="material-icons" style="font-size: 16px;">task_alt</span>
+                        </div>
+                        <div class="step-label">已完成</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="section-card">
+                <div class="section-title">訂單資訊</div>
+                
+                <div class="info-row">
+                    <div class="info-label">訂單編號</div>
+                    <div class="info-value">#2023111501</div>
+                </div>
+                
+                <div class="info-row">
+                    <div class="info-label">下單時間</div>
+                    <div class="info-value">2023-11-15 16:30</div>
+                </div>
+                
+                <div class="info-row">
+                    <div class="info-label">付款方式</div>
+                    <div class="info-value">信用卡支付</div>
+                </div>
+                
+                <div class="info-row">
+                    <div class="info-label">付款狀態</div>
+                    <div class="info-value">未付款</div>
+                </div>
+            </div>
+            
+            <div class="section-card">
+                <div class="section-title">收貨資訊</div>
+                
+                <div class="address-row">
+                    <div class="address-label">收件人</div>
+                    <div class="address-value">張小明 (0912-345-678)</div>
+                </div>
+                
+                <div class="address-row">
+                    <div class="address-label">收貨地址</div>
+                    <div class="address-value">台北市信義區忠孝東路100號 5樓</div>
+                </div>
+                
+                <div class="address-row">
+                    <div class="address-label">配送方式</div>
+                    <div class="address-value">宅配到府</div>
+                </div>
+            </div>
+            
+            <div class="section-card">
+                <div class="section-title">商品列表</div>
+                
+                <div class="order-items">
+                    <div class="order-item">
+                        <div class="item-image" style="background-image: url('https://via.placeholder.com/200x200/FF5722/FFFFFF?text=巧克力');"></div>
+                        <div class="item-details">
+                            <div class="item-name">巧克力水果糖</div>
+                            <div class="item-variant">規格：大包裝</div>
+                            <div class="item-price-row">
+                                <div class="item-price">NT$650</div>
+                                <div class="item-quantity">x1</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="order-item">
+                        <div class="item-image" style="background-image: url('https://via.placeholder.com/200x200/2196F3/FFFFFF?text=香蕉');"></div>
+                        <div class="item-details">
+                            <div class="item-name">香蕉牛奶糖</div>
+                            <div class="item-variant">規格：小包裝</div>
+                            <div class="item-price-row">
+                                <div class="item-price">NT$400</div>
+                                <div class="item-quantity">x1</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="price-summary">
+                    <div class="info-row">
+                        <div class="info-label">商品金額</div>
+                        <div class="info-value">NT$1,050</div>
+                    </div>
+                    
+                    <div class="info-row">
+                        <div class="info-label">配送費</div>
+                        <div class="info-value">NT$60</div>
+                    </div>
+                    
+                    <div class="info-row">
+                        <div class="info-label">優惠折扣</div>
+                        <div class="info-value">-NT$60</div>
+                    </div>
+                    
+                    <div class="info-row total-row">
+                        <div class="info-label">訂單總額</div>
+                        <div class="info-value">NT$1,050</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="order-actions">
+                <button class="action-button secondary-button">取消訂單</button>
+                <button class="action-button primary-button">立即付款</button>
+            </div>
+        </div>
+    </div>
+</body>
+</html> 

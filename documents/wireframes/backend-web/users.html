@@ -1,0 +1,602 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>後台管理系統 - 會員管理</title>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #560CCE;
+            --secondary-color: #414757;
+            --error-color: #f13a59;
+            --text-color: #000000;
+            --background-color: #F5F5F5;
+            --card-color: #FFFFFF;
+            --border-color: #E0E0E0;
+        }
+        
+        body {
+            font-family: 'Noto Sans TC', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: var(--background-color);
+            display: flex;
+        }
+        
+        .sidebar {
+            width: 250px;
+            height: 100vh;
+            background-color: white;
+            box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+            position: fixed;
+            left: 0;
+            top: 0;
+            overflow-y: auto;
+        }
+        
+        .sidebar-header {
+            padding: 20px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .sidebar-header .logo {
+            width: 40px;
+            height: 40px;
+            background-color: var(--primary-color);
+            border-radius: 8px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+        }
+        
+        .sidebar-header h1 {
+            margin: 0;
+            font-size: 18px;
+            font-weight: 500;
+        }
+        
+        .sidebar-menu {
+            padding: 16px 0;
+        }
+        
+        .menu-item {
+            display: flex;
+            align-items: center;
+            padding: 12px 20px;
+            color: var(--secondary-color);
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+        
+        .menu-item:hover {
+            background-color: var(--background-color);
+        }
+        
+        .menu-item.active {
+            background-color: var(--primary-color);
+            color: white;
+        }
+        
+        .menu-item .icon {
+            margin-right: 12px;
+        }
+        
+        .menu-item .label {
+            font-size: 14px;
+        }
+        
+        .main-content {
+            margin-left: 250px;
+            flex: 1;
+            padding: 20px;
+        }
+        
+        .top-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+        
+        .page-title {
+            font-size: 24px;
+            font-weight: 500;
+            margin: 0;
+        }
+        
+        .user-menu {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+        
+        .user-menu .icon {
+            color: var(--secondary-color);
+            cursor: pointer;
+        }
+        
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: var(--primary-color);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            cursor: pointer;
+        }
+        
+        .breadcrumb {
+            display: flex;
+            align-items: center;
+            margin-bottom: 16px;
+            font-size: 14px;
+        }
+        
+        .breadcrumb a {
+            color: var(--secondary-color);
+            text-decoration: none;
+        }
+        
+        .breadcrumb .separator {
+            margin: 0 8px;
+            color: var(--secondary-color);
+        }
+        
+        .breadcrumb .current {
+            color: var(--text-color);
+            font-weight: 500;
+        }
+        
+        .search-section {
+            background-color: white;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 24px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .search-container {
+            display: flex;
+            gap: 16px;
+            margin-bottom: 16px;
+        }
+        
+        .search-input {
+            flex: 1;
+            position: relative;
+        }
+        
+        .search-input input {
+            width: 100%;
+            padding: 10px 12px 10px 40px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 14px;
+            box-sizing: border-box;
+        }
+        
+        .search-input .material-icons {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--secondary-color);
+        }
+        
+        .search-select {
+            width: 180px;
+        }
+        
+        .search-select select {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 14px;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%23414757' viewBox='0 0 16 16'%3E%3Cpath d='M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 12px center;
+        }
+        
+        .search-button {
+            padding: 10px 20px;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: 500;
+            cursor: pointer;
+        }
+        
+        .action-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .add-button {
+            padding: 10px 20px;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: 500;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            text-decoration: none;
+        }
+        
+        .table-container {
+            background-color: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        
+        .table-header {
+            display: grid;
+            grid-template-columns: 80px 2fr 1fr 1fr 1fr auto;
+            padding: 16px;
+            background-color: var(--background-color);
+            font-weight: 500;
+        }
+        
+        .table-row {
+            display: grid;
+            grid-template-columns: 80px 2fr 1fr 1fr 1fr auto;
+            padding: 16px;
+            border-bottom: 1px solid var(--border-color);
+            align-items: center;
+        }
+        
+        .table-row:last-child {
+            border-bottom: none;
+        }
+        
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .user-avatar-img {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+        
+        .user-details {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+        
+        .user-name {
+            font-weight: 500;
+        }
+        
+        .user-email {
+            font-size: 12px;
+            color: var(--secondary-color);
+        }
+        
+        .status-badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+        
+        .status-badge.active {
+            background-color: #E8F5E9;
+            color: #2E7D32;
+        }
+        
+        .status-badge.inactive {
+            background-color: #FFEBEE;
+            color: #C62828;
+        }
+        
+        .level-badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+        
+        .level-badge.regular {
+            background-color: #E0E0E0;
+            color: #616161;
+        }
+        
+        .level-badge.silver {
+            background-color: #E8EAF6;
+            color: #3949AB;
+        }
+        
+        .level-badge.gold {
+            background-color: #FFF8E1;
+            color: #FF8F00;
+        }
+        
+        .level-badge.platinum {
+            background-color: #E0F2F1;
+            color: #00897B;
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .action-button {
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 14px;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+        
+        .action-button.edit {
+            background-color: #E3F2FD;
+            color: #1565C0;
+        }
+        
+        .action-button.view {
+            background-color: #F3E5F5;
+            color: #6A1B9A;
+        }
+        
+        .pagination {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 24px;
+        }
+        
+        .pagination-info {
+            font-size: 14px;
+            color: var(--secondary-color);
+        }
+        
+        .pagination-buttons {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .pagination-button {
+            padding: 6px 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            background-color: white;
+            color: var(--secondary-color);
+            cursor: pointer;
+        }
+        
+        .pagination-button.active {
+            background-color: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+        }
+        
+        .pagination-button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+    </style>
+</head>
+<body>
+    <div class="sidebar">
+        <div class="sidebar-header">
+            <div class="logo">
+                <span class="material-icons">shopping_cart</span>
+            </div>
+            <h1>後台管理系統</h1>
+        </div>
+        
+        <div class="sidebar-menu">
+            <a href="dashboard.html" class="menu-item">
+                <span class="material-icons icon">dashboard</span>
+                <span class="label">儀表板</span>
+            </a>
+            <a href="orders.html" class="menu-item">
+                <span class="material-icons icon">receipt</span>
+                <span class="label">訂單管理</span>
+            </a>
+            <a href="merchants.html" class="menu-item">
+                <span class="material-icons icon">storefront</span>
+                <span class="label">商家管理</span>
+            </a>
+            <a href="products.html" class="menu-item">
+                <span class="material-icons icon">inventory_2</span>
+                <span class="label">商品管理</span>
+            </a>
+            <a href="users.html" class="menu-item active">
+                <span class="material-icons icon">people</span>
+                <span class="label">會員管理</span>
+            </a>
+            <a href="settings.html" class="menu-item">
+                <span class="material-icons icon">settings</span>
+                <span class="label">系統設定</span>
+            </a>
+        </div>
+    </div>
+    
+    <div class="main-content">
+        <div class="top-bar">
+            <h1 class="page-title">會員管理</h1>
+            <div class="user-menu">
+                <span class="material-icons icon">notifications</span>
+                <div class="user-avatar">
+                    <span class="material-icons">person</span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="breadcrumb">
+            <a href="dashboard.html">首頁</a>
+            <span class="separator">></span>
+            <span class="current">會員管理</span>
+        </div>
+        
+        <div class="search-section">
+            <div class="search-container">
+                <div class="search-input">
+                    <span class="material-icons">search</span>
+                    <input type="text" placeholder="搜尋會員名稱、電子郵件或手機號碼">
+                </div>
+                <div class="search-select">
+                    <select>
+                        <option value="">所有等級</option>
+                        <option value="regular">一般會員</option>
+                        <option value="silver">銀卡會員</option>
+                        <option value="gold">金卡會員</option>
+                        <option value="platinum">白金會員</option>
+                    </select>
+                </div>
+                <div class="search-select">
+                    <select>
+                        <option value="">所有狀態</option>
+                        <option value="active">啟用中</option>
+                        <option value="inactive">已停用</option>
+                    </select>
+                </div>
+                <button class="search-button">搜尋</button>
+            </div>
+            
+            <div class="action-container">
+                <a href="user-create.html" class="add-button">
+                    <span class="material-icons">add</span>
+                    新增會員
+                </a>
+            </div>
+        </div>
+        
+        <div class="table-container">
+            <div class="table-header">
+                <div>ID</div>
+                <div>會員資訊</div>
+                <div>等級</div>
+                <div>註冊日期</div>
+                <div>狀態</div>
+                <div>操作</div>
+            </div>
+            
+            <div class="table-row">
+                <div>10001</div>
+                <div class="user-info">
+                    <img src="https://randomuser.me/api/portraits/women/65.jpg" alt="會員頭像" class="user-avatar-img">
+                    <div class="user-details">
+                        <div class="user-name">陳小明</div>
+                        <div class="user-email">ming.chen@example.com</div>
+                    </div>
+                </div>
+                <div>
+                    <span class="level-badge silver">銀卡會員</span>
+                </div>
+                <div>2022-03-15</div>
+                <div>
+                    <span class="status-badge active">啟用中</span>
+                </div>
+                <div class="action-buttons">
+                    <a href="user-edit.html" class="action-button edit">編輯</a>
+                    <a href="user-detail.html" class="action-button view">查看</a>
+                </div>
+            </div>
+            
+            <div class="table-row">
+                <div>10002</div>
+                <div class="user-info">
+                    <img src="https://randomuser.me/api/portraits/men/32.jpg" alt="會員頭像" class="user-avatar-img">
+                    <div class="user-details">
+                        <div class="user-name">王大華</div>
+                        <div class="user-email">wang.dahua@example.com</div>
+                    </div>
+                </div>
+                <div>
+                    <span class="level-badge gold">金卡會員</span>
+                </div>
+                <div>2021-09-08</div>
+                <div>
+                    <span class="status-badge active">啟用中</span>
+                </div>
+                <div class="action-buttons">
+                    <a href="user-edit.html" class="action-button edit">編輯</a>
+                    <a href="user-detail.html" class="action-button view">查看</a>
+                </div>
+            </div>
+            
+            <div class="table-row">
+                <div>10003</div>
+                <div class="user-info">
+                    <img src="https://randomuser.me/api/portraits/women/42.jpg" alt="會員頭像" class="user-avatar-img">
+                    <div class="user-details">
+                        <div class="user-name">李美玲</div>
+                        <div class="user-email">meiling@example.com</div>
+                    </div>
+                </div>
+                <div>
+                    <span class="level-badge regular">一般會員</span>
+                </div>
+                <div>2023-01-22</div>
+                <div>
+                    <span class="status-badge inactive">已停用</span>
+                </div>
+                <div class="action-buttons">
+                    <a href="user-edit.html" class="action-button edit">編輯</a>
+                    <a href="user-detail.html" class="action-button view">查看</a>
+                </div>
+            </div>
+            
+            <div class="table-row">
+                <div>10004</div>
+                <div class="user-info">
+                    <img src="https://randomuser.me/api/portraits/men/75.jpg" alt="會員頭像" class="user-avatar-img">
+                    <div class="user-details">
+                        <div class="user-name">張文彬</div>
+                        <div class="user-email">wenbin.zhang@example.com</div>
+                    </div>
+                </div>
+                <div>
+                    <span class="level-badge platinum">白金會員</span>
+                </div>
+                <div>2020-06-18</div>
+                <div>
+                    <span class="status-badge active">啟用中</span>
+                </div>
+                <div class="action-buttons">
+                    <a href="user-edit.html" class="action-button edit">編輯</a>
+                    <a href="user-detail.html" class="action-button view">查看</a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="pagination">
+            <div class="pagination-info">
+                顯示 1 到 4 筆，共 35 筆資料
+            </div>
+            <div class="pagination-buttons">
+                <button class="pagination-button" disabled>上一頁</button>
+                <button class="pagination-button active">1</button>
+                <button class="pagination-button">2</button>
+                <button class="pagination-button">3</button>
+                <button class="pagination-button">下一頁</button>
+            </div>
+        </div>
+    </div>
+</body>
+</html> 

@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>購物車管理後台</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Noto Sans TC', sans-serif;
+        }
+    </style>
+</head>
+<body class="bg-gray-100">
+    <!-- 瀏覽器模擬框架 開始 -->
+    <div class="mx-auto my-4 w-full max-w-6xl overflow-hidden rounded-lg border border-gray-300 shadow-lg">
+        <!-- 瀏覽器頂部 -->
+        <div class="flex items-center justify-between bg-gray-200 px-4 py-2">
+            <div class="flex space-x-2">
+                <div class="h-3 w-3 rounded-full bg-red-500"></div>
+                <div class="h-3 w-3 rounded-full bg-yellow-500"></div>
+                <div class="h-3 w-3 rounded-full bg-green-500"></div>
+            </div>
+            <div class="flex w-2/3 items-center rounded-md bg-white px-3 py-1">
+                <span class="text-gray-500 material-icons text-sm">lock</span>
+                <span class="ml-2 text-sm text-gray-600">https://admin.shoppingcar.com/</span>
+            </div>
+            <div class="flex space-x-2">
+                <span class="text-gray-500 material-icons">account_circle</span>
+                <span class="text-gray-500 material-icons">more_vert</span>
+            </div>
+        </div>
+
+        <!-- 頁面內容 -->
+        <div class="bg-white">
+            <!-- 側邊欄和主內容區 -->
+            <div class="flex">
+                <!-- 側邊欄 -->
+                <div class="w-64 bg-blue-800 text-white min-h-screen">
+                    <div class="p-4">
+                        <h1 class="text-xl font-bold">購物車管理後台</h1>
+                    </div>
+                    <nav class="mt-4">
+                        <a href="dashboard.html" class="block px-4 py-2 hover:bg-blue-700">
+                            <span class="material-icons align-middle mr-2">dashboard</span> 儀表板
+                        </a>
+                        <a href="orders.html" class="block px-4 py-2 hover:bg-blue-700">
+                            <span class="material-icons align-middle mr-2">shopping_cart</span> 訂單管理
+                        </a>
+                        <a href="merchants.html" class="block px-4 py-2 hover:bg-blue-700">
+                            <span class="material-icons align-middle mr-2">store</span> 商家管理
+                        </a>
+                        <a href="products.html" class="block px-4 py-2 hover:bg-blue-700">
+                            <span class="material-icons align-middle mr-2">inventory</span> 產品管理
+                        </a>
+                        <a href="users.html" class="block px-4 py-2 hover:bg-blue-700">
+                            <span class="material-icons align-middle mr-2">people</span> 用戶管理
+                        </a>
+                        <div class="mt-8 px-4 py-2">
+                            <a href="login.html" class="flex items-center text-red-300 hover:text-red-100">
+                                <span class="material-icons align-middle mr-2">logout</span> 登出
+                            </a>
+                        </div>
+                    </nav>
+                </div>
+
+                <!-- 主內容區域 -->
+                <div class="flex-1 p-8">
+                    <!-- 頁面標題 -->
+                    <div class="mb-8 flex justify-between">
+                        <h1 class="text-2xl font-bold">頁面標題</h1>
+                        <div>
+                            <!-- 頁面功能按鈕 -->
+                        </div>
+                    </div>
+
+                    <!-- 主要內容 -->
+                    <div>
+                        <!-- 內容放這裡 -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- 瀏覽器模擬框架 結束 -->
+</body>
+</html> 

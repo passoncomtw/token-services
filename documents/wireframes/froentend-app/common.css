@@ -1,0 +1,180 @@
+:root {
+    --primary-color: #560CCE;
+    --secondary-color: #414757;
+    --error-color: #f13a59;
+    --text-color: #000000;
+    --background-color: #F5F5F5;
+    --card-color: #FFFFFF;
+    --border-color: #E0E0E0;
+}
+
+body {
+    font-family: 'Noto Sans TC', sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: var(--background-color);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+}
+
+.ios-frame {
+    width: 375px;
+    height: 812px;
+    background-color: white;
+    border-radius: 40px;
+    overflow: hidden;
+    position: relative;
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.2);
+    border: 10px solid black;
+    box-sizing: content-box;
+}
+
+.ios-notch {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 180px;
+    height: 30px;
+    background-color: black;
+    border-bottom-left-radius: 15px;
+    border-bottom-right-radius: 15px;
+    z-index: 10;
+}
+
+.app-container {
+    width: 100%;
+    height: 100%;
+    overflow-y: auto;
+    background-color: var(--background-color);
+    position: relative;
+}
+
+.status-bar {
+    height: 44px;
+    background-color: var(--primary-color);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 15px;
+    padding-top: 15px;
+    color: white;
+}
+
+.status-bar .time {
+    font-weight: bold;
+}
+
+.status-bar .icons {
+    display: flex;
+}
+
+.status-bar .icons .icon {
+    margin-left: 8px;
+}
+
+/* 底部導航欄樣式 */
+.bottom-nav {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 56px;
+    background-color: white;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    box-shadow: 0 -2px 5px rgba(0,0,0,0.1);
+    z-index: 1000;
+}
+
+.nav-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    color: var(--secondary-color);
+    text-decoration: none;
+    flex: 1;
+}
+
+.nav-item.active {
+    color: var(--primary-color);
+}
+
+.nav-item .material-icons {
+    font-size: 24px;
+}
+
+.nav-item span {
+    font-size: 12px;
+    margin-top: 2px;
+}
+
+/* 通用按鈕樣式 */
+.btn {
+    padding: 8px 16px;
+    border-radius: 4px;
+    border: none;
+    cursor: pointer;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.btn-primary {
+    background-color: var(--primary-color);
+    color: white;
+}
+
+.btn-secondary {
+    background-color: var(--secondary-color);
+    color: white;
+}
+
+/* 通用輸入框樣式 */
+.input-field {
+    background-color: white;
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+    margin-bottom: 16px;
+    position: relative;
+    height: 50px;
+    display: flex;
+    align-items: center;
+    padding: 0 16px;
+}
+
+.input-field .material-icons {
+    color: var(--secondary-color);
+    margin-right: 12px;
+}
+
+.input-field input {
+    flex: 1;
+    border: none;
+    outline: none;
+    font-size: 15px;
+    height: 100%;
+}
+
+/* 通用卡片樣式 */
+.card {
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    padding: 16px;
+    margin-bottom: 16px;
+}
+
+/* 通用標題樣式 */
+.section-title {
+    font-size: 18px;
+    font-weight: 500;
+    margin: 16px 0 12px 0;
+}
+
+/* 通用頁面容器 */
+.page-container {
+    padding-bottom: 72px; /* 為底部導航欄留出空間 */
+} 
