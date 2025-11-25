@@ -3,24 +3,29 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>購物車應用 - 訂單詳情</title>
+    <title>購物商城 - 訂單詳情</title>
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&display=swap" rel="stylesheet">
     <style>
         :root {
             --primary-color: #560CCE;
             --secondary-color: #414757;
-            --error-color: #f13a59;
-            --text-color: #000000;
             --background-color: #F5F5F5;
-            --card-color: #FFFFFF;
             --border-color: #E0E0E0;
+            --success-color: #4CAF50;
+            --warning-color: #F57C00;
+            --error-color: #C62828;
+            --failed-color: #AD1457;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
         
         body {
             font-family: 'Noto Sans TC', sans-serif;
-            margin: 0;
-            padding: 0;
             background-color: var(--background-color);
             display: flex;
             justify-content: center;
@@ -58,159 +63,115 @@
             height: 100%;
             overflow-y: auto;
             background-color: var(--background-color);
-            position: relative;
         }
         
         .status-bar {
             height: 44px;
-            background-color: var(--primary-color);
             display: flex;
             justify-content: space-between;
             align-items: center;
             padding: 0 15px;
             padding-top: 15px;
-            color: white;
+            background-color: white;
         }
         
         .status-bar .time {
             font-weight: bold;
+            font-size: 14px;
         }
         
         .status-bar .icons {
             display: flex;
+            gap: 6px;
+            font-size: 14px;
         }
         
-        .status-bar .icons .icon {
-            margin-left: 8px;
-        }
-        
-        .app-header {
-            background-color: var(--primary-color);
-            padding: 0 20px;
-            color: white;
+        .header {
             display: flex;
-            justify-content: space-between;
             align-items: center;
             height: 56px;
+            padding: 0 16px;
+            background-color: white;
+            border-bottom: 1px solid var(--border-color);
         }
         
-        .app-header h1 {
-            font-size: 20px;
-            margin: 0;
-        }
-        
-        .app-header .back-button {
-            display: flex;
-            align-items: center;
+        .back-button {
+            color: #333;
+            text-decoration: none;
             margin-right: 16px;
         }
         
-        .app-header .header-action {
-            display: flex;
-            align-items: center;
-        }
-        
-        .app-header .header-action .icon {
-            margin-left: 16px;
-            cursor: pointer;
-        }
-        
-        .order-status-container {
-            background-color: white;
-            padding: 20px;
-        }
-        
-        .order-id {
-            font-size: 14px;
-            color: var(--secondary-color);
-            margin-bottom: 12px;
-        }
-        
-        .status-text {
+        .header-title {
             font-size: 18px;
-            font-weight: 500;
-            margin-bottom: 16px;
+            font-weight: 600;
         }
         
-        .status-timeline {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-top: 20px;
-            position: relative;
-        }
-        
-        .status-timeline:before {
-            content: '';
-            position: absolute;
-            top: 24px;
-            left: 0;
-            right: 0;
-            height: 2px;
-            background-color: var(--border-color);
-            z-index: 1;
-        }
-        
-        .timeline-step {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            position: relative;
-            z-index: 2;
-            width: 60px;
-        }
-        
-        .step-icon {
-            width: 28px;
-            height: 28px;
-            border-radius: 14px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            margin-bottom: 8px;
-            background-color: white;
-            border: 2px solid var(--border-color);
-        }
-        
-        .step-label {
-            font-size: 12px;
-            text-align: center;
-            color: var(--secondary-color);
-        }
-        
-        .timeline-step.active .step-icon {
-            background-color: var(--primary-color);
-            border-color: var(--primary-color);
-            color: white;
-        }
-        
-        .timeline-step.active .step-label {
-            color: var(--primary-color);
-            font-weight: 500;
-        }
-        
-        .timeline-step.completed .step-icon {
-            background-color: var(--primary-color);
-            border-color: var(--primary-color);
-            color: white;
-        }
-        
-        .section-card {
-            background-color: white;
-            margin: 12px 0;
+        .order-content {
             padding: 16px;
         }
         
-        .section-title {
-            font-size: 16px;
-            font-weight: 500;
+        .status-card {
+            border-radius: 12px;
+            padding: 24px;
+            text-align: center;
+            color: white;
             margin-bottom: 16px;
+        }
+        
+        .status-card.completed {
+            background: linear-gradient(135deg, #4CAF50 0%, #388E3C 100%);
+        }
+        
+        .status-card.pending {
+            background: linear-gradient(135deg, #FF9800 0%, #F57C00 100%);
+        }
+        
+        .status-card.cancelled {
+            background: linear-gradient(135deg, #E53935 0%, #C62828 100%);
+        }
+        
+        .status-card.failed {
+            background: linear-gradient(135deg, #EC407A 0%, #AD1457 100%);
+        }
+        
+        .status-icon {
+            font-size: 48px;
+            margin-bottom: 12px;
+        }
+        
+        .status-title {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+        
+        .status-subtitle {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+        
+        .info-card {
+            background-color: white;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 16px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+        }
+        
+        .card-title {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
         
         .info-row {
             display: flex;
             justify-content: space-between;
             margin-bottom: 12px;
+            font-size: 14px;
         }
         
         .info-row:last-child {
@@ -218,162 +179,134 @@
         }
         
         .info-label {
-            font-size: 14px;
-            color: var(--secondary-color);
+            color: #666;
         }
         
         .info-value {
-            font-size: 14px;
+            font-weight: 500;
+            color: #333;
             text-align: right;
         }
         
-        .address-row {
-            margin-bottom: 12px;
+        .info-value.status-completed {
+            color: var(--success-color);
         }
         
-        .address-row:last-child {
-            margin-bottom: 0;
+        .info-value.status-pending {
+            color: var(--warning-color);
         }
         
-        .address-label {
-            font-size: 14px;
-            color: var(--secondary-color);
-            margin-bottom: 4px;
+        .info-value.status-cancelled {
+            color: var(--error-color);
         }
         
-        .address-value {
-            font-size: 14px;
-        }
-        
-        .order-items {
-            margin-top: 16px;
+        .info-value.status-failed {
+            color: var(--failed-color);
         }
         
         .order-item {
             display: flex;
-            padding: 12px 0;
-            border-bottom: 1px solid var(--border-color);
+            gap: 12px;
+            margin-bottom: 16px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid #f0f0f0;
         }
         
         .order-item:last-child {
+            margin-bottom: 0;
+            padding-bottom: 0;
             border-bottom: none;
         }
         
         .item-image {
-            width: 64px;
-            height: 64px;
-            background-size: cover;
-            background-position: center;
-            border-radius: 4px;
-            margin-right: 12px;
+            width: 70px;
+            height: 70px;
+            border-radius: 8px;
+            overflow: hidden;
             flex-shrink: 0;
         }
         
-        .item-details {
+        .item-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .item-info {
             flex: 1;
         }
         
         .item-name {
-            font-size: 14px;
+            font-size: 15px;
             font-weight: 500;
-            margin-bottom: 4px;
-        }
-        
-        .item-variant {
-            font-size: 12px;
-            color: var(--secondary-color);
             margin-bottom: 8px;
+            line-height: 1.3;
         }
         
-        .item-price-row {
+        .item-details {
             display: flex;
             justify-content: space-between;
-            align-items: center;
+            font-size: 14px;
+            color: #666;
         }
         
         .item-price {
-            font-size: 14px;
-            font-weight: 500;
+            color: var(--primary-color);
+            font-weight: 600;
         }
         
-        .item-quantity {
-            font-size: 12px;
-            color: var(--secondary-color);
-        }
-        
-        .price-summary {
-            margin-top: 16px;
+        .total-section {
             padding-top: 16px;
-            border-top: 1px dashed var(--border-color);
+            border-top: 2px solid #f0f0f0;
         }
         
         .total-row {
-            font-weight: 500;
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 12px;
+            font-size: 15px;
+        }
+        
+        .total-row.final {
+            font-size: 18px;
+            font-weight: 700;
             color: var(--primary-color);
         }
         
-        .order-actions {
-            padding: 16px;
+        .action-buttons {
             display: flex;
-            justify-content: space-between;
-            position: sticky;
-            bottom: 0;
-            background-color: white;
-            box-shadow: 0 -2px 5px rgba(0,0,0,0.1);
-        }
-        
-        .action-button {
-            flex: 1;
-            height: 44px;
-            border-radius: 22px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-weight: 500;
-            font-size: 14px;
-            cursor: pointer;
-        }
-        
-        .primary-button {
-            background-color: var(--primary-color);
-            color: white;
-            border: none;
-            margin-left: 8px;
-        }
-        
-        .secondary-button {
-            background-color: white;
-            color: var(--secondary-color);
-            border: 1px solid var(--border-color);
-        }
-        
-        .tracking-info {
-            padding: 12px;
-            background-color: #E3F2FD;
-            border-radius: 4px;
-            display: flex;
-            align-items: center;
+            gap: 12px;
             margin-top: 16px;
         }
         
-        .tracking-icon {
-            color: #2196F3;
-            margin-right: 12px;
-        }
-        
-        .tracking-details {
+        .action-btn {
             flex: 1;
+            height: 44px;
+            border-radius: 22px;
+            font-size: 15px;
+            font-weight: 600;
+            border: none;
+            cursor: pointer;
+            transition: transform 0.2s ease;
         }
         
-        .tracking-status {
-            font-size: 14px;
-            font-weight: 500;
-            margin-bottom: 4px;
+        .action-btn:active {
+            transform: scale(0.98);
         }
         
-        .tracking-text {
-            font-size: 12px;
-            color: var(--secondary-color);
+        .action-btn.primary {
+            background-color: var(--primary-color);
+            color: white;
+        }
+        
+        .action-btn.secondary {
+            background-color: white;
+            color: var(--primary-color);
+            border: 2px solid var(--primary-color);
+        }
+        
+        .hidden {
+            display: none !important;
         }
     </style>
 </head>
@@ -382,166 +315,334 @@
         <div class="ios-notch"></div>
         <div class="app-container">
             <div class="status-bar">
-                <span class="time">9:41</span>
+                <div class="time">14:30</div>
                 <div class="icons">
-                    <span class="icon">📶</span>
-                    <span class="icon">📳</span>
-                    <span class="icon">🔋</span>
+                    <span>📶</span>
+                    <span>📡</span>
+                    <span>🔋</span>
                 </div>
             </div>
             
-            <div class="app-header">
-                <div class="back-button">
+            <div class="header">
+                <a href="orders.html" class="back-button">
                     <span class="material-icons">arrow_back</span>
-                </div>
-                <h1>訂單詳情</h1>
-                <div class="header-action">
-                    <span class="material-icons icon">more_vert</span>
-                </div>
+                </a>
+                <h1 class="header-title">訂單詳情</h1>
             </div>
             
-            <div class="order-status-container">
-                <div class="order-id">訂單號：#2023111501</div>
-                <div class="status-text">目前狀態：待付款</div>
+            <div class="order-content">
+                <!-- 已完成狀態 -->
+                <div id="completed-status" class="status-card completed">
+                    <div class="status-icon">✅</div>
+                    <div class="status-title">訂單已完成</div>
+                    <div class="status-subtitle">#ORD-20231115-004</div>
+                </div>
                 
-                <div class="status-timeline">
-                    <div class="timeline-step completed">
-                        <div class="step-icon">
-                            <span class="material-icons" style="font-size: 16px;">check</span>
-                        </div>
-                        <div class="step-label">已下單</div>
+                <!-- 尚未付款狀態 -->
+                <div id="pending-status" class="status-card pending hidden">
+                    <div class="status-icon">⏳</div>
+                    <div class="status-title">尚未付款</div>
+                    <div class="status-subtitle">#ORD-20231125-001</div>
+                </div>
+                
+                <!-- 已取消訂單狀態 -->
+                <div id="cancelled-status" class="status-card cancelled hidden">
+                    <div class="status-icon">❌</div>
+                    <div class="status-title">已取消訂單</div>
+                    <div class="status-subtitle">#ORD-20231120-002</div>
+                </div>
+                
+                <!-- 付款失敗狀態 -->
+                <div id="failed-status" class="status-card failed hidden">
+                    <div class="status-icon">⚠️</div>
+                    <div class="status-title">付款失敗</div>
+                    <div class="status-subtitle">#ORD-20231118-003</div>
+                </div>
+                
+                <div class="info-card">
+                    <div class="card-title">
+                        <span class="material-icons">receipt</span>
+                        訂單資訊
                     </div>
-                    
-                    <div class="timeline-step active">
-                        <div class="step-icon">
-                            <span class="material-icons" style="font-size: 16px;">payments</span>
-                        </div>
-                        <div class="step-label">待付款</div>
+                    <div class="info-row">
+                        <span class="info-label">訂單編號</span>
+                        <span class="info-value" id="order-number">#ORD-20231115-004</span>
                     </div>
-                    
-                    <div class="timeline-step">
-                        <div class="step-icon">
-                            <span class="material-icons" style="font-size: 16px;">inventory_2</span>
-                        </div>
-                        <div class="step-label">備貨中</div>
+                    <div class="info-row">
+                        <span class="info-label">下單時間</span>
+                        <span class="info-value" id="order-time">2023/11/15 10:20</span>
                     </div>
-                    
-                    <div class="timeline-step">
-                        <div class="step-icon">
-                            <span class="material-icons" style="font-size: 16px;">local_shipping</span>
-                        </div>
-                        <div class="step-label">運送中</div>
+                    <div class="info-row">
+                        <span class="info-label">付款方式</span>
+                        <span class="info-value" id="payment-method">綠界金流</span>
                     </div>
-                    
-                    <div class="timeline-step">
-                        <div class="step-icon">
-                            <span class="material-icons" style="font-size: 16px;">task_alt</span>
-                        </div>
-                        <div class="step-label">已完成</div>
+                    <div class="info-row">
+                        <span class="info-label">訂單狀態</span>
+                        <span class="info-value status-completed" id="order-status">已完成</span>
                     </div>
                 </div>
-            </div>
-            
-            <div class="section-card">
-                <div class="section-title">訂單資訊</div>
                 
-                <div class="info-row">
-                    <div class="info-label">訂單編號</div>
-                    <div class="info-value">#2023111501</div>
-                </div>
-                
-                <div class="info-row">
-                    <div class="info-label">下單時間</div>
-                    <div class="info-value">2023-11-15 16:30</div>
-                </div>
-                
-                <div class="info-row">
-                    <div class="info-label">付款方式</div>
-                    <div class="info-value">信用卡支付</div>
-                </div>
-                
-                <div class="info-row">
-                    <div class="info-label">付款狀態</div>
-                    <div class="info-value">未付款</div>
-                </div>
-            </div>
-            
-            <div class="section-card">
-                <div class="section-title">收貨資訊</div>
-                
-                <div class="address-row">
-                    <div class="address-label">收件人</div>
-                    <div class="address-value">張小明 (0912-345-678)</div>
-                </div>
-                
-                <div class="address-row">
-                    <div class="address-label">收貨地址</div>
-                    <div class="address-value">台北市信義區忠孝東路100號 5樓</div>
-                </div>
-                
-                <div class="address-row">
-                    <div class="address-label">配送方式</div>
-                    <div class="address-value">宅配到府</div>
-                </div>
-            </div>
-            
-            <div class="section-card">
-                <div class="section-title">商品列表</div>
-                
-                <div class="order-items">
+                <!-- 已完成訂單商品 -->
+                <div id="completed-items" class="info-card">
+                    <div class="card-title">
+                        <span class="material-icons">shopping_bag</span>
+                        商品明細
+                    </div>
                     <div class="order-item">
-                        <div class="item-image" style="background-image: url('https://via.placeholder.com/200x200/FF5722/FFFFFF?text=巧克力');"></div>
-                        <div class="item-details">
-                            <div class="item-name">巧克力水果糖</div>
-                            <div class="item-variant">規格：大包裝</div>
-                            <div class="item-price-row">
-                                <div class="item-price">NT$650</div>
-                                <div class="item-quantity">x1</div>
+                        <div class="item-image">
+                            <img src="https://picsum.photos/seed/prod8/200" alt="義式咖啡杯">
+                        </div>
+                        <div class="item-info">
+                            <div class="item-name">義式濃縮咖啡杯組</div>
+                            <div class="item-details">
+                                <span>x 1</span>
+                                <span class="item-price">NT$ 520</span>
                             </div>
                         </div>
                     </div>
                     
-                    <div class="order-item">
-                        <div class="item-image" style="background-image: url('https://via.placeholder.com/200x200/2196F3/FFFFFF?text=香蕉');"></div>
-                        <div class="item-details">
-                            <div class="item-name">香蕉牛奶糖</div>
-                            <div class="item-variant">規格：小包裝</div>
-                            <div class="item-price-row">
-                                <div class="item-price">NT$400</div>
-                                <div class="item-quantity">x1</div>
-                            </div>
+                    <div class="total-section">
+                        <div class="total-row">
+                            <span>商品小計</span>
+                            <span>NT$ 520</span>
+                        </div>
+                        <div class="total-row">
+                            <span>運費</span>
+                            <span>NT$ 0</span>
+                        </div>
+                        <div class="total-row final">
+                            <span>訂單總計</span>
+                            <span>NT$ 520</span>
                         </div>
                     </div>
                 </div>
                 
-                <div class="price-summary">
-                    <div class="info-row">
-                        <div class="info-label">商品金額</div>
-                        <div class="info-value">NT$1,050</div>
+                <!-- 尚未付款訂單商品 -->
+                <div id="pending-items" class="info-card hidden">
+                    <div class="card-title">
+                        <span class="material-icons">shopping_bag</span>
+                        商品明細
+                    </div>
+                    <div class="order-item">
+                        <div class="item-image">
+                            <img src="https://picsum.photos/seed/prod1/200" alt="精品咖啡豆">
+                        </div>
+                        <div class="item-info">
+                            <div class="item-name">精品咖啡豆 - 衣索比亞</div>
+                            <div class="item-details">
+                                <span>x 1</span>
+                                <span class="item-price">NT$ 580</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="order-item">
+                        <div class="item-image">
+                            <img src="https://picsum.photos/seed/prod2/200" alt="手沖咖啡器具組">
+                        </div>
+                        <div class="item-info">
+                            <div class="item-name">手沖咖啡器具組</div>
+                            <div class="item-details">
+                                <span>x 1</span>
+                                <span class="item-price">NT$ 1,280</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="order-item">
+                        <div class="item-image">
+                            <img src="https://picsum.photos/seed/prod5/200" alt="咖啡濾紙">
+                        </div>
+                        <div class="item-info">
+                            <div class="item-name">咖啡濾紙 100 入</div>
+                            <div class="item-details">
+                                <span>x 2</span>
+                                <span class="item-price">NT$ 240</span>
+                            </div>
+                        </div>
                     </div>
                     
-                    <div class="info-row">
-                        <div class="info-label">配送費</div>
-                        <div class="info-value">NT$60</div>
+                    <div class="total-section">
+                        <div class="total-row">
+                            <span>商品小計</span>
+                            <span>NT$ 2,100</span>
+                        </div>
+                        <div class="total-row">
+                            <span>運費</span>
+                            <span>NT$ 0</span>
+                        </div>
+                        <div class="total-row final">
+                            <span>訂單總計</span>
+                            <span>NT$ 2,100</span>
+                        </div>
                     </div>
                     
-                    <div class="info-row">
-                        <div class="info-label">優惠折扣</div>
-                        <div class="info-value">-NT$60</div>
-                    </div>
-                    
-                    <div class="info-row total-row">
-                        <div class="info-label">訂單總額</div>
-                        <div class="info-value">NT$1,050</div>
+                    <div class="action-buttons">
+                        <button class="action-btn secondary" onclick="alert('訂單已取消')">取消訂單</button>
+                        <button class="action-btn primary" onclick="alert('導向綠界付款頁面')">前往付款</button>
                     </div>
                 </div>
-            </div>
-            
-            <div class="order-actions">
-                <button class="action-button secondary-button">取消訂單</button>
-                <button class="action-button primary-button">立即付款</button>
+                
+                <!-- 已取消訂單商品 -->
+                <div id="cancelled-items" class="info-card hidden">
+                    <div class="card-title">
+                        <span class="material-icons">shopping_bag</span>
+                        商品明細
+                    </div>
+                    <div class="order-item">
+                        <div class="item-image">
+                            <img src="https://picsum.photos/seed/prod4/200" alt="濃縮咖啡粉">
+                        </div>
+                        <div class="item-info">
+                            <div class="item-name">濃縮咖啡粉 - 義式</div>
+                            <div class="item-details">
+                                <span>x 1</span>
+                                <span class="item-price">NT$ 420</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="total-section">
+                        <div class="total-row">
+                            <span>商品小計</span>
+                            <span>NT$ 420</span>
+                        </div>
+                        <div class="total-row">
+                            <span>運費</span>
+                            <span>NT$ 0</span>
+                        </div>
+                        <div class="total-row final">
+                            <span>訂單總計</span>
+                            <span style="text-decoration: line-through; opacity: 0.5;">NT$ 420</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 付款失敗訂單商品 -->
+                <div id="failed-items" class="info-card hidden">
+                    <div class="card-title">
+                        <span class="material-icons">shopping_bag</span>
+                        商品明細
+                    </div>
+                    <div class="order-item">
+                        <div class="item-image">
+                            <img src="https://picsum.photos/seed/prod6/200" alt="手搖磨豆機">
+                        </div>
+                        <div class="item-info">
+                            <div class="item-name">手搖磨豆機</div>
+                            <div class="item-details">
+                                <span>x 1</span>
+                                <span class="item-price">NT$ 1,850</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="order-item">
+                        <div class="item-image">
+                            <img src="https://picsum.photos/seed/prod7/200" alt="咖啡豆罐">
+                        </div>
+                        <div class="item-info">
+                            <div class="item-name">不鏽鋼咖啡豆密封罐</div>
+                            <div class="item-details">
+                                <span>x 1</span>
+                                <span class="item-price">NT$ 450</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="total-section">
+                        <div class="total-row">
+                            <span>商品小計</span>
+                            <span>NT$ 2,300</span>
+                        </div>
+                        <div class="total-row">
+                            <span>運費</span>
+                            <span>NT$ 0</span>
+                        </div>
+                        <div class="total-row final">
+                            <span>訂單總計</span>
+                            <span>NT$ 2,300</span>
+                        </div>
+                    </div>
+                    
+                    <div class="action-buttons">
+                        <button class="action-btn secondary" onclick="alert('訂單已取消')">取消訂單</button>
+                        <button class="action-btn primary" onclick="alert('重新導向綠界付款頁面')">重新付款</button>
+                    </div>
+                </div>
+                
+                <div class="info-card">
+                    <div class="card-title">
+                        <span class="material-icons">person</span>
+                        訂購人資訊
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">姓名</span>
+                        <span class="info-value">張小明</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">電話</span>
+                        <span class="info-value">0912-345-678</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Email</span>
+                        <span class="info-value">user@example.com</span>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
+    
+    <script>
+        // 根據 URL 參數顯示不同的訂單狀態
+        const urlParams = new URLSearchParams(window.location.search);
+        const status = urlParams.get('status') || 'completed';
+        
+        const statusData = {
+            completed: {
+                number: '#ORD-20231115-004',
+                time: '2023/11/15 10:20',
+                payment: '綠界金流',
+                statusText: '已完成',
+                statusClass: 'status-completed'
+            },
+            pending: {
+                number: '#ORD-20231125-001',
+                time: '2023/11/25 14:35',
+                payment: '綠界金流',
+                statusText: '尚未付款',
+                statusClass: 'status-pending'
+            },
+            cancelled: {
+                number: '#ORD-20231120-002',
+                time: '2023/11/20 11:15',
+                payment: '綠界金流',
+                statusText: '已取消訂單',
+                statusClass: 'status-cancelled'
+            },
+            failed: {
+                number: '#ORD-20231118-003',
+                time: '2023/11/18 16:42',
+                payment: '綠界金流',
+                statusText: '付款失敗',
+                statusClass: 'status-failed'
+            }
+        };
+        
+        // 隱藏所有狀態卡片
+        document.querySelectorAll('.status-card').forEach(card => card.classList.add('hidden'));
+        document.querySelectorAll('[id$="-items"]').forEach(items => items.classList.add('hidden'));
+        
+        // 顯示對應的狀態
+        const currentStatus = statusData[status];
+        document.getElementById(`${status}-status`).classList.remove('hidden');
+        document.getElementById(`${status}-items`).classList.remove('hidden');
+        
+        // 更新訂單資訊
+        document.getElementById('order-number').textContent = currentStatus.number;
+        document.getElementById('order-time').textContent = currentStatus.time;
+        document.getElementById('payment-method').textContent = currentStatus.payment;
+        
+        const orderStatusEl = document.getElementById('order-status');
+        orderStatusEl.textContent = currentStatus.statusText;
+        orderStatusEl.className = `info-value ${currentStatus.statusClass}`;
+    </script>
 </body>
-</html> 
+</html>

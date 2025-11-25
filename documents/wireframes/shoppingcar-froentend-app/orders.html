@@ -3,25 +3,26 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>購物車應用 - 訂單</title>
+    <title>購物商城 - 我的訂單</title>
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&display=swap" rel="stylesheet">
-    <link href="common.css" rel="stylesheet">
     <style>
         :root {
             --primary-color: #560CCE;
             --secondary-color: #414757;
-            --error-color: #f13a59;
-            --text-color: #000000;
             --background-color: #F5F5F5;
-            --card-color: #FFFFFF;
             --border-color: #E0E0E0;
+            --success-color: #4CAF50;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
         
         body {
             font-family: 'Noto Sans TC', sans-serif;
-            margin: 0;
-            padding: 0;
             background-color: var(--background-color);
             display: flex;
             justify-content: center;
@@ -59,7 +60,6 @@
             height: 100%;
             overflow-y: auto;
             background-color: var(--background-color);
-            position: relative;
         }
         
         .status-bar {
@@ -75,73 +75,29 @@
         
         .status-bar .time {
             font-weight: bold;
+            font-size: 14px;
         }
         
         .status-bar .icons {
             display: flex;
-        }
-        
-        .status-bar .icons .icon {
-            margin-left: 8px;
-        }
-        
-        .header {
-            position: relative;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            height: 56px;
-            padding: 0 20px;
-            background-color: var(--background-color);
-        }
-        
-        .header h1 {
-            font-size: 18px;
-            font-weight: 500;
-            margin: 0;
-        }
-        
-        .back-button {
-            position: absolute;
-            left: 16px;
-            top: 50%;
-            transform: translateY(-50%);
-            color: var(--text-color);
-            text-decoration: none;
-        }
-        
-        .order-tabs {
-            display: flex;
-            background-color: white;
-            padding: 0 16px;
-            border-bottom: 1px solid var(--background-color);
-        }
-        
-        .order-tab {
-            padding: 12px 16px;
+            gap: 6px;
             font-size: 14px;
-            color: var(--secondary-color);
-            position: relative;
-            cursor: pointer;
         }
         
-        .order-tab.active {
-            color: var(--primary-color);
-            font-weight: 500;
-        }
-        
-        .order-tab.active::after {
-            content: '';
-            position: absolute;
-            bottom: -1px;
-            left: 0;
-            right: 0;
-            height: 2px;
+        .app-header {
             background-color: var(--primary-color);
+            padding: 16px 20px;
+            color: white;
         }
         
-        .order-list {
+        .header-title {
+            font-size: 24px;
+            font-weight: 600;
+        }
+        
+        .order-content {
             padding: 16px;
+            padding-bottom: 80px;
         }
         
         .order-card {
@@ -149,168 +105,152 @@
             border-radius: 12px;
             margin-bottom: 16px;
             overflow: hidden;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
         }
         
         .order-header {
-            padding: 12px 16px;
-            border-bottom: 1px solid var(--background-color);
+            padding: 16px;
+            border-bottom: 1px solid var(--border-color);
             display: flex;
             justify-content: space-between;
             align-items: center;
         }
         
-        .order-header .merchant {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-        
-        .order-header .merchant .icon {
-            color: var(--primary-color);
-        }
-        
-        .order-header .status {
+        .order-number {
             font-size: 14px;
-            color: var(--primary-color);
+            font-weight: 600;
         }
         
-        .order-content {
-            padding: 12px 16px;
+        .order-status {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
         }
         
-        .product-item {
+        .order-status.completed {
+            background-color: #E8F5E9;
+            color: var(--success-color);
+        }
+        
+        .order-status.processing {
+            background-color: #E3F2FD;
+            color: #1976D2;
+        }
+        
+        .order-status.pending {
+            background-color: #FFF3E0;
+            color: #F57C00;
+        }
+        
+        .order-status.cancelled {
+            background-color: #FFEBEE;
+            color: #C62828;
+        }
+        
+        .order-status.failed {
+            background-color: #FCE4EC;
+            color: #AD1457;
+        }
+        
+        .order-items {
+            padding: 16px;
+        }
+        
+        .order-item {
             display: flex;
+            gap: 12px;
             margin-bottom: 12px;
         }
         
-        .product-item:last-child {
+        .order-item:last-child {
             margin-bottom: 0;
         }
         
-        .product-item .image {
+        .item-image {
             width: 60px;
             height: 60px;
             border-radius: 8px;
             overflow: hidden;
-            margin-right: 12px;
+            flex-shrink: 0;
         }
         
-        .product-item .image img {
+        .item-image img {
             width: 100%;
             height: 100%;
             object-fit: cover;
         }
         
-        .product-item .info {
+        .item-info {
             flex: 1;
         }
         
-        .product-item .info .title {
+        .item-name {
             font-size: 14px;
             font-weight: 500;
-            margin: 0 0 4px;
+            margin-bottom: 4px;
+            line-height: 1.3;
         }
         
-        .product-item .info .price {
-            color: var(--primary-color);
-            font-weight: 600;
-            font-size: 14px;
-            margin: 0;
+        .item-meta {
+            font-size: 13px;
+            color: #666;
         }
         
         .order-footer {
-            padding: 12px 16px;
-            border-top: 1px solid var(--background-color);
+            padding: 16px;
+            border-top: 1px solid var(--border-color);
             display: flex;
             justify-content: space-between;
             align-items: center;
         }
         
-        .order-footer .total {
-            font-size: 14px;
-            color: var(--secondary-color);
+        .total-amount {
+            font-size: 16px;
         }
         
-        .order-footer .total .amount {
+        .total-amount span {
+            font-weight: 700;
             color: var(--primary-color);
-            font-weight: 600;
-            margin-left: 4px;
+            font-size: 18px;
+            margin-left: 8px;
         }
         
-        .order-footer .actions {
-            display: flex;
-            gap: 8px;
-        }
-        
-        .order-footer .action-button {
-            padding: 6px 12px;
-            border-radius: 16px;
-            font-size: 14px;
-            cursor: pointer;
-        }
-        
-        .order-footer .action-button.outline {
-            border: 1px solid var(--primary-color);
-            color: var(--primary-color);
-            background-color: white;
-        }
-        
-        .order-footer .action-button.primary {
+        .view-detail-btn {
+            padding: 8px 20px;
             background-color: var(--primary-color);
             color: white;
             border: none;
-        }
-        
-        .empty-orders {
-            text-align: center;
-            padding: 40px 16px;
-            color: var(--secondary-color);
-        }
-        
-        .empty-orders .material-icons {
-            font-size: 48px;
-            margin-bottom: 16px;
-        }
-        
-        .empty-orders .message {
-            font-size: 16px;
-            margin-bottom: 24px;
-        }
-        
-        .empty-orders .button {
-            display: inline-block;
-            background-color: var(--primary-color);
-            color: white;
-            padding: 12px 24px;
-            border-radius: 24px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 600;
             text-decoration: none;
-            font-weight: 500;
+            display: inline-block;
         }
         
         .bottom-nav {
             position: fixed;
             bottom: 0;
-            left: 0;
-            right: 0;
-            height: 56px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 375px;
+            height: 60px;
             background-color: white;
             display: flex;
-            justify-content: space-around;
-            align-items: center;
-            box-shadow: 0 -2px 5px rgba(0,0,0,0.1);
-            z-index: 100;
-            width: 100%;
-            box-sizing: border-box;
+            border-top: 1px solid var(--border-color);
+            box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05);
         }
         
         .nav-item {
+            flex: 1;
             display: flex;
             flex-direction: column;
             align-items: center;
-            color: var(--secondary-color);
+            justify-content: center;
             text-decoration: none;
-            flex: 1;
+            color: #999;
+            gap: 2px;
         }
         
         .nav-item.active {
@@ -318,24 +258,12 @@
         }
         
         .nav-item .material-icons {
-            font-size: 24px;
+            font-size: 26px;
         }
         
         .nav-item span {
-            font-size: 12px;
-            margin-top: 2px;
-        }
-        
-        .order-date {
-            font-size: 12px;
-            color: var(--secondary-color);
-            margin-bottom: 8px;
-        }
-        
-        .order-number {
-            font-size: 12px;
-            color: var(--secondary-color);
-            margin-top: 4px;
+            font-size: 11px;
+            font-weight: 500;
         }
     </style>
 </head>
@@ -346,160 +274,162 @@
             <div class="status-bar">
                 <div class="time">14:30</div>
                 <div class="icons">
-                    <div class="icon">📶</div>
-                    <div class="icon">📡</div>
-                    <div class="icon">🔋</div>
+                    <span>📶</span>
+                    <span>📡</span>
+                    <span>🔋</span>
                 </div>
             </div>
             
-            <div class="header">
-                <a href="home.html" class="back-button">
-                    <span class="material-icons">arrow_back</span>
-                </a>
-                <h1>訂單</h1>
+            <div class="app-header">
+                <h1 class="header-title">我的訂單</h1>
             </div>
             
-            <div class="order-tabs">
-                <div class="order-tab active">全部</div>
-                <div class="order-tab">待付款</div>
-                <div class="order-tab">待出貨</div>
-                <div class="order-tab">待收貨</div>
-                <div class="order-tab">已完成</div>
-            </div>
-            
-            <div class="order-list">
+            <div class="order-content">
                 <div class="order-card">
                     <div class="order-header">
-                        <div class="merchant">
-                            <span class="material-icons icon">storefront</span>
-                            <span>範例咖啡廳</span>
-                        </div>
-                        <div class="status">待付款</div>
+                        <div class="order-number">#ORD-20231125-001</div>
+                        <div class="order-status pending">尚未付款</div>
                     </div>
-                    
-                    <div class="order-content">
-                        <div class="product-item">
-                            <div class="image">
-                                <img src="https://via.placeholder.com/60x60/FFC107/FFFFFF?text=產品1" alt="產品1">
+                    <div class="order-items">
+                        <div class="order-item">
+                            <div class="item-image">
+                                <img src="https://picsum.photos/seed/prod1/200" alt="精品咖啡豆">
                             </div>
-                            <div class="info">
-                                <div class="title">經典手工陶瓷咖啡杯組</div>
-                                <div class="price">NT$ 450</div>
+                            <div class="item-info">
+                                <div class="item-name">精品咖啡豆 - 衣索比亞</div>
+                                <div class="item-meta">x1 • NT$ 580</div>
                             </div>
                         </div>
-                        
-                        <div class="product-item">
-                            <div class="image">
-                                <img src="https://via.placeholder.com/60x60/4CAF50/FFFFFF?text=產品2" alt="產品2">
+                        <div class="order-item">
+                            <div class="item-image">
+                                <img src="https://picsum.photos/seed/prod2/200" alt="手沖咖啡器具組">
                             </div>
-                            <div class="info">
-                                <div class="title">精選咖啡豆禮盒裝</div>
-                                <div class="price">NT$ 580</div>
+                            <div class="item-info">
+                                <div class="item-name">手沖咖啡器具組</div>
+                                <div class="item-meta">x1 • NT$ 1,280</div>
+                            </div>
+                        </div>
+                        <div class="order-item">
+                            <div class="item-image">
+                                <img src="https://picsum.photos/seed/prod5/200" alt="咖啡濾紙">
+                            </div>
+                            <div class="item-info">
+                                <div class="item-name">咖啡濾紙 100 入</div>
+                                <div class="item-meta">x2 • NT$ 240</div>
                             </div>
                         </div>
                     </div>
-                    
                     <div class="order-footer">
-                        <div class="total">
-                            共2件商品，總計：<span class="amount">NT$ 1,030</span>
+                        <div class="total-amount">
+                            總計<span>NT$ 2,100</span>
                         </div>
-                        <div class="actions">
-                            <button class="action-button outline">取消訂單</button>
-                            <button class="action-button primary">付款</button>
-                        </div>
+                        <a href="order-detail.html?status=pending" class="view-detail-btn">查看詳情</a>
                     </div>
                 </div>
                 
                 <div class="order-card">
                     <div class="order-header">
-                        <div class="merchant">
-                            <span class="material-icons icon">storefront</span>
-                            <span>優質餐具店</span>
-                        </div>
-                        <div class="status">待出貨</div>
+                        <div class="order-number">#ORD-20231120-002</div>
+                        <div class="order-status cancelled">已取消訂單</div>
                     </div>
-                    
-                    <div class="order-content">
-                        <div class="product-item">
-                            <div class="image">
-                                <img src="https://via.placeholder.com/60x60/009688/FFFFFF?text=產品3" alt="產品3">
+                    <div class="order-items">
+                        <div class="order-item">
+                            <div class="item-image">
+                                <img src="https://picsum.photos/seed/prod4/200" alt="濃縮咖啡粉">
                             </div>
-                            <div class="info">
-                                <div class="title">北歐風格餐桌墊四件組</div>
-                                <div class="price">NT$ 320</div>
+                            <div class="item-info">
+                                <div class="item-name">濃縮咖啡粉 - 義式</div>
+                                <div class="item-meta">x1 • NT$ 420</div>
                             </div>
                         </div>
                     </div>
-                    
                     <div class="order-footer">
-                        <div class="total">
-                            共1件商品，總計：<span class="amount">NT$ 320</span>
+                        <div class="total-amount">
+                            總計<span>NT$ 420</span>
                         </div>
-                        <div class="actions">
-                            <button class="action-button outline">查看物流</button>
-                        </div>
+                        <a href="order-detail.html?status=cancelled" class="view-detail-btn">查看詳情</a>
                     </div>
                 </div>
                 
                 <div class="order-card">
                     <div class="order-header">
-                        <div class="merchant">
-                            <span class="material-icons icon">storefront</span>
-                            <span>生活雜貨鋪</span>
-                        </div>
-                        <div class="status">已完成</div>
+                        <div class="order-number">#ORD-20231118-003</div>
+                        <div class="order-status failed">付款失敗</div>
                     </div>
-                    
-                    <div class="order-content">
-                        <div class="product-item">
-                            <div class="image">
-                                <img src="https://via.placeholder.com/60x60/E91E63/FFFFFF?text=產品4" alt="產品4">
+                    <div class="order-items">
+                        <div class="order-item">
+                            <div class="item-image">
+                                <img src="https://picsum.photos/seed/prod6/200" alt="手搖磨豆機">
                             </div>
-                            <div class="info">
-                                <div class="title">多功能廚房剪刀</div>
-                                <div class="price">NT$ 220</div>
+                            <div class="item-info">
+                                <div class="item-name">手搖磨豆機</div>
+                                <div class="item-meta">x1 • NT$ 1,850</div>
                             </div>
                         </div>
+                        <div class="order-item">
+                            <div class="item-image">
+                                <img src="https://picsum.photos/seed/prod7/200" alt="咖啡豆罐">
+                            </div>
+                            <div class="item-info">
+                                <div class="item-name">不鏽鋼咖啡豆密封罐</div>
+                                <div class="item-meta">x1 • NT$ 450</div>
+                            </div>
+                        </div>
                     </div>
-                    
                     <div class="order-footer">
-                        <div class="total">
-                            共1件商品，總計：<span class="amount">NT$ 220</span>
+                        <div class="total-amount">
+                            總計<span>NT$ 2,300</span>
                         </div>
-                        <div class="actions">
-                            <button class="action-button outline">評價</button>
-                            <button class="action-button outline">再次購買</button>
+                        <a href="order-detail.html?status=failed" class="view-detail-btn">查看詳情</a>
+                    </div>
+                </div>
+                
+                <div class="order-card">
+                    <div class="order-header">
+                        <div class="order-number">#ORD-20231115-004</div>
+                        <div class="order-status completed">已完成</div>
+                    </div>
+                    <div class="order-items">
+                        <div class="order-item">
+                            <div class="item-image">
+                                <img src="https://picsum.photos/seed/prod8/200" alt="義式咖啡杯">
+                            </div>
+                            <div class="item-info">
+                                <div class="item-name">義式濃縮咖啡杯組</div>
+                                <div class="item-meta">x1 • NT$ 520</div>
+                            </div>
                         </div>
+                    </div>
+                    <div class="order-footer">
+                        <div class="total-amount">
+                            總計<span>NT$ 520</span>
+                        </div>
+                        <a href="order-detail.html?status=completed" class="view-detail-btn">查看詳情</a>
                     </div>
                 </div>
             </div>
-            
-            <div style="height: 80px;"></div>
             
             <div class="bottom-nav">
                 <a href="home.html" class="nav-item">
-                    <span class="material-icons icon">home</span>
+                    <span class="material-icons">home</span>
                     <span>首頁</span>
                 </a>
-                <a href="merchants.html" class="nav-item">
-                    <span class="material-icons icon">search</span>
-                    <span>搜尋</span>
-                </a>
                 <a href="shoppingcar.html" class="nav-item">
-                    <span class="material-icons icon">shopping_cart</span>
+                    <span class="material-icons">shopping_cart</span>
                     <span>購物車</span>
                 </a>
                 <a href="orders.html" class="nav-item active">
-                    <span class="material-icons icon">receipt</span>
+                    <span class="material-icons">receipt</span>
                     <span>訂單</span>
                 </a>
-                <a href="setting.html" class="nav-item">
-                    <span class="material-icons icon">person</span>
+                <a href="profile.html" class="nav-item">
+                    <span class="material-icons">person</span>
                     <span>我的</span>
-                    <span class="member-badge">銀卡</span>
                 </a>
             </div>
         </div>
     </div>
 </body>
+</html>
+
 </html> 
