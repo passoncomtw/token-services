@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>掛單/賣出 - E幣錢包</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="phone-container">
+        <div class="phone-screen">
+            <div class="notch"></div>
+            
+            <div class="status-bar">
+                <span>9:41</span>
+                <span>📶 📡 🔋</span>
+            </div>
+            
+            <div class="top-bar">
+                <a href="create-pending-list.html" class="back-btn">‹</a>
+                <h1>掛單/賣出</h1>
+            </div>
+            
+            <div class="content">
+                <div class="section">
+                    <div class="input-field">
+                        <label>數量</label>
+                        <input type="number" placeholder="請輸入賣出數量">
+                        <div style="font-size: 12px; color: #666; margin-top: 4px;">e幣可用餘額 10,000</div>
+                    </div>
+                    <div class="label-text">
+                        <span class="label">交易金額</span>
+                        <span class="text" style="color: #E9967A; font-weight: bold;">CNY ¥0</span>
+                    </div>
+                    <div class="input-field">
+                        <label>交易帳戶</label>
+                        <a href="card-list.html" style="text-decoration: none;">
+                            <div style="padding: 12px; border: 1px solid #ddd; border-radius: 4px;">
+                                <div style="color: #999;">請選擇收款帳戶</div>
+                            </div>
+                        </a>
+                        <div class="hint" style="margin-top: 8px;">
+                            買方將以您提供的交易帳戶進行打款
+                        </div>
+                    </div>
+                    <div class="input-field">
+                        <label>是否拆單</label>
+                        <select>
+                            <option>是</option>
+                            <option>否</option>
+                        </select>
+                        <div style="font-size: 12px; color: #666; margin-top: 4px;">當訂單數量較大時，拆單掛單會加速完成交易</div>
+                    </div>
+                    <div class="input-field">
+                        <label>最小交易量</label>
+                        <input type="number" placeholder="請輸入最小交易量">
+                    </div>
+                    <div class="input-field">
+                        <label>支付時效 ℹ️</label>
+                        <select>
+                            <option>10分鐘</option>
+                            <option selected>15分鐘</option>
+                            <option>20分鐘</option>
+                            <option>25分鐘</option>
+                            <option>30分鐘</option>
+                        </select>
+                    </div>
+                    <div class="input-field">
+                        <label>交易密碼</label>
+                        <input type="password" placeholder="請輸入交易密碼">
+                    </div>
+                    <div class="hint">
+                        掛單時，人請務必在線
+                    </div>
+                    <a href="pending-with-orders.html" class="btn-primary">賣出e幣</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
+

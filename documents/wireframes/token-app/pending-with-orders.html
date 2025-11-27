@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>掛單 - E幣錢包</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="phone-container">
+        <div class="phone-screen">
+            <div class="notch"></div>
+            
+            <div class="status-bar">
+                <span>9:41</span>
+                <span>📶 📡 🔋</span>
+            </div>
+            
+            <div class="top-bar">
+                <h1>掛單</h1>
+                <a href="create-pending-list.html" class="right-btn">➕</a>
+            </div>
+            
+            <div class="content">
+                <!-- 掛單成功提示 -->
+                <div style="background: #e8f5e9; padding: 16px; margin: 12px; border-radius: 8px; border-left: 4px solid #4CAF50;">
+                    <div style="display: flex; align-items: center; margin-bottom: 8px;">
+                        <span style="font-size: 24px; margin-right: 12px;">✅</span>
+                        <span style="font-weight: bold; color: #2e7d32; font-size: 16px;">掛單成功！</span>
+                    </div>
+                    <div style="color: #666; font-size: 14px;">您的掛單已成功建立，請保持在線等待交易對手</div>
+                </div>
+
+                <!-- 買入掛單 -->
+                <div class="pending-card">
+                    <div class="pending-header">
+                        <div class="pending-type buy">買入</div>
+                        <div class="pending-status">進行中</div>
+                    </div>
+                    <div class="label-text">
+                        <span class="label">數量</span>
+                        <span class="text">5,000 E幣</span>
+                    </div>
+                    <div class="label-text">
+                        <span class="label">交易金額</span>
+                        <span class="text">CNY ¥5,000</span>
+                    </div>
+                    <div class="label-text">
+                        <span class="label">最小交易量</span>
+                        <span class="text">100 E幣</span>
+                    </div>
+                    <div class="label-text">
+                        <span class="label">支付時效</span>
+                        <span class="text">15 分鐘</span>
+                    </div>
+                    <div class="label-text">
+                        <span class="label">創建時間</span>
+                        <span class="text">剛剛</span>
+                    </div>
+                    <div class="pending-actions">
+                        <button class="btn-small" style="background: #f5f5f5;" onclick="alert('已鎖定掛單')">鎖定</button>
+                        <button class="btn-small" style="background: #4CAF50; color: white;" onclick="alert('開始交易')">開始</button>
+                        <button class="btn-small" style="background: #f44336; color: white;" onclick="if(confirm('確定要刪除此掛單嗎？')) window.location='pending.html'">刪除</button>
+                    </div>
+                </div>
+
+                <!-- 賣出掛單 -->
+                <div class="pending-card">
+                    <div class="pending-header">
+                        <div class="pending-type sell">賣出</div>
+                        <div class="pending-status" style="background: #fff3e0; color: #f57c00;">已鎖定</div>
+                    </div>
+                    <div class="label-text">
+                        <span class="label">數量</span>
+                        <span class="text">3,000 E幣</span>
+                    </div>
+                    <div class="label-text">
+                        <span class="label">交易金額</span>
+                        <span class="text">CNY ¥3,000</span>
+                    </div>
+                    <div class="label-text">
+                        <span class="label">最小交易量</span>
+                        <span class="text">200 E幣</span>
+                    </div>
+                    <div class="label-text">
+                        <span class="label">支付時效</span>
+                        <span class="text">20 分鐘</span>
+                    </div>
+                    <div class="label-text">
+                        <span class="label">創建時間</span>
+                        <span class="text">2023-11-25 09:30</span>
+                    </div>
+                    <div class="pending-actions">
+                        <button class="btn-small" style="background: #4CAF50; color: white;" onclick="alert('已解除鎖定')">解鎖</button>
+                        <button class="btn-small" style="background: #f44336; color: white;" onclick="if(confirm('確定要刪除此掛單嗎？')) alert('已刪除')">刪除</button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="bottom-nav">
+                <a href="home.html" class="nav-item">
+                    <div class="nav-icon">👛</div>
+                    <div class="nav-label">錢包</div>
+                </a>
+                <a href="transaction-buy.html" class="nav-item">
+                    <div class="nav-icon">💱</div>
+                    <div class="nav-label">交易</div>
+                </a>
+                <a href="pending-with-orders.html" class="nav-item active">
+                    <div class="nav-icon">📋</div>
+                    <div class="nav-label">掛單</div>
+                </a>
+                <a href="orders.html" class="nav-item">
+                    <div class="nav-icon">🧾</div>
+                    <div class="nav-label">訂單</div>
+                </a>
+                <a href="about.html" class="nav-item">
+                    <div class="nav-icon">👤</div>
+                    <div class="nav-label">我</div>
+                </a>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
+

@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>錢包 - E幣錢包</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="phone-container">
+        <div class="phone-screen">
+            <div class="notch"></div>
+            
+            <div class="status-bar">
+                <span>9:41</span>
+                <span>📶 📡 🔋</span>
+            </div>
+            
+            <div class="top-bar">
+                <h1>錢包</h1>
+            </div>
+            
+            <div class="content">
+                <div class="balance-card">
+                    <div class="balance-header">
+                        <div class="coin-icon"></div>
+                        <span style="font-weight: bold;">E幣</span>
+                        <button class="eye-btn" onclick="alert('切換餘額顯示/隱藏')">👁️</button>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <div>
+                            <div class="balance-amount">10,000</div>
+                            <div class="balance-cny">= CNY ¥10,000</div>
+                        </div>
+                        <a href="orders.html" style="text-decoration: none; color: white;">
+                            <div style="font-size: 12px; margin-bottom: 4px;">查看訂單</div>
+                            <div style="font-size: 24px;">→</div>
+                        </a>
+                    </div>
+                    <div class="balance-divider"></div>
+                    <div class="balance-details">
+                        <div class="balance-item">
+                            <div class="balance-label">可用餘額 (E幣)</div>
+                            <div class="balance-value">10,000</div>
+                        </div>
+                        <div class="balance-item">
+                            <div class="balance-label">擔保餘額 (E幣)</div>
+                            <div class="balance-value">0</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="action-list">
+                    <a href="transaction-buy.html" class="action-item">
+                        <div class="action-icon" style="background: #e3f2fd; color: #2196F3;">💰</div>
+                        <div class="action-content">
+                            <div class="action-title">我要買</div>
+                        </div>
+                        <div class="action-arrow">›</div>
+                    </a>
+                    <a href="transaction-sell.html" class="action-item">
+                        <div class="action-icon" style="background: #fff3e0; color: #FF9800;">💸</div>
+                        <div class="action-content">
+                            <div class="action-title">我要賣</div>
+                        </div>
+                        <div class="action-arrow">›</div>
+                    </a>
+                    <a href="card-list.html" class="action-item">
+                        <div class="action-icon" style="background: #f3e5f5; color: #9C27B0;">💳</div>
+                        <div class="action-content">
+                            <div class="action-title">收付方式</div>
+                        </div>
+                        <div class="action-arrow">›</div>
+                    </a>
+                </div>
+            </div>
+            
+            <div class="bottom-nav">
+                <a href="home.html" class="nav-item active">
+                    <div class="nav-icon">👛</div>
+                    <div class="nav-label">錢包</div>
+                </a>
+                <a href="transaction-buy.html" class="nav-item">
+                    <div class="nav-icon">💱</div>
+                    <div class="nav-label">交易</div>
+                </a>
+                <a href="pending.html" class="nav-item">
+                    <div class="nav-icon">📋</div>
+                    <div class="nav-label">掛單</div>
+                </a>
+                <a href="orders.html" class="nav-item">
+                    <div class="nav-icon">🧾</div>
+                    <div class="nav-label">訂單</div>
+                </a>
+                <a href="about.html" class="nav-item">
+                    <div class="nav-icon">👤</div>
+                    <div class="nav-label">我</div>
+                </a>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
+

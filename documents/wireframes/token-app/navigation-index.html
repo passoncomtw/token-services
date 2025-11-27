@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>E幣錢包 - 頁面導航索引</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang TC', 'Microsoft JhengHei', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 40px 20px;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 16px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        
+        h1 {
+            color: #5B4C9E;
+            margin-bottom: 8px;
+            font-size: 32px;
+        }
+        
+        .subtitle {
+            color: #666;
+            margin-bottom: 32px;
+            font-size: 16px;
+        }
+        
+        .version-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 24px;
+            margin-bottom: 48px;
+        }
+        
+        .version-card {
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            padding: 24px;
+            transition: all 0.3s;
+        }
+        
+        .version-card:hover {
+            border-color: #5B4C9E;
+            box-shadow: 0 8px 24px rgba(91, 76, 158, 0.2);
+            transform: translateY(-4px);
+        }
+        
+        .version-card h2 {
+            color: #5B4C9E;
+            margin-bottom: 12px;
+            font-size: 24px;
+        }
+        
+        .version-card p {
+            color: #666;
+            line-height: 1.6;
+            margin-bottom: 16px;
+        }
+        
+        .version-card .features {
+            list-style: none;
+            margin-bottom: 20px;
+        }
+        
+        .version-card .features li {
+            padding: 8px 0;
+            color: #555;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        
+        .version-card .features li:last-child {
+            border-bottom: none;
+        }
+        
+        .version-card .features li:before {
+            content: "✓ ";
+            color: #4CAF50;
+            font-weight: bold;
+            margin-right: 8px;
+        }
+        
+        .btn {
+            display: inline-block;
+            padding: 12px 24px;
+            background: #5B4C9E;
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+        
+        .btn:hover {
+            background: #4A3C8D;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(91, 76, 158, 0.3);
+        }
+        
+        .page-list {
+            margin-top: 48px;
+        }
+        
+        .page-list h2 {
+            color: #5B4C9E;
+            margin-bottom: 24px;
+            font-size: 24px;
+        }
+        
+        .page-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 16px;
+        }
+        
+        .page-item {
+            padding: 16px;
+            background: #f8f8f8;
+            border-radius: 8px;
+            text-decoration: none;
+            color: #333;
+            transition: all 0.2s;
+            display: block;
+        }
+        
+        .page-item:hover {
+            background: #5B4C9E;
+            color: white;
+            transform: translateX(4px);
+        }
+        
+        .page-item .page-name {
+            font-weight: bold;
+            margin-bottom: 4px;
+        }
+        
+        .page-item .page-desc {
+            font-size: 14px;
+            opacity: 0.8;
+        }
+        
+        .section {
+            margin-top: 48px;
+        }
+        
+        .badge {
+            display: inline-block;
+            padding: 4px 12px;
+            background: #E9967A;
+            color: white;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: bold;
+            margin-left: 8px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📱 E幣錢包 App - Wireframe 導航</h1>
+        <p class="subtitle">選擇您想要瀏覽的版本，或直接跳轉至特定頁面</p>
+        
+        <div style="max-width: 800px; margin: 0 auto;">
+            <div class="version-card">
+                <h2>🎯 互動式 Wireframe</h2>
+                <p>每個頁面都是獨立的 HTML 檔案，使用傳統的超連結導航。適合初階工程師學習頁面結構與導航流程。</p>
+                <ul class="features">
+                    <li>清晰的檔案結構</li>
+                    <li>易於理解的導航邏輯</li>
+                    <li>初學者友善</li>
+                    <li>可直接查看任何頁面</li>
+                    <li>完整模擬 iPhone 介面</li>
+                    <li>包含所有主要功能流程</li>
+                </ul>
+                <a href="login.html" class="btn">開始使用 →</a>
+                <a href="README-MULTI-PAGE.md" style="margin-left: 12px; color: #5B4C9E; text-decoration: none;">查看說明文件</a>
+            </div>
+        </div>
+        
+        <div class="section page-list">
+            <h2>🗂️ 快速跳轉至任何頁面</h2>
+            
+            <h3 style="color: #666; margin: 24px 0 16px;">登入流程</h3>
+            <div class="page-grid">
+                <a href="login.html" class="page-item">
+                    <div class="page-name">🔐 登入頁</div>
+                    <div class="page-desc">login.html</div>
+                </a>
+                <a href="registry.html" class="page-item">
+                    <div class="page-name">📝 註冊頁</div>
+                    <div class="page-desc">registry.html</div>
+                </a>
+            </div>
+            
+            <h3 style="color: #666; margin: 24px 0 16px;">主要功能頁（底部導航）</h3>
+            <div class="page-grid">
+                <a href="home.html" class="page-item">
+                    <div class="page-name">👛 錢包首頁</div>
+                    <div class="page-desc">home.html</div>
+                </a>
+                <a href="transaction-buy.html" class="page-item">
+                    <div class="page-name">💰 交易 - 我要買</div>
+                    <div class="page-desc">transaction-buy.html</div>
+                </a>
+                <a href="transaction-sell.html" class="page-item">
+                    <div class="page-name">💸 交易 - 我要賣</div>
+                    <div class="page-desc">transaction-sell.html</div>
+                </a>
+                <a href="pending.html" class="page-item">
+                    <div class="page-name">📋 掛單列表</div>
+                    <div class="page-desc">pending.html</div>
+                </a>
+                <a href="orders.html" class="page-item">
+                    <div class="page-name">🧾 訂單列表</div>
+                    <div class="page-desc">orders.html</div>
+                </a>
+                <a href="about.html" class="page-item">
+                    <div class="page-name">👤 個人中心</div>
+                    <div class="page-desc">about.html</div>
+                </a>
+            </div>
+            
+            <h3 style="color: #666; margin: 24px 0 16px;">交易流程</h3>
+            <div class="page-grid">
+                <a href="create-order-buy.html" class="page-item">
+                    <div class="page-name">🛒 建立購買訂單</div>
+                    <div class="page-desc">create-order-buy.html</div>
+                </a>
+                <a href="create-order-sell.html" class="page-item">
+                    <div class="page-name">🏪 建立出售訂單</div>
+                    <div class="page-desc">create-order-sell.html</div>
+                </a>
+                <a href="confirm-order-buy.html" class="page-item">
+                    <div class="page-name">✅ 確認訂單（買）</div>
+                    <div class="page-desc">confirm-order-buy.html</div>
+                </a>
+                <a href="confirm-order-sell.html" class="page-item">
+                    <div class="page-name">✅ 確認訂單（賣）</div>
+                    <div class="page-desc">confirm-order-sell.html</div>
+                </a>
+                <a href="order-detail.html" class="page-item">
+                    <div class="page-name">📄 訂單詳情</div>
+                    <div class="page-desc">order-detail.html</div>
+                </a>
+            </div>
+            
+            <h3 style="color: #666; margin: 24px 0 16px;">掛單流程</h3>
+            <div class="page-grid">
+                <a href="create-pending-list.html" class="page-item">
+                    <div class="page-name">📝 選擇掛單類型</div>
+                    <div class="page-desc">create-pending-list.html</div>
+                </a>
+                <a href="create-pending-buy.html" class="page-item">
+                    <div class="page-name">💰 建立買入掛單</div>
+                    <div class="page-desc">create-pending-buy.html</div>
+                </a>
+                <a href="create-pending-sell.html" class="page-item">
+                    <div class="page-name">💸 建立賣出掛單</div>
+                    <div class="page-desc">create-pending-sell.html</div>
+                </a>
+            </div>
+            
+            <h3 style="color: #666; margin: 24px 0 16px;">個人設定</h3>
+            <div class="page-grid">
+                <a href="user.html" class="page-item">
+                    <div class="page-name">👤 個人資料</div>
+                    <div class="page-desc">user.html</div>
+                </a>
+                <a href="password.html" class="page-item">
+                    <div class="page-name">🔑 修改密碼選單</div>
+                    <div class="page-desc">password.html</div>
+                </a>
+                <a href="reset-pwd-login.html" class="page-item">
+                    <div class="page-name">🔐 修改登入密碼</div>
+                    <div class="page-desc">reset-pwd-login.html</div>
+                </a>
+                <a href="reset-pwd-transaction.html" class="page-item">
+                    <div class="page-name">🔑 修改交易密碼</div>
+                    <div class="page-desc">reset-pwd-transaction.html</div>
+                </a>
+                <a href="card-list.html" class="page-item">
+                    <div class="page-name">💳 銀行卡列表</div>
+                    <div class="page-desc">card-list.html</div>
+                </a>
+            </div>
+        </div>
+        
+        <div class="section">
+            <h2>📚 學習資源</h2>
+            <div style="margin-top: 16px;">
+                <a href="README-MULTI-PAGE.md" style="color: #5B4C9E; text-decoration: none; display: block; padding: 12px 0;">
+                    📖 完整說明文件 →
+                </a>
+                <a href="00-START-HERE.md" style="color: #5B4C9E; text-decoration: none; display: block; padding: 12px 0;">
+                    🚀 快速開始指南 →
+                </a>
+                <a href="styles.css" style="color: #5B4C9E; text-decoration: none; display: block; padding: 12px 0;">
+                    🎨 共用樣式檔案 (styles.css) →
+                </a>
+            </div>
+        </div>
+        
+        <div class="section" style="background: #f8f8f8; padding: 24px; border-radius: 8px; margin-top: 48px;">
+            <h3 style="color: #5B4C9E; margin-bottom: 16px;">💡 使用建議</h3>
+            <ol style="line-height: 1.8; color: #666; padding-left: 24px;">
+                <li><strong>初次使用</strong>：建議從 <a href="login.html" style="color: #5B4C9E;">login.html</a> 開始</li>
+                <li><strong>學習導航</strong>：體驗完整的使用者流程，理解頁面之間的跳轉關係</li>
+                <li><strong>研究結構</strong>：打開 HTML 檔案查看程式碼結構</li>
+                <li><strong>修改樣式</strong>：嘗試編輯 styles.css 改變頁面外觀</li>
+                <li><strong>對照原始碼</strong>：參考 src/screens/ 資料夾中的 React Native 元件</li>
+            </ol>
+        </div>
+        
+        <div style="text-align: center; margin-top: 48px; padding-top: 24px; border-top: 1px solid #e0e0e0; color: #999; font-size: 14px;">
+            <p>E幣錢包 App Wireframe v1.0.0</p>
+            <p>最後更新：2023-11-27</p>
+        </div>
+    </div>
+</body>
+</html>
+

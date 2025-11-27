@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>確認訂單 - E幣錢包</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="phone-container">
+        <div class="phone-screen">
+            <div class="notch"></div>
+            
+            <div class="status-bar">
+                <span>9:41</span>
+                <span>📶 📡 🔋</span>
+            </div>
+            
+            <div class="top-bar">
+                <a href="create-order-sell.html" class="back-btn">‹</a>
+                <h1>確認訂單</h1>
+            </div>
+            
+            <div class="content">
+                <div class="section">
+                    <div style="text-align: center; padding: 24px 0;">
+                        <div style="font-size: 48px; margin-bottom: 16px;">⏰</div>
+                        <div style="font-size: 32px; font-weight: bold; color: #FF9800; margin-bottom: 8px;">14:45</div>
+                        <div style="color: #666;">等待買家付款</div>
+                    </div>
+                </div>
+                <div class="section">
+                    <div class="section-title">訂單資訊</div>
+                    <div class="label-text">
+                        <span class="label">訂單編號</span>
+                        <span class="text">202311250003</span>
+                    </div>
+                    <div class="label-text">
+                        <span class="label">數量</span>
+                        <span class="text">1,000 E幣</span>
+                    </div>
+                    <div class="label-text">
+                        <span class="label">交易金額</span>
+                        <span class="text" style="color: #E9967A; font-weight: bold;">CNY ¥1,000</span>
+                    </div>
+                    <div class="label-text">
+                        <span class="label">買家暱稱</span>
+                        <span class="text">趙六</span>
+                    </div>
+                </div>
+                <div class="section">
+                    <div class="section-title">您的收款資訊</div>
+                    <div class="label-text">
+                        <span class="label">銀行名稱</span>
+                        <span class="text">中國銀行</span>
+                    </div>
+                    <div class="label-text">
+                        <span class="label">卡號</span>
+                        <span class="text">6217 **** **** 5678</span>
+                    </div>
+                    <div class="hint">
+                        請確認收到款項後再點擊「確認收款並放行」，切勿在未收到款項前放行
+                    </div>
+                </div>
+                <div style="padding: 16px;">
+                    <a href="orders.html" class="btn-primary" onclick="return confirm('請確認您已收到款項')">確認收款並放行</a>
+                    <a href="orders.html" class="btn-light" style="margin-top: 12px;" onclick="return confirm('確定要取消訂單嗎？')">取消訂單</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
+
