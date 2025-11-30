@@ -47,8 +47,9 @@ type Config struct {
 	LogMode  string
 
 	// Swagger
+	SwaggerEnabled    bool
 	SwaggerBaseDomain string
-	
+
 	// App Version
 	AppVersion string
 }
@@ -59,18 +60,58 @@ var (
 )
 
 /**
+ * @brief 取得當前服務名稱（從工作目錄推斷）
+ * @return string 服務名稱，如果無法推斷則返回空字串
+ */
+func getCurrentServiceName() string {
+	cwd, err := os.Getwd()
+	if err != nil {
+		return ""
+	}
+
+	// 如果當前目錄在 cmd/{service_name}/ 下
+	// 例如: /path/to/project/cmd/token-admin-api
+	if len(cwd) > 4 && cwd[len(cwd)-4:] == "/cmd" {
+		return ""
+	}
+
+	// 檢查路徑中是否包含 cmd/
+	for i := len(cwd) - 1; i >= 0; i-- {
+		if i >= 3 && cwd[i-3:i+1] == "/cmd" && i+1 < len(cwd) {
+			// 找到 /cmd/ 之後的服務名稱
+			remaining := cwd[i+1:]
+			if len(remaining) > 0 && remaining[0] == '/' {
+				remaining = remaining[1:]
+			}
+			// 取第一個路徑段作為服務名稱
+			for j, c := range remaining {
+				if c == '/' {
+					return remaining[:j]
+				}
+			}
+			return remaining
+		}
+	}
+
+	return ""
+}
+
+/**
  * @brief 載入 .env 檔案
  * @return bool 是否成功載入
  */
 func loadEnvFile() bool {
 	// 嘗試多個可能的路徑載入 .env 檔案
 	envPaths := []string{
-		"cmd/token-admin-api/.env", // 從專案根目錄執行時
-		".env",       // 從當前目錄執行時
-		"../.env",    // 從子目錄執行時
-		"../../.env", // 從更深的子目錄執行時
+		".env", // 1. 當前目錄（優先，適用於在 cmd/{service_name} 下執行）
 	}
 
+	// 2. 如果可以推斷出服務名稱，嘗試從專案根目錄載入
+	if serviceName := getCurrentServiceName(); serviceName != "" {
+		envPaths = append(envPaths, fmt.Sprintf("cmd/%s/.env", serviceName)) // 從專案根目錄
+	}
+
+	// 嘗試載入
 	for _, path := range envPaths {
 		if err := godotenv.Load(path); err == nil {
 			log.Printf("✅ Loaded .env file from: %s", path)
@@ -78,7 +119,7 @@ func loadEnvFile() bool {
 		}
 	}
 
-	log.Println("⚠️  .env file not found in any expected location, using environment variables or defaults")
+	log.Println("⚠️  .env file not found, using environment variables or defaults")
 	return false
 }
 
@@ -177,8 +218,9 @@ func Load() *Config {
 			LogMode:  getEnv("LOG_MODE", "production"),
 
 			// Swagger
+			SwaggerEnabled:    getEnv("SWAGGER_ENABLED", "true") == "true",
 			SwaggerBaseDomain: getEnv("SWAGGER_BASE_DOMAIN", ""),
-			
+
 			// App Version
 			AppVersion: getEnv("APP_VERSION", "dev"),
 		}
@@ -209,7 +251,7 @@ func (c *Config) GetSwaggerHost() string {
 	if c.SwaggerBaseDomain != "" {
 		return c.SwaggerBaseDomain
 	}
-	
+
 	// 回退到使用本地 IP:Port
 	localIP := getLocalIP()
 	return fmt.Sprintf("%s:%d", localIP, c.HTTPPort)
