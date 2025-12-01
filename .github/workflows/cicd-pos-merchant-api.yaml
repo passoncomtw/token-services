@@ -106,12 +106,17 @@ jobs:
           echo "📦 Image: ghcr.io/passoncomtw/pos-merchant-api:develop"
           echo "📍 Namespace: ${{ env.NAMESPACE }}"
           
-          # 更新鏡像並觸發滾動更新
+          # 更新鏡像引用
           kubectl set image deployment/pos-merchant-api \
             pos-merchant-api=ghcr.io/passoncomtw/pos-merchant-api:develop \
             -n ${{ env.NAMESPACE }}
           
-          echo "✅ 鏡像已更新，滾動更新已觸發"
+          # 強制重啟以確保拉取最新鏡像（因為使用固定 tag: develop）
+          echo "🔄 強制重啟 Deployment 以拉取最新鏡像..."
+          kubectl rollout restart deployment/pos-merchant-api \
+            -n ${{ env.NAMESPACE }}
+          
+          echo "✅ 滾動更新已觸發"
 
       - name: Wait for deployment
         id: wait
