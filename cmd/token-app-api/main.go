@@ -11,6 +11,7 @@ import (
 	"passontw-backend-services/pkg/database"
 	"passontw-backend-services/pkg/logger"
 	"passontw-backend-services/pkg/middleware"
+	"passontw-backend-services/pkg/swagger"
 
 	"go.uber.org/fx"
 )
@@ -50,6 +51,7 @@ func main() {
 		config.ConfigModule,
 		logger.LoggerModule,
 		middleware.MiddlewareModule,
+		swagger.SwaggerModule,
 		database.DatabaseModule,
 		services.AuthModule,
 		services.UserModule,

@@ -10,6 +10,7 @@ import (
 	"passontw-backend-services/pkg/config"
 	"passontw-backend-services/pkg/logger"
 	"passontw-backend-services/pkg/middleware"
+	"passontw-backend-services/pkg/swagger"
 
 	"github.com/gin-gonic/gin"
 	"go.uber.org/fx"
@@ -32,9 +33,10 @@ type Server struct {
  * @param log Logger 實例
  * @param loggerMw Logger 中間件
  * @param corsMw CORS 中間件
+ * @param swaggerMgr Swagger 管理器
  * @return Server 指標
  */
-func NewServer(router *Router, cfg *config.Config, log logger.Logger, loggerMw *middleware.LoggerMiddleware, corsMw *middleware.CORSMiddleware) *Server {
+func NewServer(router *Router, cfg *config.Config, log logger.Logger, loggerMw *middleware.LoggerMiddleware, corsMw *middleware.CORSMiddleware, swaggerMgr *swagger.SwaggerManager) *Server {
 	// 設定 Gin 模式
 	gin.SetMode(gin.ReleaseMode)
 
@@ -44,34 +46,30 @@ func NewServer(router *Router, cfg *config.Config, log logger.Logger, loggerMw *
 	engine.Use(corsMw.Handler())   // 使用 CORS 中間件（必須在其他中間件之前）
 	engine.Use(loggerMw.Handler()) // 使用我們的日誌中間件
 
-	// 取得本機 IP 和 Swagger host
+	// 取得本機 IP
 	localIP := cfg.GetLocalIP()
-	swagHost := cfg.GetSwaggerHost()
 
-	// 動態設定 Swagger Host（優先使用環境變量 SWAGGER_BASE_DOMAIN）
-	docs.SwaggerInfo.Host = swagHost
-
-	// 動態設定 Swagger 版本號（從 Config 讀取）
-	docs.SwaggerInfo.Version = cfg.AppVersion
-
-	// 支援 HTTP 和 HTTPS 兩種協議
-	docs.SwaggerInfo.Schemes = []string{"https", "http"}
+	// 使用 Swagger 模組初始化文檔
+	swaggerMgr.InitializeDocs(docs.SwaggerInfo)
 
 	log.Info("Server configuration",
 		zap.String("localIP", localIP),
-		zap.String("swaggerHost", swagHost),
+		zap.String("swaggerHost", swaggerMgr.GetConfig().Host),
 		zap.String("version", cfg.AppVersion),
 		zap.Int("port", cfg.HTTPPort),
 	)
 
-	// 設定路由（包含 Swagger 路由）
+	// 設定路由
 	router.SetupRoutes(engine)
+	
+	// 註冊 Swagger 路由
+	swaggerMgr.RegisterRoutes(engine)
 
 	return &Server{
 		engine:   engine,
 		port:     cfg.HTTPPort,
 		localIP:  localIP,
-		swagHost: swagHost,
+		swagHost: swaggerMgr.GetConfig().Host,
 		logger:   log.With(zap.String("component", "Server")),
 	}
 }
