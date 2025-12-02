@@ -21,7 +21,7 @@ type AuthServiceInterface interface {
 
 // ==================== 使用者相關 ====================
 type RegisterRequest struct {
-	Type            int    `json:"type" binding:"required" example:"0"`                              // 使用者類型：0=一般使用者, 1=平台使用者
+	Type            *int   `json:"type" binding:"required" example:"0"`                              // 使用者類型：0=一般使用者, 1=平台使用者
 	Account         string `json:"account" binding:"required" example:"user001"`                     // 帳號
 	Name            string `json:"name" binding:"required" example:"王小明"`                            // 姓名
 	Email           string `json:"email" binding:"required,email" example:"user001@example.com"`     // 電子郵件

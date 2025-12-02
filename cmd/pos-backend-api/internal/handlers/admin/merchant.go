@@ -16,8 +16,13 @@ import (
 // @Tags admin-merchant
 // @Security BearerAuth
 // @Produce json
+// @Param page query int false "頁碼" default(1) example(1)
+// @Param limit query int false "每頁筆數" default(10) example(10)
+// @Param search query string false "搜尋關鍵字" example("測試")
 // @Success 200 {object} models.MerchantListResponse "商家列表"
+// @Failure 400 {object} models.ErrorResponse "參數錯誤"
 // @Failure 401 {object} models.ErrorResponse "Token 無效"
+// @Failure 500 {object} models.ErrorResponse "伺服器錯誤"
 // @Router /api/admin/merchant [get]
 func GetMerchantListHandler(svc services.MerchantService) gin.HandlerFunc {
 	return func(c *gin.Context) {

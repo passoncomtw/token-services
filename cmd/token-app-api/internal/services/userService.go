@@ -70,7 +70,7 @@ func (s *UserService) Register(req *interfaces.RegisterRequest) (*interfaces.Use
 
 	// 建立使用者
 	user := &models.User{
-		Type:              req.Type,
+		Type:              *req.Type, // 解引用指針
 		Account:           req.Account,
 		Name:              req.Name,
 		Email:             req.Email,
