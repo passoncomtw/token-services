@@ -12,5 +12,7 @@ data:
   LOG_DEVELOPMENT: "false"
   LOG_ENCODING: "json"
   SWAGGER_BASE_DOMAIN: "pos-merchant-api.passon.tw"
+  # CORS 設定：允許的前端來源（多個來源用逗號分隔）
+  CORS_ALLOW_ORIGINS: "http://localhost:5173,https://pos-merchant-web.passon.tw"
 
 

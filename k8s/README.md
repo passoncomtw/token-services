@@ -150,6 +150,11 @@ kubectl logs -f deployment/token-admin-api -n passontw-services-staging
    - 由 CI/CD 從 GitHub Secrets 自動同步
    - 包含所有配置：DB_HOST, DB_PORT, DB_USER, DB_PASSWORD, JWT_SECRET 等
    - HTTP_PORT 默認為 8080（服務器綁定到所有接口）
+   - **CORS_ALLOW_ORIGINS**：允許的前端來源（多個來源用逗號分隔）
+     - 例如：`"http://localhost:5173,https://pos-backend-web.passon.tw"`
+     - 用於控制跨域請求（CORS）
+   - **SWAGGER_BASE_DOMAIN**：Swagger UI 顯示的 Base URL
+     - 例如：`"pos-backend-api.passon.tw"`
 
 2. **redis-secret**（僅 Token APIs）
    - 使用 `envFrom` 注入

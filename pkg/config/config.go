@@ -6,6 +6,7 @@ import (
 	"net"
 	"os"
 	"strconv"
+	"strings"
 	"sync"
 	"time"
 
@@ -48,6 +49,9 @@ type Config struct {
 	// Swagger
 	SwaggerEnabled    bool
 	SwaggerBaseDomain string
+
+	// CORS
+	CORSAllowOrigins []string
 
 	// App Version
 	AppVersion string
@@ -219,6 +223,9 @@ func Load() *Config {
 			SwaggerEnabled:    getEnv("SWAGGER_ENABLED", "true") == "true",
 			SwaggerBaseDomain: getEnv("SWAGGER_BASE_DOMAIN", ""),
 
+			// CORS
+			CORSAllowOrigins: parseCORSAllowOrigins(getEnv("CORS_ALLOW_ORIGINS", "")),
+
 			// App Version
 			AppVersion: getEnv("APP_VERSION", "dev"),
 		}
@@ -261,4 +268,33 @@ func (c *Config) GetSwaggerHost() string {
  */
 func (c *Config) GetLocalIP() string {
 	return getLocalIP()
+}
+
+/**
+ * @brief 解析 CORS 允許的來源字串
+ * @param originsStr 逗號分隔的來源字串（例如: "http://localhost:5173,https://pos-backend-web.passon.tw"）
+ * @return []string 來源清單
+ */
+func parseCORSAllowOrigins(originsStr string) []string {
+	if originsStr == "" {
+		// 預設允許所有來源（開發環境）
+		return []string{"*"}
+	}
+
+	// 分割並清理空白
+	origins := strings.Split(originsStr, ",")
+	result := make([]string, 0, len(origins))
+
+	for _, origin := range origins {
+		trimmed := strings.TrimSpace(origin)
+		if trimmed != "" {
+			result = append(result, trimmed)
+		}
+	}
+
+	if len(result) == 0 {
+		return []string{"*"}
+	}
+
+	return result
 }

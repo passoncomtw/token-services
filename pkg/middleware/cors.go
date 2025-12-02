@@ -5,6 +5,8 @@ import (
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
+	
+	pkgConfig "passontw-backend-services/pkg/config"
 )
 
 // CORSMiddleware CORS 中介軟體
@@ -34,6 +36,9 @@ func NewCORSMiddleware(allowOrigins []string) *CORSMiddleware {
  * @return Gin 處理器函數
  */
 func (m *CORSMiddleware) Handler() gin.HandlerFunc {
+	// 檢查是否允許所有來源
+	allowAllOrigins := len(m.allowOrigins) == 1 && m.allowOrigins[0] == "*"
+	
 	config := cors.Config{
 		// 允許的來源
 		AllowOrigins: m.allowOrigins,
@@ -66,7 +71,8 @@ func (m *CORSMiddleware) Handler() gin.HandlerFunc {
 
 		// 允許攜帶憑證（cookies, authorization headers）
 		// 注意：當 AllowOrigins 為 "*" 時，必須設為 false
-		AllowCredentials: false,
+		// 當指定具體來源時，可以設為 true 以支援 cookies 和 authorization
+		AllowCredentials: !allowAllOrigins,
 
 		// 預檢請求結果快取時間（12 小時）
 		MaxAge: 12 * time.Hour,
@@ -77,8 +83,9 @@ func (m *CORSMiddleware) Handler() gin.HandlerFunc {
 
 /**
  * @brief 建立 CORS 中介軟體的工廠函數（用於 FX 依賴注入）
+ * @param cfg 應用程式配置
  * @return CORSMiddleware 指標
  */
-func ProvideCORSMiddleware() *CORSMiddleware {
-	return NewCORSMiddleware(nil)
+func ProvideCORSMiddleware(cfg *pkgConfig.Config) *CORSMiddleware {
+	return NewCORSMiddleware(cfg.CORSAllowOrigins)
 }

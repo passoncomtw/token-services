@@ -13,6 +13,7 @@ import (
 	"passontw-backend-services/cmd/pos-backend-api/internal/handlers"
 	"passontw-backend-services/cmd/pos-backend-api/internal/middleware"
 	"passontw-backend-services/pkg/logger"
+	pkgMiddleware "passontw-backend-services/pkg/middleware"
 
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
@@ -25,11 +26,11 @@ type HTTPServer struct {
 	config *config.Config
 }
 
-func NewHTTPServer(cfg *config.Config, lgr logger.Logger, handlers *handlers.Handlers) (*HTTPServer, error) {
+func NewHTTPServer(cfg *config.Config, lgr logger.Logger, handlers *handlers.Handlers, corsMw *pkgMiddleware.CORSMiddleware) (*HTTPServer, error) {
 	gin.SetMode(gin.ReleaseMode)
 	engine := gin.New()
 	engine.Use(gin.Recovery())
-	engine.Use(middleware.CORSMiddleware())
+	engine.Use(corsMw.Handler()) // 使用統一的 CORS 中間件
 	engine.Use(gin.LoggerWithWriter(gin.DefaultWriter, "/api/admin/auth"))
 
 	// Health check endpoints

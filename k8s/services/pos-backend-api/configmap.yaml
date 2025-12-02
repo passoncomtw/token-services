@@ -10,4 +10,6 @@ data:
   HTTP_PORT: "8080"
   LOG_LEVEL: "info"
   SWAGGER_BASE_DOMAIN: "pos-backend-api.passon.tw"
+  # CORS 設定：允許的前端來源（多個來源用逗號分隔）
+  CORS_ALLOW_ORIGINS: "http://localhost:5173,https://pos-backend-web.passon.tw"
 

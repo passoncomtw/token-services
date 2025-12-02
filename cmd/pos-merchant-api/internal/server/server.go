@@ -17,6 +17,7 @@ import (
 	"passontw-backend-services/cmd/pos-merchant-api/internal/config"
 	pkgConfig "passontw-backend-services/pkg/config"
 	"passontw-backend-services/pkg/logger"
+	pkgMiddleware "passontw-backend-services/pkg/middleware"
 	"passontw-backend-services/cmd/pos-merchant-api/internal/docs"
 	"passontw-backend-services/cmd/pos-merchant-api/internal/handlers"
 	"passontw-backend-services/cmd/pos-merchant-api/internal/middleware"
@@ -24,7 +25,7 @@ import (
 	"passontw-backend-services/cmd/pos-merchant-api/internal/services"
 )
 
-func StartHTTPServer(lc fx.Lifecycle, log logger.Logger, db *gorm.DB, productSvc services.ProductService, pkgCfg *pkgConfig.Config) {
+func StartHTTPServer(lc fx.Lifecycle, log logger.Logger, db *gorm.DB, productSvc services.ProductService, pkgCfg *pkgConfig.Config, corsMw *pkgMiddleware.CORSMiddleware) {
 	lc.Append(fx.Hook{
 		OnStart: func(ctx context.Context) error {
 			// 載入設定
@@ -49,6 +50,7 @@ func StartHTTPServer(lc fx.Lifecycle, log logger.Logger, db *gorm.DB, productSvc
 			router := gin.Default()
 
 			// 全局中間件
+			router.Use(corsMw.Handler()) // 添加 CORS 中間件
 			router.Use(middleware.RequestIDMiddleware())
 
 			// 健康檢查端點
