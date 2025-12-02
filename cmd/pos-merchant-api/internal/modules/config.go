@@ -87,7 +87,6 @@ func NewPkgConfig() *pkgConfig.Config {
 	return &pkgConfig.Config{
 		// HTTP Server
 		HTTPPort: getEnvInt("HTTP_PORT", 8080),
-		HTTPHost: getEnv("HTTP_HOST", "127.0.0.1"),
 
 		// JWT
 		JWTSecret:         getEnv("JWT_SECRET", "your_super_secret_jwt_key_here"),

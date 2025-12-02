@@ -7,7 +7,6 @@ metadata:
 data:
   # 以下為預設值，實際值會在部署時從 GitHub Secrets 同步
   APP_ENV: "staging"
-  HTTP_HOST: "0.0.0.0"
   HTTP_PORT: "8080"
   LOG_LEVEL: "info"
   SWAGGER_BASE_DOMAIN: "pos-backend-api.passon.tw"

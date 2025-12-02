@@ -32,13 +32,14 @@ func StartHTTPServer(lc fx.Lifecycle, log logger.Logger, db *gorm.DB, productSvc
 			}
 
 			// 動態設定 Swagger Host
-			httpHost := getEnvOrDefault("HTTP_HOST", "localhost")
 			port := getEnvOrDefault("HTTP_PORT", "8080")
 			
-			// 設定 Swagger Host - 在 k8s 環境中使用外部域名
-			swaggerHost := "merchant-api.passon.tw"
-			if httpHost == "localhost" {
-				swaggerHost = httpHost + ":" + port
+			// 設定 Swagger Host
+			// 在 K8s 環境中由 SWAGGER_BASE_DOMAIN 控制
+			// 如果未設置，默認使用 0.0.0.0:port（綁定所有接口）
+			swaggerHost := getEnvOrDefault("SWAGGER_BASE_DOMAIN", "")
+			if swaggerHost == "" {
+				swaggerHost = "0.0.0.0:" + port
 			}
 			docs.SwaggerInfo.Host = swaggerHost
 

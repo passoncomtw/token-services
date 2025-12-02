@@ -51,16 +51,13 @@ func NewHTTPServer(cfg *config.Config, lgr logger.Logger, handlers *handlers.Han
 	}
 
 	// 動態設定 Swagger Host
-	host := cfg.HTTP.Host
-	if host == "" {
-		host = "localhost"
-	}
-	docs.SwaggerInfo.Host = host + ":" + cfg.HTTP.Port
+	// Swagger Host 將由環境變數 SWAGGER_BASE_DOMAIN 控制
+	// 如果未設置，默認使用 0.0.0.0:port（綁定所有接口）
+	docs.SwaggerInfo.Host = "0.0.0.0:" + cfg.HTTP.Port
 
+	// 在 Kubernetes 中，始終綁定到所有接口
+	// HTTP_HOST 僅用於 Swagger 文檔顯示，不用於服務器綁定
 	addr := ":" + cfg.HTTP.Port
-	if cfg.HTTP.Host != "" {
-		addr = cfg.HTTP.Host + ":" + cfg.HTTP.Port
-	}
 	server := &http.Server{
 		Addr:    addr,
 		Handler: engine,

@@ -21,10 +21,8 @@ type ServerConfig struct {
 
 // HTTPConfig HTTP 服務配置
 // 支援 CORS 設定
-
 type HTTPConfig struct {
 	Port string
-	Host string
 }
 
 // DBConfig 資料庫與連接池配置
@@ -64,7 +62,6 @@ func NewConfig() *Config {
 		},
 		HTTP: HTTPConfig{
 			Port: getEnvOrDefault("HTTP_PORT", "8080"),
-			Host: getEnvOrDefault("HTTP_HOST", ""),
 		},
 		DB: DBConfig{
 			Host:            getEnvOrDefault("DB_HOST", "localhost"),

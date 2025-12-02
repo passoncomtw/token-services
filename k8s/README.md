@@ -149,7 +149,7 @@ kubectl logs -f deployment/token-admin-api -n passontw-services-staging
 1. **ConfigMap**（主要配置來源）
    - 由 CI/CD 從 GitHub Secrets 自動同步
    - 包含所有配置：DB_HOST, DB_PORT, DB_USER, DB_PASSWORD, JWT_SECRET 等
-   - HTTP_HOST 必須設置為 `0.0.0.0`（避免健康檢查失敗）
+   - HTTP_PORT 默認為 8080（服務器綁定到所有接口）
 
 2. **redis-secret**（僅 Token APIs）
    - 使用 `envFrom` 注入
@@ -345,7 +345,7 @@ spec:
 ConfigMap 由 CI/CD 從 GitHub Secrets 自動同步，包含：
 - `DB_*` - 數據庫配置
 - `JWT_SECRET` - JWT 簽名密鑰
-- `HTTP_HOST` - 必須設置為 `0.0.0.0`
+- `HTTP_PORT` - HTTP 服務器端口（默認 8080）
 - 其他服務特定配置
 
 **`redis-secrets-env.yaml`**
@@ -601,7 +601,7 @@ kustomize build . | grep -A 50 "env:"
 # 應該看到：
 # - DB_HOST, DB_PORT, etc. (來自 ConfigMap)
 # - JWT_SECRET (來自 ConfigMap)
-# - HTTP_HOST=0.0.0.0 (來自 ConfigMap，必須設置)
+# - HTTP_PORT=8080 (來自 ConfigMap)
 # - REDIS_HOST, etc. (來自 redis-secret envFrom，僅 Token APIs)
 ```
 

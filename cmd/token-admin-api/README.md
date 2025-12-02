@@ -18,7 +18,6 @@ cp ENV_TEMPLATE.md .env.example
 ```bash
 cat > .env << 'EOF'
 HTTP_PORT=8080
-HTTP_HOST=127.0.0.1
 JWT_SECRET=your_secret_key_here
 DB_HOST=localhost
 DB_PORT=5432

@@ -18,7 +18,6 @@ import (
 type Config struct {
 	// HTTP Server
 	HTTPPort int
-	HTTPHost string
 
 	// JWT
 	JWTSecret         string
@@ -189,7 +188,6 @@ func Load() *Config {
 		instance = &Config{
 			// HTTP Server
 			HTTPPort: getEnvInt("HTTP_PORT", 8080),
-			HTTPHost: getEnv("HTTP_HOST", "127.0.0.1"),
 
 			// JWT
 			JWTSecret:         getEnv("JWT_SECRET", "your_super_secret_jwt_key_here"),
@@ -252,9 +250,8 @@ func (c *Config) GetSwaggerHost() string {
 		return c.SwaggerBaseDomain
 	}
 
-	// 回退到使用本地 IP:Port
-	localIP := getLocalIP()
-	return fmt.Sprintf("%s:%d", localIP, c.HTTPPort)
+	// 回退到使用 0.0.0.0:Port（綁定所有接口）
+	return fmt.Sprintf("0.0.0.0:%d", c.HTTPPort)
 }
 
 /**
