@@ -48,7 +48,6 @@ func LoadConfig() (*Config, error) {
 		Server:    loadServerConfig(),
 		Logger:    loadLoggerConfig(),
 		Backend:   loadBackendConfig(),
-		AESKey:    getEnvOrDefault("AES_KEY", ""),
 		JWTSecret: getEnvOrDefault("JWT_SECRET", ""),
 	}, nil
 }
