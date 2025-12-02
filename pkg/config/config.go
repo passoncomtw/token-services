@@ -250,8 +250,9 @@ func (c *Config) GetSwaggerHost() string {
 		return c.SwaggerBaseDomain
 	}
 
-	// 回退到使用 0.0.0.0:Port（綁定所有接口）
-	return fmt.Sprintf("0.0.0.0:%d", c.HTTPPort)
+	// 回退到使用本地 IP:Port（方便本地開發和測試）
+	localIP := getLocalIP()
+	return fmt.Sprintf("%s:%d", localIP, c.HTTPPort)
 }
 
 /**

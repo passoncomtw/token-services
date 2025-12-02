@@ -2,6 +2,7 @@ package server
 
 import (
 	"context"
+	"net"
 	"net/http"
 	"os"
 
@@ -14,6 +15,7 @@ import (
 	"go.uber.org/zap"
 
 	"passontw-backend-services/cmd/pos-merchant-api/internal/config"
+	pkgConfig "passontw-backend-services/pkg/config"
 	"passontw-backend-services/pkg/logger"
 	"passontw-backend-services/cmd/pos-merchant-api/internal/docs"
 	"passontw-backend-services/cmd/pos-merchant-api/internal/handlers"
@@ -22,7 +24,7 @@ import (
 	"passontw-backend-services/cmd/pos-merchant-api/internal/services"
 )
 
-func StartHTTPServer(lc fx.Lifecycle, log logger.Logger, db *gorm.DB, productSvc services.ProductService) {
+func StartHTTPServer(lc fx.Lifecycle, log logger.Logger, db *gorm.DB, productSvc services.ProductService, pkgCfg *pkgConfig.Config) {
 	lc.Append(fx.Hook{
 		OnStart: func(ctx context.Context) error {
 			// 載入設定
@@ -35,13 +37,14 @@ func StartHTTPServer(lc fx.Lifecycle, log logger.Logger, db *gorm.DB, productSvc
 			port := getEnvOrDefault("HTTP_PORT", "8080")
 			
 			// 設定 Swagger Host
-			// 在 K8s 環境中由 SWAGGER_BASE_DOMAIN 控制
-			// 如果未設置，默認使用 0.0.0.0:port（綁定所有接口）
-			swaggerHost := getEnvOrDefault("SWAGGER_BASE_DOMAIN", "")
-			if swaggerHost == "" {
-				swaggerHost = "0.0.0.0:" + port
+			// 在 K8s 環境中由 SWAGGER_BASE_DOMAIN 控制（從 pkgConfig 讀取）
+			// 如果未設置，使用本地 IP:port（方便本地開發和測試）
+			if pkgCfg.SwaggerBaseDomain != "" {
+				docs.SwaggerInfo.Host = pkgCfg.SwaggerBaseDomain
+			} else {
+				localIP := getLocalIP()
+				docs.SwaggerInfo.Host = localIP + ":" + port
 			}
-			docs.SwaggerInfo.Host = swaggerHost
 
 			router := gin.Default()
 
@@ -133,4 +136,24 @@ func configGetenv(key string) string {
 // configGetenvOrig 實際呼叫 os.Getenv
 func configGetenvOrig(key string) string {
 	return os.Getenv(key)
+}
+
+// getLocalIP 取得本機 IP 地址（用於 Swagger Host 顯示）
+func getLocalIP() string {
+	addrs, err := net.InterfaceAddrs()
+	if err != nil {
+		return "localhost"
+	}
+
+	for _, addr := range addrs {
+		// 檢查是否為 IP 地址（排除網路遮罩等）
+		if ipNet, ok := addr.(*net.IPNet); ok && !ipNet.IP.IsLoopback() {
+			// 只取 IPv4 地址
+			if ipNet.IP.To4() != nil {
+				return ipNet.IP.String()
+			}
+		}
+	}
+
+	return "localhost"
 }

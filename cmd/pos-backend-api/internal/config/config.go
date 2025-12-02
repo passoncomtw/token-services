@@ -22,7 +22,8 @@ type ServerConfig struct {
 // HTTPConfig HTTP 服務配置
 // 支援 CORS 設定
 type HTTPConfig struct {
-	Port string
+	Port              string
+	SwaggerBaseDomain string // Swagger 基礎域名（用於 Swagger UI 顯示）
 }
 
 // DBConfig 資料庫與連接池配置
@@ -61,7 +62,8 @@ func NewConfig() *Config {
 			Mode:  getEnvOrDefault("LOG_MODE", "development"),
 		},
 		HTTP: HTTPConfig{
-			Port: getEnvOrDefault("HTTP_PORT", "8080"),
+			Port:              getEnvOrDefault("HTTP_PORT", "8080"),
+			SwaggerBaseDomain: getEnvOrDefault("SWAGGER_BASE_DOMAIN", ""),
 		},
 		DB: DBConfig{
 			Host:            getEnvOrDefault("DB_HOST", "localhost"),

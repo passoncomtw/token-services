@@ -2,6 +2,7 @@ package server
 
 import (
 	"context"
+	"net"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -52,8 +53,13 @@ func NewHTTPServer(cfg *config.Config, lgr logger.Logger, handlers *handlers.Han
 
 	// 動態設定 Swagger Host
 	// Swagger Host 將由環境變數 SWAGGER_BASE_DOMAIN 控制
-	// 如果未設置，默認使用 0.0.0.0:port（綁定所有接口）
-	docs.SwaggerInfo.Host = "0.0.0.0:" + cfg.HTTP.Port
+	// 如果未設置，使用本地 IP:port（方便本地開發和測試）
+	if cfg.HTTP.SwaggerBaseDomain != "" {
+		docs.SwaggerInfo.Host = cfg.HTTP.SwaggerBaseDomain
+	} else {
+		localIP := getLocalIP()
+		docs.SwaggerInfo.Host = localIP + ":" + cfg.HTTP.Port
+	}
 
 	// 在 Kubernetes 中，始終綁定到所有接口
 	// HTTP_HOST 僅用於 Swagger 文檔顯示，不用於服務器綁定
@@ -78,4 +84,24 @@ func (s *HTTPServer) Start() error {
 func (s *HTTPServer) Stop(ctx context.Context) error {
 	s.logger.Info("Stopping HTTP server")
 	return s.server.Shutdown(ctx)
+}
+
+// getLocalIP 取得本機 IP 地址（用於 Swagger Host 顯示）
+func getLocalIP() string {
+	addrs, err := net.InterfaceAddrs()
+	if err != nil {
+		return "localhost"
+	}
+
+	for _, addr := range addrs {
+		// 檢查是否為 IP 地址（排除網路遮罩等）
+		if ipNet, ok := addr.(*net.IPNet); ok && !ipNet.IP.IsLoopback() {
+			// 只取 IPv4 地址
+			if ipNet.IP.To4() != nil {
+				return ipNet.IP.String()
+			}
+		}
+	}
+
+	return "localhost"
 }
