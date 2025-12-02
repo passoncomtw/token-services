@@ -141,7 +141,6 @@ go mod download
 ```env
 # HTTP Server
 HTTP_PORT=8080
-HTTP_HOST=127.0.0.1
 
 # JWT 認證
 JWT_SECRET=your_super_secret_jwt_key_here

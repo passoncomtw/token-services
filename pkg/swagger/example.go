@@ -2,12 +2,12 @@ package swagger
 
 /**
  * 這個檔案提供 Swagger 模組的使用範例
- * 
+ *
  * 注意：這個檔案僅供參考，不會被編譯到最終的二進制文件中
  */
 
 // 範例 1: 在 main.go 中引入 Swagger 模組
-// 
+//
 // package main
 //
 // import (
@@ -16,9 +16,9 @@ package swagger
 //     "passontw-backend-services/pkg/swagger"
 //     "passontw-backend-services/pkg/middleware"
 //     "passontw-backend-services/pkg/database"
-//     
+//
 //     "passontw-backend-services/cmd/your-service/internal/server"
-//     
+//
 //     "go.uber.org/fx"
 // )
 //
@@ -46,11 +46,11 @@ package swagger
 //         config.ConfigModule,
 //         logger.LoggerModule,
 //         swagger.SwaggerModule,  // 新增 Swagger 模組
-//         
+//
 //         // 基礎設施模組
 //         middleware.MiddlewareModule,
 //         database.DatabaseModule,
-//         
+//
 //         // 服務模組
 //         server.ServerModule,
 //     ).Run()
@@ -93,21 +93,21 @@ package swagger
 //     swaggerManager *swagger.SwaggerManager,  // 注入 SwaggerManager
 // ) *Server {
 //     gin.SetMode(gin.ReleaseMode)
-//     
+//
 //     engine := gin.New()
 //     engine.Use(gin.Recovery())
 //     engine.Use(corsMw.Handler())
 //     engine.Use(loggerMw.Handler())
-//     
+//
 //     // 初始化 Swagger 文檔（動態設定 Host、Version 等）
 //     swaggerManager.InitializeDocs(docs.SwaggerInfo)
-//     
+//
 //     // 註冊 Swagger 路由（只有在啟用時才會註冊）
 //     swaggerManager.RegisterRoutes(engine)
-//     
+//
 //     // 設定其他業務路由
 //     router.SetupRoutes(engine)
-//     
+//
 //     return &Server{
 //         engine:         engine,
 //         port:           cfg.HTTPPort,
@@ -126,7 +126,7 @@ package swagger
 //         OnStart: func(ctx context.Context) error {
 //             go func() {
 //                 s.logger.Info("🚀 Server starting", zap.Int("port", s.port))
-//                 
+//
 //                 // 顯示 Swagger UI URL（只有在啟用時才顯示）
 //                 if s.swaggerManager.IsEnabled() {
 //                     s.logger.Info("📚 Swagger UI",
@@ -134,7 +134,7 @@ package swagger
 //                         zap.String("network", s.swaggerManager.GetSwaggerURL(false)),
 //                     )
 //                 }
-//                 
+//
 //                 if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 //                     s.logger.Fatal("Failed to start server", zap.Error(err))
 //                 }
@@ -229,7 +229,6 @@ package swagger
 //
 // # HTTP Server 配置
 // HTTP_PORT=8080
-// HTTP_HOST=0.0.0.0
 //
 // # 其他配置...
 
@@ -237,12 +236,12 @@ package swagger
 //
 // func NewServer(...) *Server {
 //     // ...
-//     
+//
 //     // 使用自訂路徑註冊 Swagger
 //     swaggerManager.RegisterRoutes(engine, "/api/docs/*any")
-//     
+//
 //     // 這樣 Swagger UI 就會在 http://localhost:8080/api/docs/index.html
-//     
+//
 //     // ...
 // }
 
@@ -268,4 +267,3 @@ package swagger
 //     fmt.Printf("Swagger BasePath: %s\n", cfg.BasePath)
 //     fmt.Printf("Swagger Schemes: %v\n", cfg.Schemes)
 // }
-

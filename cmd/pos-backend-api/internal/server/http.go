@@ -62,7 +62,6 @@ func NewHTTPServer(cfg *config.Config, lgr logger.Logger, handlers *handlers.Han
 	}
 
 	// 在 Kubernetes 中，始終綁定到所有接口
-	// HTTP_HOST 僅用於 Swagger 文檔顯示，不用於服務器綁定
 	addr := ":" + cfg.HTTP.Port
 	server := &http.Server{
 		Addr:    addr,
