@@ -9,7 +9,6 @@ resources:
 - ../../services/pos-backend-api
 - ../../services/pos-merchant-api
 - middleware-redirect-https.yaml
-- middleware-cors.yaml
 - ingress.yaml
 
 # Staging 命名空间
