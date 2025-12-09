@@ -10,9 +10,10 @@ metadata:
     # Cert-manager - 使用 Let's Encrypt Production 證書
     cert-manager.io/cluster-issuer: "letsencrypt-prod"
     
-    # CORS 處理由應用程式層的 CORS middleware 負責
-    # 應用程式層使用 AllowOriginFunc 動態允許所有來源，並支援 credentials
-    # 不引用 Traefik 層的 CORS middleware，避免來源列表限制
+    # Traefik v3 - 使用 Middleware（HTTPS 重定向）
+    # CORS 處理由應用程式層的 CORS middleware 負責（動態允許所有來源並支援 credentials）
+    # 注意：redirect-https 會重定向 HTTP 到 HTTPS，但應用程式層的 CORS 會處理 HTTPS 請求
+    traefik.ingress.kubernetes.io/router.middlewares: "passontw-services-staging-redirect-https@kubernetescrd"
 spec:
   # TLS 配置 - Backend APIs 證書
   tls:
