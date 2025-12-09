@@ -10,8 +10,9 @@ metadata:
     # Cert-manager - 使用 Let's Encrypt Production 證書
     cert-manager.io/cluster-issuer: "letsencrypt-prod"
     
-    # Traefik v3 - 使用 Middleware 強制 HTTPS 重定向
-    traefik.ingress.kubernetes.io/router.middlewares: "passontw-services-staging-redirect-https@kubernetescrd"
+    # Traefik v3 - 使用 Middleware（CORS 和 HTTPS 重定向）
+    # 注意：CORS 必須在 redirect-https 之前，以確保 OPTIONS 預檢請求能正確處理
+    traefik.ingress.kubernetes.io/router.middlewares: "passontw-services-staging-cors@kubernetescrd,passontw-services-staging-redirect-https@kubernetescrd"
     
     # 安全標頭 - HSTS, XSS Protection, etc.
     traefik.ingress.kubernetes.io/custom-response-headers: |
