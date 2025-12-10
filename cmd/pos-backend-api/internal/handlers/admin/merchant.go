@@ -3,6 +3,7 @@ package admin
 import (
 	"net/http"
 	"strconv"
+	"time"
 
 	"passontw-backend-services/cmd/pos-backend-api/internal/models"
 	"passontw-backend-services/cmd/pos-backend-api/internal/services"
@@ -23,7 +24,7 @@ import (
 // @Failure 400 {object} models.ErrorResponse "參數錯誤"
 // @Failure 401 {object} models.ErrorResponse "Token 無效"
 // @Failure 500 {object} models.ErrorResponse "伺服器錯誤"
-// @Router /api/admin/merchant [get]
+// @Router /api/admin/merchants [get]
 func GetMerchantListHandler(svc services.MerchantService) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		pageStr := c.DefaultQuery("page", "1")
@@ -75,6 +76,9 @@ func GetMerchantListHandler(svc services.MerchantService) gin.HandlerFunc {
 			merchantDTOs = append(merchantDTOs, models.MerchantDTO{
 				MerchantID:   m.MerchantID,
 				MerchantName: m.MerchantName,
+				Status:       m.Status,
+				UpdatedAt:    m.UpdatedAt.Format(time.RFC3339),
+				CreatedAt:    m.CreatedAt.Format(time.RFC3339),
 			})
 		}
 

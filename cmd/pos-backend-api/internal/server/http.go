@@ -11,6 +11,7 @@ import (
 	"passontw-backend-services/cmd/pos-backend-api/internal/config"
 	"passontw-backend-services/cmd/pos-backend-api/internal/docs"
 	"passontw-backend-services/cmd/pos-backend-api/internal/handlers"
+	"passontw-backend-services/cmd/pos-backend-api/internal/handlers/admin"
 	"passontw-backend-services/cmd/pos-backend-api/internal/middleware"
 	"passontw-backend-services/pkg/logger"
 	pkgMiddleware "passontw-backend-services/pkg/middleware"
@@ -50,6 +51,13 @@ func NewHTTPServer(cfg *config.Config, lgr logger.Logger, handlers *handlers.Han
 	{
 		adminGroup.POST("/login", handlers.AdminAuth.Login)
 		adminGroup.POST("/logout", middleware.AuthMiddleware(cfg), handlers.AdminAuth.Logout)
+	}
+
+	// 管理員商家 API（需要認證）
+	adminMerchantGroup := engine.Group("/api/admin")
+	adminMerchantGroup.Use(middleware.AuthMiddleware(cfg))
+	{
+		adminMerchantGroup.GET("/merchants", admin.GetMerchantListHandler(handlers.MerchantService))
 	}
 
 	// 動態設定 Swagger Host

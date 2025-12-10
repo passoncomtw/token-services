@@ -36,13 +36,15 @@ func (s *merchantService) ListMerchants(ctx context.Context, page, limit int, se
 	offset := (page - 1) * limit
 	var args []interface{}
 	var where []string
+	argIndex := 1
 
 	query := `SELECT merchant_id, merchant_name, status, created_at, updated_at FROM merchants`
 	countQuery := `SELECT COUNT(*) FROM merchants`
 
 	if search != "" {
-		where = append(where, "merchant_name ILIKE ?")
+		where = append(where, fmt.Sprintf("merchant_name ILIKE $%d", argIndex))
 		args = append(args, "%"+search+"%")
+		argIndex++
 	}
 
 	if len(where) > 0 {
@@ -51,10 +53,11 @@ func (s *merchantService) ListMerchants(ctx context.Context, page, limit int, se
 		countQuery += cond
 	}
 
-	query += " ORDER BY created_at DESC LIMIT ? OFFSET ?"
+	// 添加 LIMIT 和 OFFSET（使用 PostgreSQL 佔位符）
+	query += fmt.Sprintf(" ORDER BY created_at DESC LIMIT $%d OFFSET $%d", argIndex, argIndex+1)
 	args = append(args, limit, offset)
 
-	// 查詢總數
+	// 查詢總數（不包含 LIMIT 和 OFFSET 的參數）
 	var total int
 	err := s.DB.QueryRowContext(ctx, countQuery, args[:len(args)-2]...).Scan(&total)
 	if err != nil {

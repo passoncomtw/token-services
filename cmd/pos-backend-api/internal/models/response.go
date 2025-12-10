@@ -30,8 +30,11 @@ type Pagination struct {
 
 // MerchantDTO 商家資料傳輸物件
 type MerchantDTO struct {
-	MerchantID   string `json:"merchant_id" example:"MCH001"`      // 商家 ID
-	MerchantName string `json:"merchant_name" example:"測試商家A"`   // 商家名稱
+	MerchantID   string `json:"merchant_id" example:"MCH001"`                    // 商家 ID
+	MerchantName string `json:"merchant_name" example:"測試商家A"`                 // 商家名稱
+	Status       string `json:"status" example:"online"`                       // 連線狀態 (online/offline)
+	UpdatedAt    string `json:"updated_at" example:"2024-01-15T10:30:00Z"`        // 最後更新時間
+	CreatedAt    string `json:"created_at" example:"2024-01-01T08:00:00Z"`       // 註冊時間
 }
 
 // MerchantListData 商家列表資料

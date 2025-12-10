@@ -7,11 +7,13 @@ import (
 )
 
 type Handlers struct {
-	AdminAuth *admin.AuthHandler
+	AdminAuth       *admin.AuthHandler
+	MerchantService services.MerchantService
 }
 
-func NewHandlers(authService *services.AuthService, logger logger.Logger) *Handlers {
+func NewHandlers(authService *services.AuthService, merchantService services.MerchantService, logger logger.Logger) *Handlers {
 	return &Handlers{
-		AdminAuth: admin.NewAuthHandler(authService, logger),
+		AdminAuth:       admin.NewAuthHandler(authService, logger),
+		MerchantService: merchantService,
 	}
 }
