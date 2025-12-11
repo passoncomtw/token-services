@@ -198,21 +198,6 @@ CREATE TABLE "public"."schema_migrations" (
     PRIMARY KEY ("version")
 );
 
-INSERT INTO "public"."merchant_info" ("merchant_id", "merchant_name", "address", "phone", "created_at", "updated_at") VALUES
-('a7b9ff08-c708-479a-b1ae-66baae3409d5', '示範商家', '台北市信義區信義路五段7號', '02-2345-6789', '2025-09-10 15:48:47.688369+00', '2025-09-10 15:48:47.688369+00');
-
-;
-;
-;
-;
-;
-;
-;
-;
-;
-;
-
-
 -- Indices
 CREATE INDEX idx_merchant_info_name ON public.merchant_info USING btree (merchant_name);
 ALTER TABLE "public"."users" ADD FOREIGN KEY ("merchant_id") REFERENCES "public"."merchant_info"("merchant_id") ON DELETE CASCADE;
