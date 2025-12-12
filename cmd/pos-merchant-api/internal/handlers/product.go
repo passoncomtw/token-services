@@ -33,21 +33,20 @@ type ProductListQuery struct {
 	ActiveOnly bool   `form:"active_only" example:"true"`
 }
 
-// ProductListResponse 商品列表回應格式 (符合 Issue #10 規格)
+// ProductListResponse 商品列表回應格式（保留，不再使用分頁）
 type ProductListResponse struct {
-	Success    bool            `json:"success"`
-	Data       []*ProductInfo  `json:"data"`
-	Pagination *PaginationInfo `json:"pagination"`
+	Success bool           `json:"success"`
+	Data    []*ProductInfo `json:"data"`
 }
 
-// PaginationInfo 分頁資訊 (符合 Issue #10 規格)
+// PaginationInfo 已不再使用，保留結構避免其他引用報錯
 type PaginationInfo struct {
-	CurrentPage  int   `json:"current_page"`
-	TotalPages   int   `json:"total_pages"`
-	TotalItems   int64 `json:"total_items"`
-	ItemsPerPage int   `json:"items_per_page"`
-	HasNext      bool  `json:"has_next"`
-	HasPrev      bool  `json:"has_prev"`
+	CurrentPage  int   `json:"current_page,omitempty"`
+	TotalPages   int   `json:"total_pages,omitempty"`
+	TotalItems   int64 `json:"total_items,omitempty"`
+	ItemsPerPage int   `json:"items_per_page,omitempty"`
+	HasNext      bool  `json:"has_next,omitempty"`
+	HasPrev      bool  `json:"has_prev,omitempty"`
 }
 
 // ProductInfo 商品基本信息 (符合 Issue #10 規格)
@@ -215,53 +214,9 @@ func GetProductsHandlerWrapper(c *gin.Context) {
 	// The actual implementation is in GetProductsHandler
 }
 
-// GetProductsHandler 獲取商品列表
+// GetProductsHandler 獲取商品列表（不分頁，回傳全部）
 func GetProductsHandler(svc services.ProductService) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		// 解析查詢參數
-		var query ProductListQuery
-		if err := c.ShouldBindQuery(&query); err != nil {
-			utils.RespondWithError(c, utils.ErrInvalidRequest)
-			return
-		}
-
-		// 預設值設定和參數驗證 (符合 Issue #10 規格)
-		if query.Page < 1 {
-			query.Page = 1
-		}
-		if query.Limit < 1 || query.Limit > 100 {
-			query.Limit = 20 // 預設改為 20
-		}
-		if query.Category == "" {
-			query.Category = "all"
-		}
-		if query.SortBy == "" {
-			query.SortBy = "created_at"
-		}
-		if query.SortOrder == "" {
-			query.SortOrder = "desc"
-		}
-
-		// 驗證 SortBy 參數值
-		validSortBy := []string{"name", "price", "created_at"}
-		if !contains(validSortBy, query.SortBy) {
-			utils.RespondWithError(c, utils.ErrInvalidRequest)
-			return
-		}
-
-		// 驗證 SortOrder 參數值
-		if query.SortOrder != "asc" && query.SortOrder != "desc" {
-			utils.RespondWithError(c, utils.ErrInvalidRequest)
-			return
-		}
-
-		// 驗證 Category 參數值
-		validCategories := []string{"all", "drink", "oden"}
-		if !contains(validCategories, query.Category) {
-			utils.RespondWithError(c, utils.ErrInvalidRequest)
-			return
-		}
-
 		// 從中間件獲取商家 ID
 		claims, exists := c.Get("user_claims")
 		if !exists {
@@ -281,8 +236,8 @@ func GetProductsHandler(svc services.ProductService) gin.HandlerFunc {
 			return
 		}
 
-		// 呼叫服務層 (傳入 Issue #10 規格的完整查詢參數)
-		products, total, err := svc.GetProducts(c, merchantID, query.Page, query.Limit, query.Category, query.Search, query.SortBy, query.SortOrder, query.ActiveOnly)
+		// 呼叫服務層：回傳全部商品（不分頁）
+		products, err := svc.GetAllProducts(c, merchantID)
 		if err != nil {
 			utils.RespondWithError(c, utils.ErrInternalError)
 			return
@@ -328,22 +283,9 @@ func GetProductsHandler(svc services.ProductService) gin.HandlerFunc {
 			productInfos = append(productInfos, productInfo)
 		}
 
-		// 計算分頁資訊
-		totalPages := int((total + int64(query.Limit) - 1) / int64(query.Limit))
-		hasNext := query.Page < totalPages
-		hasPrev := query.Page > 1
-
 		response := &ProductListResponse{
 			Success: true,
 			Data:    productInfos,
-			Pagination: &PaginationInfo{
-				CurrentPage:  query.Page,
-				TotalPages:   totalPages,
-				TotalItems:   total,
-				ItemsPerPage: query.Limit,
-				HasNext:      hasNext,
-				HasPrev:      hasPrev,
-			},
 		}
 
 		c.JSON(http.StatusOK, response)

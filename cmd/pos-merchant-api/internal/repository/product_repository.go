@@ -18,6 +18,8 @@ type ProductRepository interface {
 
 	// 新增方法 (支援 Issue #10 規格的完整查詢參數)
 	GetProductsByMerchant(ctx context.Context, merchantID uuid.UUID, page, limit int, category, search, sortBy, sortOrder string, activeOnly bool) ([]*models.Product, int64, error)
+	// 取得所有商品（無分頁）
+	GetAllProductsByMerchant(ctx context.Context, merchantID uuid.UUID, category, search, sortBy, sortOrder string, activeOnly bool) ([]*models.Product, error)
 	GetProductByID(ctx context.Context, productID, merchantID uuid.UUID) (*models.Product, error)
 	UpdateProduct(ctx context.Context, productID, merchantID uuid.UUID, updates map[string]interface{}) error
 	SoftDeleteProduct(ctx context.Context, productID, merchantID uuid.UUID) error
@@ -133,15 +135,66 @@ func (r *ProductRepositoryImpl) GetProductsByMerchant(ctx context.Context, merch
 		}
 	}
 
-	// 分頁查詢
-	offset := (page - 1) * limit
-	if err := query.Order(orderClause).
-		Offset(offset).Limit(limit).
-		Find(&products).Error; err != nil {
-		return nil, 0, err
+	// 分頁查詢；limit <= 0 代表不分頁
+	if limit > 0 {
+		offset := (page - 1) * limit
+		if err := query.Order(orderClause).
+			Offset(offset).Limit(limit).
+			Find(&products).Error; err != nil {
+			return nil, 0, err
+		}
+	} else {
+		if err := query.Order(orderClause).
+			Find(&products).Error; err != nil {
+			return nil, 0, err
+		}
+		// 不分頁時，以實際筆數回傳 total
+		total = int64(len(products))
 	}
 
 	return products, total, nil
+}
+
+// GetAllProductsByMerchant 獲取商家的所有商品（無分頁）
+func (r *ProductRepositoryImpl) GetAllProductsByMerchant(ctx context.Context, merchantID uuid.UUID, category, search, sortBy, sortOrder string, activeOnly bool) ([]*models.Product, error) {
+	var products []*models.Product
+
+	query := r.Db.WithContext(ctx).Model(&models.Product{}).Where("merchant_id = ?", merchantID)
+
+	// active_only 篩選
+	if activeOnly {
+		query = query.Where("is_active = ?", true)
+	}
+
+	// 分類篩選
+	if category != "" && category != "all" {
+		query = query.Where("category = ?", category)
+	}
+
+	// 搜尋功能（搜尋商品名稱和描述）
+	if search != "" {
+		query = query.Where("(name ILIKE ? OR description ILIKE ?)", "%"+search+"%", "%"+search+"%")
+	}
+
+	// 排序
+	orderClause := "created_at DESC" // 預設排序
+	if sortBy != "" {
+		switch sortBy {
+		case "name":
+			orderClause = "name " + sortOrder
+		case "price":
+			orderClause = "price " + sortOrder
+		case "created_at":
+			orderClause = "created_at " + sortOrder
+		}
+	}
+
+	if err := query.Order(orderClause).
+		Find(&products).Error; err != nil {
+		return nil, err
+	}
+
+	return products, nil
 }
 
 // GetProductByID 獲取單一商品

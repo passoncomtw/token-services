@@ -75,8 +75,11 @@ func StartHTTPServer(lc fx.Lifecycle, log logger.Logger, db *gorm.DB, productSvc
 
 			// 產品路由組
 			productGroup := router.Group("/api/v1/products")
+			// 支援不帶斜線與帶斜線，避免 301 重定向
+			productGroup.GET("", middleware.AuthMiddleware(cfg), handlers.GetProductsHandler(productSvc))
 			productGroup.GET("/", middleware.AuthMiddleware(cfg), handlers.GetProductsHandler(productSvc))
 			productGroup.GET("/:id", middleware.AuthMiddleware(cfg), handlers.GetProductByIDHandler(productSvc))
+			productGroup.POST("", middleware.AuthMiddleware(cfg), handlers.CreateProductHandler(productSvc, cfg))
 			productGroup.POST("/", middleware.AuthMiddleware(cfg), handlers.CreateProductHandler(productSvc, cfg))
 			productGroup.PUT("/:id", middleware.AuthMiddleware(cfg), handlers.UpdateProductHandler(productSvc))
 			productGroup.DELETE("/:id", middleware.AuthMiddleware(cfg), handlers.DeleteProductHandler(productSvc))

@@ -19,6 +19,7 @@ type ProductService interface {
 	CreateProduct(ctx context.Context, merchantID uuid.UUID, req *models.CreateProductRequest) (*models.ProductDTO, error)
 
 	// 新增方法 (支援 Issue #10 規格的完整查詢參數)
+	GetAllProducts(ctx context.Context, merchantID uuid.UUID) ([]*models.ProductDTO, error)
 	GetProducts(ctx context.Context, merchantID uuid.UUID, page, limit int, category, search, sortBy, sortOrder string, activeOnly bool) ([]*models.ProductDTO, int64, error)
 	GetProductByID(ctx context.Context, productID, merchantID uuid.UUID) (*models.ProductDTO, error)
 	UpdateProduct(ctx context.Context, productID, merchantID uuid.UUID, req *models.UpdateProductRequest) (*models.ProductDTO, error)
@@ -133,20 +134,35 @@ func (s *ProductServiceImpl) CreateProduct(ctx context.Context, merchantID uuid.
 	}, nil
 }
 
-// GetProducts 獲取商品列表 (支援 Issue #10 規格的完整查詢參數)
+// GetProducts 獲取商品列表；當 limit <= 0 時，回傳所有符合條件的商品（無分頁）
 func (s *ProductServiceImpl) GetProducts(ctx context.Context, merchantID uuid.UUID, page, limit int, category, search, sortBy, sortOrder string, activeOnly bool) ([]*models.ProductDTO, int64, error) {
 	// 參數驗證
 	if page < 1 {
 		page = 1
 	}
-	if limit < 1 || limit > 100 {
-		limit = 20 // 符合 Issue #10 預設值
+	// limit <= 0 代表不分頁；僅在需要分頁時才限制範圍
+	if limit > 0 && (limit < 1 || limit > 100) {
+		limit = 20
 	}
 
-	// 呼叫 Repository
-	products, total, err := s.Repo.GetProductsByMerchant(ctx, merchantID, page, limit, category, search, sortBy, sortOrder, activeOnly)
-	if err != nil {
-		return nil, 0, err
+	var (
+		products []*models.Product
+		total    int64
+		err      error
+	)
+
+	// limit <= 0 代表不分頁，使用獨立函數取回全部
+	if limit <= 0 {
+		products, err = s.Repo.GetAllProductsByMerchant(ctx, merchantID, category, search, sortBy, sortOrder, activeOnly)
+		if err != nil {
+			return nil, 0, err
+		}
+		total = int64(len(products))
+	} else {
+		products, total, err = s.Repo.GetProductsByMerchant(ctx, merchantID, page, limit, category, search, sortBy, sortOrder, activeOnly)
+		if err != nil {
+			return nil, 0, err
+		}
 	}
 
 	// 轉換為 DTO 格式 (包含客製化選項，符合 Issue #10 要求)
@@ -166,6 +182,30 @@ func (s *ProductServiceImpl) GetProducts(ctx context.Context, merchantID uuid.UU
 	}
 
 	return productDTOs, total, nil
+}
+
+// GetAllProducts 獲取商家的全部商品（不分頁，預設啟用商品，依 created_at desc 排序）
+func (s *ProductServiceImpl) GetAllProducts(ctx context.Context, merchantID uuid.UUID) ([]*models.ProductDTO, error) {
+	products, err := s.Repo.GetAllProductsByMerchant(ctx, merchantID, "all", "", "created_at", "desc", true)
+	if err != nil {
+		return nil, err
+	}
+
+	var productDTOs []*models.ProductDTO
+	for _, product := range products {
+		productDTO := s.convertToProductDTO(product)
+
+		if product.Customizable {
+			customizations, err := s.getProductCustomizationsForList(ctx, product.ProductID, merchantID)
+			if err == nil {
+				productDTO.Customizations = customizations
+			}
+		}
+
+		productDTOs = append(productDTOs, productDTO)
+	}
+
+	return productDTOs, nil
 }
 
 // GetProductByID 獲取單一商品
@@ -247,14 +287,14 @@ func (s *ProductServiceImpl) GetProductCustomizations(ctx context.Context, produ
 		// 添加選項值
 		if values, exists := valueMap[option.OptionID]; exists {
 			for _, value := range values {
-			valueResponse := models.CustomizationValueResponse{
-				ValueID:       value.ValueID.String(),
-				Name:          value.Name,
-				PriceModifier: value.PriceModifier,
-				IsDefault:     value.IsDefault,
-				DisplayOrder:  value.DisplayOrder,
-			}
-			response.Values = append(response.Values, valueResponse)
+				valueResponse := models.CustomizationValueResponse{
+					ValueID:       value.ValueID.String(),
+					Name:          value.Name,
+					PriceModifier: value.PriceModifier,
+					IsDefault:     value.IsDefault,
+					DisplayOrder:  value.DisplayOrder,
+				}
+				response.Values = append(response.Values, valueResponse)
 			}
 		}
 
