@@ -9,7 +9,7 @@ import (
 
 // LoginLog 登入日誌模型
 type LoginLog struct {
-	LogID           string    `gorm:"column:log_id;primary_key" json:"log_id"`
+	LogID           string    `gorm:"column:log_id;primary_key;default:uuid_generate_v4()" json:"log_id"`
 	MerchantID      *string   `gorm:"column:merchant_id" json:"merchant_id,omitempty"`
 	UserID          *string   `gorm:"column:user_id" json:"user_id,omitempty"`
 	Username        string    `gorm:"column:username" json:"username"`
@@ -46,6 +46,7 @@ func CreateLoginLog(db *gorm.DB, req LoginLogRequest) error {
 	}
 
 	log := &LoginLog{
+		// LogID 不設置，讓資料庫自動生成 UUID
 		MerchantID:    req.MerchantID,
 		UserID:        req.UserID,
 		Username:      req.Username,
@@ -57,7 +58,8 @@ func CreateLoginLog(db *gorm.DB, req LoginLogRequest) error {
 		CreatedAt:     time.Now(),
 	}
 
-	return db.Create(log).Error
+	// 使用 Omit 排除 LogID，讓資料庫自動生成
+	return db.Omit("log_id").Create(log).Error
 }
 
 // GetLoginLogsByIP 獲取特定 IP 的登入日誌

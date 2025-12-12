@@ -15,14 +15,14 @@ import (
 	"go.uber.org/zap"
 
 	"passontw-backend-services/cmd/pos-merchant-api/internal/config"
-	pkgConfig "passontw-backend-services/pkg/config"
-	"passontw-backend-services/pkg/logger"
-	pkgMiddleware "passontw-backend-services/pkg/middleware"
 	"passontw-backend-services/cmd/pos-merchant-api/internal/docs"
 	"passontw-backend-services/cmd/pos-merchant-api/internal/handlers"
 	"passontw-backend-services/cmd/pos-merchant-api/internal/middleware"
 	"passontw-backend-services/cmd/pos-merchant-api/internal/repository"
 	"passontw-backend-services/cmd/pos-merchant-api/internal/services"
+	pkgConfig "passontw-backend-services/pkg/config"
+	"passontw-backend-services/pkg/logger"
+	pkgMiddleware "passontw-backend-services/pkg/middleware"
 )
 
 func StartHTTPServer(lc fx.Lifecycle, log logger.Logger, db *gorm.DB, productSvc services.ProductService, pkgCfg *pkgConfig.Config, corsMw *pkgMiddleware.CORSMiddleware) {
@@ -36,7 +36,7 @@ func StartHTTPServer(lc fx.Lifecycle, log logger.Logger, db *gorm.DB, productSvc
 
 			// 動態設定 Swagger Host
 			port := getEnvOrDefault("HTTP_PORT", "8080")
-			
+
 			// 設定 Swagger Host
 			// 在 K8s 環境中由 SWAGGER_BASE_DOMAIN 控制（從 pkgConfig 讀取）
 			// 如果未設置，使用本地 IP:port（方便本地開發和測試）
@@ -49,15 +49,17 @@ func StartHTTPServer(lc fx.Lifecycle, log logger.Logger, db *gorm.DB, productSvc
 
 			router := gin.Default()
 
-			// 全局中間件
-			router.Use(corsMw.Handler()) // 添加 CORS 中間件
+			// 全局中間件（按順序執行）
+			// 1. CORS 中間件（統一處理所有 OPTIONS 預檢請求，必須在最前面）
+			router.Use(corsMw.Handler())
+			// 2. 其他中間件
 			router.Use(middleware.RequestIDMiddleware())
 
 			// 健康檢查端點
 			router.GET("/health", func(c *gin.Context) {
 				c.JSON(http.StatusOK, gin.H{"status": "ok", "service": "merchant-service"})
 			})
-			
+
 			router.GET("/ready", func(c *gin.Context) {
 				c.JSON(http.StatusOK, gin.H{"status": "ready", "service": "merchant-service"})
 			})
