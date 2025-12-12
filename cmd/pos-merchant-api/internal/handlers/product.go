@@ -154,7 +154,7 @@ func CreateProductHandler(svc services.ProductService, cfg *config.Config) gin.H
 		if err := c.ShouldBindJSON(&req); err != nil {
 			invalidReqErr := utils.NewAPIError(
 				utils.ErrorCodeInvalidRequest,
-				"請求格式錯誤",
+				utils.ErrInvalidRequest.Message,
 				http.StatusBadRequest,
 				err,
 			)
