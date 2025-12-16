@@ -41,9 +41,9 @@ func NewPendingOrderHandlers(
 // @Param balance query number false "掛單的餘額搜尋"
 // @Param size query int false "取回幾筆資料" default(10)
 // @Param page query int false "取為第幾頁的資料" default(1)
-// @Success 200 {object} map[string]interface{} "取回列表成功"
-// @Failure 400 {object} map[string]interface{} "請求參數錯誤"
-// @Failure 500 {object} map[string]interface{} "伺服器錯誤"
+// @Success 200 {object} interfaces.PendingOrderListSuccessResponse "取回列表成功"
+// @Failure 400 {object} interfaces.ErrorResponse "請求參數錯誤"
+// @Failure 500 {object} interfaces.ErrorResponse "伺服器錯誤"
 // @Router /pending/orders [get]
 func (h *PendingOrderHandlers) GetPendingOrders(c *gin.Context) {
 	var filter interfaces.PendingOrderFilter
@@ -82,10 +82,10 @@ func (h *PendingOrderHandlers) GetPendingOrders(c *gin.Context) {
 // @Produce json
 // @Param pendingorder_id path string true "掛單 Id"
 // @Security Bearer
-// @Success 200 {object} map[string]interface{} "取回掛單詳情成功"
-// @Failure 400 {object} map[string]interface{} "請求參數錯誤"
-// @Failure 404 {object} map[string]interface{} "掛單不存在"
-// @Failure 500 {object} map[string]interface{} "伺服器錯誤"
+// @Success 200 {object} interfaces.PendingOrderDetailSuccessResponse "取回掛單詳情成功"
+// @Failure 400 {object} interfaces.ErrorResponse "請求參數錯誤"
+// @Failure 404 {object} interfaces.ErrorResponse "掛單不存在"
+// @Failure 500 {object} interfaces.ErrorResponse "伺服器錯誤"
 // @Router /pending/orders/{pendingorder_id} [get]
 func (h *PendingOrderHandlers) GetPendingOrder(c *gin.Context) {
 	pendingOrderID := c.Param("pendingorder_id")
@@ -125,15 +125,13 @@ func (h *PendingOrderHandlers) GetPendingOrder(c *gin.Context) {
 // @Produce json
 // @Param data body interfaces.CreatePendingOrderRequest true "掛單資料"
 // @Security Bearer
-// @Success 200 {object} map[string]interface{} "新增掛單成功"
-// @Failure 400 {object} map[string]interface{} "請求參數錯誤"
-// @Failure 401 {object} map[string]interface{} "未授權"
-// @Failure 500 {object} map[string]interface{} "伺服器錯誤"
+// @Success 200 {object} interfaces.PendingOrderDetailSuccessResponse "新增掛單成功"
+// @Failure 400 {object} interfaces.ErrorResponse "請求參數錯誤"
+// @Failure 401 {object} interfaces.ErrorResponse "未授權"
+// @Failure 500 {object} interfaces.ErrorResponse "伺服器錯誤"
 // @Router /pending/orders [post]
 func (h *PendingOrderHandlers) CreatePendingOrder(c *gin.Context) {
-	// TODO: 從 JWT token 中取得使用者 ID
-	// userID := c.GetInt("user_id")
-	userID := 1 // 暫時使用固定值
+	userID := c.GetInt("user_id")
 
 	var req interfaces.CreatePendingOrderRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -170,16 +168,14 @@ func (h *PendingOrderHandlers) CreatePendingOrder(c *gin.Context) {
 // @Produce json
 // @Param pendingorder_id path string true "掛單 Id"
 // @Security Bearer
-// @Success 200 {object} map[string]interface{} "刪除掛單成功"
-// @Failure 400 {object} map[string]interface{} "請求參數錯誤"
-// @Failure 401 {object} map[string]interface{} "未授權"
-// @Failure 404 {object} map[string]interface{} "掛單不存在"
-// @Failure 500 {object} map[string]interface{} "伺服器錯誤"
+// @Success 200 {object} interfaces.SuccessResponse "刪除掛單成功"
+// @Failure 400 {object} interfaces.ErrorResponse "請求參數錯誤"
+// @Failure 401 {object} interfaces.ErrorResponse "未授權"
+// @Failure 404 {object} interfaces.ErrorResponse "掛單不存在"
+// @Failure 500 {object} interfaces.ErrorResponse "伺服器錯誤"
 // @Router /pending/orders/{pendingorder_id} [delete]
 func (h *PendingOrderHandlers) DeletePendingOrder(c *gin.Context) {
-	// TODO: 從 JWT token 中取得使用者 ID
-	// userID := c.GetInt("user_id")
-	userID := 1 // 暫時使用固定值
+	userID := c.GetInt("user_id")
 
 	pendingOrderID := c.Param("pendingorder_id")
 	if pendingOrderID == "" {
@@ -218,16 +214,14 @@ func (h *PendingOrderHandlers) DeletePendingOrder(c *gin.Context) {
 // @Produce json
 // @Param pendingorder_id path string true "掛單 Id"
 // @Security Bearer
-// @Success 200 {object} map[string]interface{} "凍結掛單成功"
-// @Failure 400 {object} map[string]interface{} "請求參數錯誤"
-// @Failure 401 {object} map[string]interface{} "未授權"
-// @Failure 404 {object} map[string]interface{} "掛單不存在"
-// @Failure 500 {object} map[string]interface{} "伺服器錯誤"
+// @Success 200 {object} interfaces.SuccessResponse "凍結掛單成功"
+// @Failure 400 {object} interfaces.ErrorResponse "請求參數錯誤"
+// @Failure 401 {object} interfaces.ErrorResponse "未授權"
+// @Failure 404 {object} interfaces.ErrorResponse "掛單不存在"
+// @Failure 500 {object} interfaces.ErrorResponse "伺服器錯誤"
 // @Router /pending/orders/{pendingorder_id}/lock [put]
 func (h *PendingOrderHandlers) LockPendingOrder(c *gin.Context) {
-	// TODO: 從 JWT token 中取得使用者 ID
-	// userID := c.GetInt("user_id")
-	userID := 1 // 暫時使用固定值
+	userID := c.GetInt("user_id")
 
 	pendingOrderID := c.Param("pendingorder_id")
 	if pendingOrderID == "" {
@@ -266,16 +260,14 @@ func (h *PendingOrderHandlers) LockPendingOrder(c *gin.Context) {
 // @Produce json
 // @Param pendingorder_id path string true "掛單 Id"
 // @Security Bearer
-// @Success 200 {object} map[string]interface{} "解除凍結掛單成功"
-// @Failure 400 {object} map[string]interface{} "請求參數錯誤"
-// @Failure 401 {object} map[string]interface{} "未授權"
-// @Failure 404 {object} map[string]interface{} "掛單不存在"
-// @Failure 500 {object} map[string]interface{} "伺服器錯誤"
+// @Success 200 {object} interfaces.SuccessResponse "解除凍結掛單成功"
+// @Failure 400 {object} interfaces.ErrorResponse "請求參數錯誤"
+// @Failure 401 {object} interfaces.ErrorResponse "未授權"
+// @Failure 404 {object} interfaces.ErrorResponse "掛單不存在"
+// @Failure 500 {object} interfaces.ErrorResponse "伺服器錯誤"
 // @Router /pending/orders/{pendingorder_id}/unlock [put]
 func (h *PendingOrderHandlers) UnlockPendingOrder(c *gin.Context) {
-	// TODO: 從 JWT token 中取得使用者 ID
-	// userID := c.GetInt("user_id")
-	userID := 1 // 暫時使用固定值
+	userID := c.GetInt("user_id")
 
 	pendingOrderID := c.Param("pendingorder_id")
 	if pendingOrderID == "" {
@@ -308,19 +300,17 @@ func (h *PendingOrderHandlers) UnlockPendingOrder(c *gin.Context) {
 
 // GetUserPendingOrders godoc
 // @Summary 取回使用者自己建立的掛單
-// @Description 取回使用者自己建立的買幣和賣幣掛單
+// @Description 透過 JWT token 中的 user_id 取回使用者自己建立的買幣和賣幣掛單
 // @Tags 使用者
 // @Accept json
 // @Produce json
 // @Security Bearer
-// @Success 200 {object} map[string]interface{} "取回成功"
-// @Failure 401 {object} map[string]interface{} "未授權"
-// @Failure 500 {object} map[string]interface{} "伺服器錯誤"
+// @Success 200 {object} interfaces.UserPendingOrdersSuccessResponse "取回成功"
+// @Failure 401 {object} interfaces.ErrorResponse "未授權"
+// @Failure 500 {object} interfaces.ErrorResponse "伺服器錯誤"
 // @Router /users/pending/orders [get]
 func (h *PendingOrderHandlers) GetUserPendingOrders(c *gin.Context) {
-	// TODO: 從 JWT token 中取得使用者 ID
-	// userID := c.GetInt("user_id")
-	userID := 1 // 暫時使用固定值
+	userID := c.GetInt("user_id")
 
 	result, err := h.service.GetUserPendingOrders(userID)
 	if err != nil {
@@ -338,4 +328,3 @@ func (h *PendingOrderHandlers) GetUserPendingOrders(c *gin.Context) {
 		"data":    result,
 	})
 }
-

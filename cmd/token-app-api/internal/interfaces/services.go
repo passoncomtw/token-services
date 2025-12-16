@@ -46,15 +46,16 @@ type UpdateTransactionCodeRequest struct {
 }
 
 type UserDetail struct {
-	ID           int           `json:"id" example:"1"`                          // 使用者 ID
-	Type         int           `json:"type" example:"0"`                        // 使用者類型：0=一般使用者, 1=平台使用者
-	Account      string        `json:"account" example:"user001"`               // 帳號
-	Name         string        `json:"name" example:"王小明"`                      // 姓名
-	Email        string        `json:"email" example:"user001@example.com"`     // 電子郵件
-	CreateAt     string        `json:"createAt" example:"2024-01-01T00:00:00Z"` // 建立時間
-	ReferralCode string        `json:"referralCode" example:"REF001"`           // 推薦碼
-	Wallet       *WalletDetail `json:"wallet,omitempty"`                        // 錢包資訊
-	ReferralUser *ReferralUser `json:"referralUser,omitempty"`                  // 推薦人資訊
+	ID           int               `json:"id" example:"1"`                          // 使用者 ID
+	Type         int               `json:"type" example:"0"`                        // 使用者類型：0=一般使用者, 1=平台使用者
+	Account      string            `json:"account" example:"user001"`               // 帳號
+	Name         string            `json:"name" example:"王小明"`                      // 姓名
+	Email        string            `json:"email" example:"user001@example.com"`     // 電子郵件
+	CreateAt     string            `json:"createAt" example:"2024-01-01T00:00:00Z"` // 建立時間
+	ReferralCode string            `json:"referralCode" example:"REF001"`           // 推薦碼
+	Wallet       *WalletDetail     `json:"wallet,omitempty"`                        // 錢包資訊
+	BankCards    []*BankCardDetail `json:"bankCards"`                               // 銀行卡列表
+	ReferralUser *ReferralUser     `json:"referralUser,omitempty"`                  // 推薦人資訊
 }
 
 type ReferralUser struct {
@@ -192,6 +193,35 @@ type SimpleUser struct {
 type UserPendingOrdersResponse struct {
 	Buy  *PendingOrderDetail `json:"buy,omitempty"`  // 買幣掛單
 	Sell *PendingOrderDetail `json:"sell,omitempty"` // 賣幣掛單
+}
+
+// Swagger Response 類型
+type SuccessResponse struct {
+	Success bool   `json:"success" example:"true"` // 是否成功
+	Message string `json:"message,omitempty"`      // 訊息
+}
+
+type ErrorResponse struct {
+	Success bool   `json:"success" example:"false"` // 是否成功
+	Message string `json:"message"`                 // 錯誤訊息
+	Error   string `json:"error,omitempty"`         // 錯誤詳情
+}
+
+type UserPendingOrdersSuccessResponse struct {
+	Success bool                      `json:"success" example:"true"` // 是否成功
+	Data    *UserPendingOrdersResponse `json:"data"`                   // 使用者掛單資料
+}
+
+type PendingOrderListSuccessResponse struct {
+	Success bool                     `json:"success" example:"true"` // 是否成功
+	Message string                   `json:"message,omitempty"`      // 訊息
+	Data    *PendingOrderListResponse `json:"data"`                   // 掛單列表資料
+}
+
+type PendingOrderDetailSuccessResponse struct {
+	Success bool                `json:"success" example:"true"` // 是否成功
+	Message string              `json:"message,omitempty"`      // 訊息
+	Data    *PendingOrderDetail `json:"data"`                   // 掛單詳情資料
 }
 
 type PendingOrderListResponse struct {

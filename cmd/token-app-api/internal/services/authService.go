@@ -2,6 +2,7 @@ package services
 
 import (
 	"errors"
+	"strconv"
 
 	"passontw-backend-services/cmd/token-app-api/internal/interfaces"
 	"passontw-backend-services/pkg/auth"
@@ -32,10 +33,12 @@ func NewAuthService(db *gorm.DB, cfg *config.Config, logger logger.Logger) *Auth
 
 // Login 使用者登入
 func (s *AuthService) Login(req *interfaces.LoginRequest) (*interfaces.LoginResponse, error) {
-	// 查詢使用者
+	// 查詢使用者（包含錢包和銀行卡資訊）
 	var user models.User
 	err := s.db.Where("account = ? AND deleted_at IS NULL", req.Account).
 		Preload("Wallet").
+		Preload("BankCards", "deleted_at IS NULL").
+		Preload("BankCards.Bank").
 		First(&user).Error
 
 	if err == gorm.ErrRecordNotFound {
@@ -94,10 +97,39 @@ func (s *AuthService) convertToUserDetail(user *models.User) *interfaces.UserDet
 	// 添加錢包資訊
 	if user.Wallet != nil {
 		userDetail.Wallet = &interfaces.WalletDetail{
-			Status:             user.Wallet.Status,
-			UsefulBalance:      user.Wallet.UsefulBalance,
-			GuaranteedBalance:  user.Wallet.GuaranteedBalance,
-			FreezeBalance:      user.Wallet.FreezeBalance,
+			Status:            user.Wallet.Status,
+			UsefulBalance:     user.Wallet.UsefulBalance,
+			GuaranteedBalance: user.Wallet.GuaranteedBalance,
+			FreezeBalance:     user.Wallet.FreezeBalance,
+		}
+	}
+
+	// 添加銀行卡資訊（預設為空陣列）
+	userDetail.BankCards = make([]*interfaces.BankCardDetail, 0)
+	if len(user.BankCards) > 0 {
+		for _, card := range user.BankCards {
+			// 將 Status 從 string 轉換為 int
+			status, _ := strconv.Atoi(card.Status)
+			bankCardDetail := &interfaces.BankCardDetail{
+				ID:         card.ID,
+				CreatedAt:  card.CreatedAt.Format("2006-01-02 15:04:05"),
+				Name:       card.Name,
+				CardNumber: card.CardNumber,
+				BranchName: card.BranchName,
+				Status:     status,
+			}
+			if card.BankID != nil {
+				bankCardDetail.BankID = *card.BankID
+			}
+			// 添加銀行資訊
+			if card.Bank != nil {
+				bankCardDetail.Bank = &interfaces.BankDetail{
+					ID:       card.Bank.ID,
+					BankName: card.Bank.BankName,
+					BankCode: card.Bank.BankCode,
+				}
+			}
+			userDetail.BankCards = append(userDetail.BankCards, bankCardDetail)
 		}
 	}
 
