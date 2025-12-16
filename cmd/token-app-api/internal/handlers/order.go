@@ -47,9 +47,7 @@ func NewOrderHandlers(
 // @Failure 500 {object} map[string]interface{} "伺服器錯誤"
 // @Router /orders [get]
 func (h *OrderHandlers) GetOrders(c *gin.Context) {
-	// TODO: 從 JWT token 中取得使用者 ID
-	// userID := c.GetInt("user_id")
-	userID := 1 // 暫時使用固定值
+	userID := c.GetInt("user_id")
 
 	// 取得分頁參數
 	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
@@ -87,9 +85,7 @@ func (h *OrderHandlers) GetOrders(c *gin.Context) {
 // @Failure 500 {object} map[string]interface{} "伺服器錯誤"
 // @Router /orders [post]
 func (h *OrderHandlers) CreateOrder(c *gin.Context) {
-	// TODO: 從 JWT token 中取得使用者 ID
-	// userID := c.GetInt("user_id")
-	userID := 1 // 暫時使用固定值
+	userID := c.GetInt("user_id")
 
 	var req interfaces.CreateOrderRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -133,9 +129,7 @@ func (h *OrderHandlers) CreateOrder(c *gin.Context) {
 // @Failure 500 {object} map[string]interface{} "伺服器錯誤"
 // @Router /orders/{order_id}/paid [put]
 func (h *OrderHandlers) MarkAsPaid(c *gin.Context) {
-	// TODO: 從 JWT token 中取得使用者 ID
-	// userID := c.GetInt("user_id")
-	userID := 1 // 暫時使用固定值
+	userID := c.GetInt("user_id")
 
 	orderID := c.Param("order_id")
 	if orderID == "" {
@@ -182,9 +176,7 @@ func (h *OrderHandlers) MarkAsPaid(c *gin.Context) {
 // @Failure 500 {object} map[string]interface{} "伺服器錯誤"
 // @Router /orders/{order_id}/apply [put]
 func (h *OrderHandlers) ApplyOrder(c *gin.Context) {
-	// TODO: 從 JWT token 中取得使用者 ID
-	// userID := c.GetInt("user_id")
-	userID := 1 // 暫時使用固定值
+	userID := c.GetInt("user_id")
 
 	orderID := c.Param("order_id")
 	if orderID == "" {
@@ -232,9 +224,7 @@ func (h *OrderHandlers) ApplyOrder(c *gin.Context) {
 // @Failure 500 {object} map[string]interface{} "伺服器錯誤"
 // @Router /orders/{order_id}/reject [put]
 func (h *OrderHandlers) RejectOrder(c *gin.Context) {
-	// TODO: 從 JWT token 中取得使用者 ID
-	// userID := c.GetInt("user_id")
-	userID := 1 // 暫時使用固定值
+	userID := c.GetInt("user_id")
 
 	orderID := c.Param("order_id")
 	if orderID == "" {

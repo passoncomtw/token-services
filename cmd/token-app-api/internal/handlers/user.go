@@ -134,9 +134,7 @@ func (h *UserHandlers) UpdateUser(c *gin.Context) {
 // @Failure 401 {object} response.ErrorResponse
 // @Router /users/login/password [put]
 func (h *UserHandlers) UpdateLoginPassword(c *gin.Context) {
-	// TODO: 從 JWT token 中取得使用者 ID
-	// userID := c.GetInt("user_id")
-	userID := 1 // 暫時使用固定值
+	userID := c.GetInt("user_id")
 
 	var req interfaces.UpdateLoginPasswordRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -165,9 +163,7 @@ func (h *UserHandlers) UpdateLoginPassword(c *gin.Context) {
 // @Failure 401 {object} response.ErrorResponse
 // @Router /users/transaction/password [put]
 func (h *UserHandlers) UpdateTransactionCode(c *gin.Context) {
-	// TODO: 從 JWT token 中取得使用者 ID
-	// userID := c.GetInt("user_id")
-	userID := 1 // 暫時使用固定值
+	userID := c.GetInt("user_id")
 
 	var req interfaces.UpdateTransactionCodeRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
