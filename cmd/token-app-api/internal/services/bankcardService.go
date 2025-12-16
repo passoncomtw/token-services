@@ -47,6 +47,15 @@ func (s *BankCardService) GetBankCards(userID int) ([]*interfaces.BankCardDetail
 
 // CreateBankCard 新增銀行卡
 func (s *BankCardService) CreateBankCard(userID int, req *interfaces.CreateBankCardRequest) (*interfaces.BankCardDetail, error) {
+	// 驗證使用者是否存在
+	var user models.User
+	if err := s.db.Where("id = ? AND deleted_at IS NULL", userID).First(&user).Error; err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return nil, errors.New("使用者不存在")
+		}
+		return nil, err
+	}
+
 	// 驗證銀行是否存在
 	var bank models.Bank
 	if err := s.db.Where("id = ? AND deleted_at IS NULL", req.BankID).First(&bank).Error; err != nil {
@@ -54,6 +63,12 @@ func (s *BankCardService) CreateBankCard(userID int, req *interfaces.CreateBankC
 			return nil, errors.New("銀行不存在")
 		}
 		return nil, err
+	}
+
+	// 檢查同一使用者下是否已有相同卡號
+	var existingCard models.BankCard
+	if err := s.db.Where("user_id = ? AND card_number = ? AND deleted_at IS NULL", userID, req.CardNumber).First(&existingCard).Error; err == nil {
+		return nil, errors.New("此銀行卡號已綁定")
 	}
 
 	// 建立銀行卡
@@ -64,7 +79,7 @@ func (s *BankCardService) CreateBankCard(userID int, req *interfaces.CreateBankC
 		CardNumber: req.CardNumber,
 		BankID:     bankIDPtr,
 		BranchName: req.BranchName,
-		Status:     fmt.Sprintf("%d", req.Status), // 轉換為字串
+		Status:     "0", // 預設為正常狀態
 	}
 
 	if err := s.db.Create(bankCard).Error; err != nil {
@@ -188,4 +203,3 @@ func (s *BankCardService) convertToBankCardDetail(bc *models.BankCard) *interfac
 var BankCardModule = fx.Module("bankcard",
 	fx.Provide(fx.Annotate(NewBankCardService, fx.As(new(interfaces.BankCardServiceInterface)))),
 )
-

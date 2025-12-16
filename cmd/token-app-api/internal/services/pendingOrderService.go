@@ -186,7 +186,7 @@ func (s *PendingOrderService) CreatePendingOrder(userID int, req *interfaces.Cre
 	}
 
 	// 如果是賣幣（type=1），需要凍結金額
-	if req.Type == 1 {
+	if *req.Type == 1 {
 		// 轉換為 int64（以分為單位）
 		amountInt := int64(req.Amount)
 
@@ -213,7 +213,7 @@ func (s *PendingOrderService) CreatePendingOrder(userID int, req *interfaces.Cre
 		ID:                 uuid.New(),
 		UserID:             userIDPtr,
 		BankCardID:         bankCardIDPtr,
-		Type:               req.Type,
+		Type:               *req.Type,
 		Status:             0, // 0: 掛賣中
 		TransactionMinutes: req.TransactionMinutes,
 		MinAmount:          int64(req.MinAmount),

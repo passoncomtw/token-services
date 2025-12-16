@@ -1,7 +1,11 @@
 package handlers
 
 import (
+	"strings"
+
 	"passontw-backend-services/cmd/token-app-api/internal/interfaces"
+	"passontw-backend-services/pkg/auth"
+	"passontw-backend-services/pkg/config"
 	"passontw-backend-services/pkg/logger"
 	"passontw-backend-services/pkg/response"
 
@@ -10,12 +14,14 @@ import (
 
 type AuthHandlers struct {
 	authService interfaces.AuthServiceInterface
+	jwtConfig   *auth.Config
 	logger      logger.Logger
 }
 
-func NewAuthHandlers(authService interfaces.AuthServiceInterface, logger logger.Logger) *AuthHandlers {
+func NewAuthHandlers(authService interfaces.AuthServiceInterface, cfg *config.Config, logger logger.Logger) *AuthHandlers {
 	return &AuthHandlers{
 		authService: authService,
+		jwtConfig:   auth.NewConfigFromAppConfig(cfg),
 		logger:      logger,
 	}
 }
@@ -72,25 +78,34 @@ func (r *AuthHandlers) Logout(c *gin.Context) {
 func (h *AuthHandlers) JWTAuthMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		// 從 Header 取得 token
-		token := c.GetHeader("Authorization")
-		if token == "" {
+		authHeader := c.GetHeader("Authorization")
+		if authHeader == "" {
 			response.Unauthorized(c, "未提供認證 token")
 			c.Abort()
 			return
 		}
 
-		// 驗證 token（這裡簡化處理，實際應該解析 JWT）
-		if len(token) > 7 && token[:7] == "Bearer " {
-			token = token[7:]
-		}
-
-		// TODO: 實作真正的 JWT 驗證邏輯
-		// 這裡暫時只檢查 token 不為空
-		if token == "" {
-			response.Unauthorized(c, "無效的認證 token")
+		// 檢查 Bearer 格式
+		parts := strings.SplitN(authHeader, " ", 2)
+		if len(parts) != 2 || parts[0] != "Bearer" {
+			response.Unauthorized(c, "認證格式錯誤")
 			c.Abort()
 			return
 		}
+
+		tokenString := parts[1]
+
+		// 驗證 token
+		claims, err := auth.ValidateToken(h.jwtConfig, tokenString)
+		if err != nil {
+			response.Unauthorized(c, "無效的 token")
+			c.Abort()
+			return
+		}
+
+		// 將使用者資訊存入 context
+		c.Set("user_id", claims.UserID)
+		c.Set("account", claims.Account)
 
 		c.Next()
 	}

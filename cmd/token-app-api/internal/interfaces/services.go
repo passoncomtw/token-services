@@ -113,7 +113,6 @@ type CreateBankCardRequest struct {
 	CardNumber string `json:"cardNumber" binding:"required" example:"1234567890123456"` // 銀行卡號
 	BankID     int    `json:"bankId" binding:"required" example:"1"`                    // 銀行 ID
 	BranchName string `json:"branchName" example:"台北分行"`                                // 分行名稱（可選）
-	Status     int    `json:"status" example:"0"`                                       // 狀態：0=正常, 1=停用, 2=凍結
 }
 
 type UpdateBankCardRequest struct {
@@ -151,7 +150,7 @@ type BankCardServiceInterface interface {
 // ==================== 掛單相關 ====================
 type CreatePendingOrderRequest struct {
 	BankCardID         int     `json:"bankcardId" binding:"required" example:"1"`               // 銀行卡 ID
-	Type               int     `json:"type" binding:"required" example:"0"`                     // 掛單類型：0=買幣, 1=賣幣
+	Type               *int    `json:"type" binding:"required" example:"0"`                     // 掛單類型：0=買幣, 1=賣幣
 	Amount             float64 `json:"amount" binding:"required,gt=0" example:"10000.00"`       // 掛單金額
 	MinAmount          float64 `json:"minAmount" binding:"required,gt=0" example:"1000.00"`     // 最小交易金額
 	TransactionMinutes int     `json:"transactionMinutes" binding:"required,gt=0" example:"30"` // 交易時限（分鐘）
@@ -208,13 +207,13 @@ type ErrorResponse struct {
 }
 
 type UserPendingOrdersSuccessResponse struct {
-	Success bool                      `json:"success" example:"true"` // 是否成功
+	Success bool                       `json:"success" example:"true"` // 是否成功
 	Data    *UserPendingOrdersResponse `json:"data"`                   // 使用者掛單資料
 }
 
 type PendingOrderListSuccessResponse struct {
-	Success bool                     `json:"success" example:"true"` // 是否成功
-	Message string                   `json:"message,omitempty"`      // 訊息
+	Success bool                      `json:"success" example:"true"` // 是否成功
+	Message string                    `json:"message,omitempty"`      // 訊息
 	Data    *PendingOrderListResponse `json:"data"`                   // 掛單列表資料
 }
 

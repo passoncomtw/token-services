@@ -36,9 +36,7 @@ func NewBankCardHandlers(bankCardService interfaces.BankCardServiceInterface, lo
 // @Failure 500 {object} response.ErrorResponse
 // @Router /bankcards [get]
 func (h *BankCardHandlers) GetBankCards(c *gin.Context) {
-	// TODO: 從 JWT token 中取得使用者 ID
-	// userID := c.GetInt("user_id")
-	userID := 1 // 暫時使用固定值
+	userID := c.GetInt("user_id")
 
 	bankCards, err := h.bankCardService.GetBankCards(userID)
 	if err != nil {
@@ -62,9 +60,7 @@ func (h *BankCardHandlers) GetBankCards(c *gin.Context) {
 // @Failure 401 {object} response.ErrorResponse
 // @Router /bankcards [post]
 func (h *BankCardHandlers) CreateBankCard(c *gin.Context) {
-	// TODO: 從 JWT token 中取得使用者 ID
-	// userID := c.GetInt("user_id")
-	userID := 1 // 暫時使用固定值
+	userID := c.GetInt("user_id")
 
 	var req interfaces.CreateBankCardRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -96,9 +92,7 @@ func (h *BankCardHandlers) CreateBankCard(c *gin.Context) {
 // @Failure 404 {object} response.ErrorResponse
 // @Router /bankcards/{bankcard_id} [put]
 func (h *BankCardHandlers) UpdateBankCard(c *gin.Context) {
-	// TODO: 從 JWT token 中取得使用者 ID
-	// userID := c.GetInt("user_id")
-	userID := 1 // 暫時使用固定值
+	userID := c.GetInt("user_id")
 
 	bankcardID, err := strconv.Atoi(c.Param("bankcard_id"))
 	if err != nil {
@@ -135,9 +129,7 @@ func (h *BankCardHandlers) UpdateBankCard(c *gin.Context) {
 // @Failure 404 {object} response.ErrorResponse
 // @Router /bankcards/{bankcard_id} [delete]
 func (h *BankCardHandlers) DeleteBankCard(c *gin.Context) {
-	// TODO: 從 JWT token 中取得使用者 ID
-	// userID := c.GetInt("user_id")
-	userID := 1 // 暫時使用固定值
+	userID := c.GetInt("user_id")
 
 	bankcardID, err := strconv.Atoi(c.Param("bankcard_id"))
 	if err != nil {
@@ -152,4 +144,3 @@ func (h *BankCardHandlers) DeleteBankCard(c *gin.Context) {
 
 	response.SuccessWithMessage(c, "刪除成功", nil)
 }
-
