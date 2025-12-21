@@ -49,17 +49,48 @@ func (s *OrderService) GetOrders(userID int, page, size int) (*interfaces.OrderL
 		size = 100
 	}
 
-	// 計算總數
+	// 計算總數：包含用戶作為買家創建的訂單，以及作為賣家接收的訂單
 	var total int64
-	query := s.db.Model(&models.Order{}).Where("user_id = ? AND deleted_at IS NULL", userID)
+	query := s.db.Model(&models.Order{}).
+		Joins("LEFT JOIN pending_orders ON orders.pending_order_id = pending_orders.id").
+		Where("orders.deleted_at IS NULL").
+		Where("(orders.user_id = ? OR pending_orders.user_id = ?)", userID, userID)
 	if err := query.Count(&total).Error; err != nil {
-		s.logger.Error("計算訂單總數失敗", zap.Error(err))
+		s.logger.Error("計算訂單總數失敗", zap.Error(err), zap.Int("userID", userID))
 		return nil, err
 	}
 
-	// 取回資料
-	var orders []*models.Order
+	// 記錄查詢條件以便調試
+	s.logger.Info("查詢訂單", zap.Int("userID", userID), zap.Int64("total", total))
+
+	// 取回資料：包含用戶作為買家創建的訂單，以及作為賣家接收的訂單
+	// 先查詢訂單 ID，避免 JOIN 與 Preload 衝突
+	var orderIDs []uuid.UUID
 	offset := (page - 1) * size
+	if err := s.db.Model(&models.Order{}).
+		Joins("LEFT JOIN pending_orders ON orders.pending_order_id = pending_orders.id").
+		Where("orders.deleted_at IS NULL").
+		Where("(orders.user_id = ? OR pending_orders.user_id = ?)", userID, userID).
+		Order("orders.created_at DESC").
+		Limit(size).
+		Offset(offset).
+		Pluck("orders.id", &orderIDs).Error; err != nil {
+		s.logger.Error("查詢訂單 ID 失敗", zap.Error(err), zap.Int("userID", userID))
+		return nil, err
+	}
+
+	// 如果沒有訂單，直接返回
+	if len(orderIDs) == 0 {
+		return &interfaces.OrderListResponse{
+			Rows:  []*interfaces.OrderDetail{},
+			Page:  page,
+			Size:  size,
+			Total: total,
+		}, nil
+	}
+
+	// 使用訂單 ID 查詢完整資料（包含 Preload）
+	var orders []*models.Order
 	if err := s.db.
 		Preload("User").
 		Preload("BankCard").
@@ -68,14 +99,15 @@ func (s *OrderService) GetOrders(userID int, page, size int) (*interfaces.OrderL
 		Preload("PendingOrder.User").
 		Preload("PendingOrder.BankCard").
 		Preload("PendingOrder.BankCard.Bank").
-		Where("user_id = ? AND deleted_at IS NULL", userID).
+		Where("id IN ?", orderIDs).
 		Order("created_at DESC").
-		Limit(size).
-		Offset(offset).
 		Find(&orders).Error; err != nil {
-		s.logger.Error("取回訂單列表失敗", zap.Error(err))
+		s.logger.Error("取回訂單列表失敗", zap.Error(err), zap.Int("userID", userID))
 		return nil, err
 	}
+
+	// 記錄查詢結果以便調試
+	s.logger.Info("取回訂單列表", zap.Int("userID", userID), zap.Int("count", len(orders)))
 
 	// 轉換為回應格式
 	rows := make([]*interfaces.OrderDetail, 0, len(orders))
@@ -670,4 +702,3 @@ func (s *OrderService) convertToOrderDetail(order *models.Order) *interfaces.Ord
 var OrderModule = fx.Module("order",
 	fx.Provide(fx.Annotate(NewOrderService, fx.As(new(interfaces.OrderServiceInterface)))),
 )
-

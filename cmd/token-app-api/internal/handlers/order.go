@@ -47,11 +47,33 @@ func NewOrderHandlers(
 // @Failure 500 {object} map[string]interface{} "伺服器錯誤"
 // @Router /orders [get]
 func (h *OrderHandlers) GetOrders(c *gin.Context) {
-	userID := c.GetInt("user_id")
+	// 從 context 取得 user_id，使用 MustGet 確保值存在
+	userIDInterface, exists := c.Get("user_id")
+	if !exists {
+		h.logger.Error("無法取得 user_id")
+		c.JSON(http.StatusUnauthorized, gin.H{
+			"success": false,
+			"message": "未授權",
+		})
+		return
+	}
+
+	userID, ok := userIDInterface.(int)
+	if !ok {
+		h.logger.Error("user_id 類型錯誤", zap.Any("userID", userIDInterface))
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"success": false,
+			"message": "內部錯誤",
+		})
+		return
+	}
 
 	// 取得分頁參數
 	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
 	size, _ := strconv.Atoi(c.DefaultQuery("size", "10"))
+
+	// 記錄查詢參數以便調試
+	h.logger.Info("查詢訂單列表", zap.Int("userID", userID), zap.Int("page", page), zap.Int("size", size))
 
 	result, err := h.service.GetOrders(userID, page, size)
 	if err != nil {
@@ -63,6 +85,9 @@ func (h *OrderHandlers) GetOrders(c *gin.Context) {
 		})
 		return
 	}
+
+	// 記錄查詢結果以便調試
+	h.logger.Info("查詢訂單列表成功", zap.Int("userID", userID), zap.Int64("total", result.Total), zap.Int("count", len(result.Rows)))
 
 	c.JSON(http.StatusOK, gin.H{
 		"success": true,
@@ -265,4 +290,3 @@ func (h *OrderHandlers) RejectOrder(c *gin.Context) {
 		"data":    result,
 	})
 }
-
