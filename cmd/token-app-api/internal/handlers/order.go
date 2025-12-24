@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"net/http"
 	"strconv"
 
 	"passontw-backend-services/cmd/token-app-api/internal/interfaces"
@@ -91,39 +90,28 @@ func (h *OrderHandlers) GetOrders(c *gin.Context) {
 // @Produce json
 // @Param data body interfaces.CreateOrderRequest true "訂單資料"
 // @Security Bearer
-// @Success 200 {object} map[string]interface{} "新增成功"
-// @Failure 400 {object} map[string]interface{} "請求參數錯誤"
-// @Failure 401 {object} map[string]interface{} "未授權"
-// @Failure 500 {object} map[string]interface{} "伺服器錯誤"
+// @Success 200 {object} interfaces.OrderDetailSuccessResponse "新增成功"
+// @Failure 400 {object} response.ErrorResponse "請求參數錯誤"
+// @Failure 401 {object} response.ErrorResponse "未授權"
+// @Failure 500 {object} response.ErrorResponse "伺服器錯誤"
 // @Router /orders [post]
 func (h *OrderHandlers) CreateOrder(c *gin.Context) {
 	userID := c.GetInt("user_id")
 
 	var req interfaces.CreateOrderRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"success": false,
-			"message": "請求參數錯誤",
-			"error":   err.Error(),
-		})
+		response.BadRequest(c, "請求參數錯誤: "+err.Error())
 		return
 	}
 
 	result, err := h.service.CreateOrder(userID, &req)
 	if err != nil {
 		h.logger.Error("建立訂單失敗", zap.Error(err), zap.Int("userID", userID))
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"success": false,
-			"message": err.Error(),
-		})
+		response.InternalError(c, err.Error())
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{
-		"success": true,
-		"message": "新增成功",
-		"data":    result,
-	})
+	response.SuccessWithMessage(c, "新增成功", result)
 }
 
 // MarkAsPaid godoc
@@ -134,43 +122,33 @@ func (h *OrderHandlers) CreateOrder(c *gin.Context) {
 // @Produce json
 // @Param order_id path string true "交易 Id"
 // @Security Bearer
-// @Success 200 {object} map[string]interface{} "付款已完成"
-// @Failure 400 {object} map[string]interface{} "請求參數錯誤"
-// @Failure 401 {object} map[string]interface{} "未授權"
-// @Failure 404 {object} map[string]interface{} "訂單不存在"
-// @Failure 500 {object} map[string]interface{} "伺服器錯誤"
+// @Success 200 {object} interfaces.OrderDetailSuccessResponse "付款已完成"
+// @Failure 400 {object} response.ErrorResponse "請求參數錯誤"
+// @Failure 401 {object} response.ErrorResponse "未授權"
+// @Failure 404 {object} response.ErrorResponse "訂單不存在"
+// @Failure 500 {object} response.ErrorResponse "伺服器錯誤"
 // @Router /orders/{order_id}/paid [put]
 func (h *OrderHandlers) MarkAsPaid(c *gin.Context) {
 	userID := c.GetInt("user_id")
 
 	orderID := c.Param("order_id")
 	if orderID == "" {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"success": false,
-			"message": "訂單 ID 不能為空",
-		})
+		response.BadRequest(c, "訂單 ID 不能為空")
 		return
 	}
 
 	result, err := h.service.MarkAsPaid(userID, orderID)
 	if err != nil {
 		h.logger.Error("標記已付款失敗", zap.Error(err), zap.Int("userID", userID), zap.String("orderID", orderID))
-		statusCode := http.StatusInternalServerError
 		if err.Error() == "訂單不存在或無權操作" || err.Error() == "訂單 ID 格式錯誤" {
-			statusCode = http.StatusNotFound
+			response.NotFound(c, err.Error())
+		} else {
+			response.InternalError(c, err.Error())
 		}
-		c.JSON(statusCode, gin.H{
-			"success": false,
-			"message": err.Error(),
-		})
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{
-		"success": true,
-		"message": "付款已完成",
-		"data":    result,
-	})
+	response.SuccessWithMessage(c, "付款已完成", result)
 }
 
 // ApplyOrder godoc
@@ -181,43 +159,33 @@ func (h *OrderHandlers) MarkAsPaid(c *gin.Context) {
 // @Produce json
 // @Param order_id path string true "交易 Id"
 // @Security Bearer
-// @Success 200 {object} map[string]interface{} "放行成功"
-// @Failure 400 {object} map[string]interface{} "請求參數錯誤"
-// @Failure 401 {object} map[string]interface{} "未授權"
-// @Failure 404 {object} map[string]interface{} "訂單不存在"
-// @Failure 500 {object} map[string]interface{} "伺服器錯誤"
+// @Success 200 {object} interfaces.OrderDetailSuccessResponse "放行成功"
+// @Failure 400 {object} response.ErrorResponse "請求參數錯誤"
+// @Failure 401 {object} response.ErrorResponse "未授權"
+// @Failure 404 {object} response.ErrorResponse "訂單不存在"
+// @Failure 500 {object} response.ErrorResponse "伺服器錯誤"
 // @Router /orders/{order_id}/apply [put]
 func (h *OrderHandlers) ApplyOrder(c *gin.Context) {
 	userID := c.GetInt("user_id")
 
 	orderID := c.Param("order_id")
 	if orderID == "" {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"success": false,
-			"message": "訂單 ID 不能為空",
-		})
+		response.BadRequest(c, "訂單 ID 不能為空")
 		return
 	}
 
 	result, err := h.service.ApplyOrder(userID, orderID)
 	if err != nil {
 		h.logger.Error("放行失敗", zap.Error(err), zap.Int("userID", userID), zap.String("orderID", orderID))
-		statusCode := http.StatusInternalServerError
 		if err.Error() == "訂單不存在" || err.Error() == "訂單 ID 格式錯誤" || err.Error() == "無權操作此訂單" {
-			statusCode = http.StatusNotFound
+			response.NotFound(c, err.Error())
+		} else {
+			response.InternalError(c, err.Error())
 		}
-		c.JSON(statusCode, gin.H{
-			"success": false,
-			"message": err.Error(),
-		})
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{
-		"success": true,
-		"message": "放行成功",
-		"data":    result,
-	})
+	response.SuccessWithMessage(c, "放行成功", result)
 }
 
 // RejectOrder godoc
@@ -229,51 +197,37 @@ func (h *OrderHandlers) ApplyOrder(c *gin.Context) {
 // @Param order_id path string true "交易 Id"
 // @Param data body interfaces.RejectOrderRequest true "取消原因"
 // @Security Bearer
-// @Success 200 {object} map[string]interface{} "取消訂單成功"
-// @Failure 400 {object} map[string]interface{} "請求參數錯誤"
-// @Failure 401 {object} map[string]interface{} "未授權"
-// @Failure 404 {object} map[string]interface{} "訂單不存在"
-// @Failure 500 {object} map[string]interface{} "伺服器錯誤"
+// @Success 200 {object} interfaces.OrderDetailSuccessResponse "取消訂單成功"
+// @Failure 400 {object} response.ErrorResponse "請求參數錯誤"
+// @Failure 401 {object} response.ErrorResponse "未授權"
+// @Failure 404 {object} response.ErrorResponse "訂單不存在"
+// @Failure 500 {object} response.ErrorResponse "伺服器錯誤"
 // @Router /orders/{order_id}/reject [put]
 func (h *OrderHandlers) RejectOrder(c *gin.Context) {
 	userID := c.GetInt("user_id")
 
 	orderID := c.Param("order_id")
 	if orderID == "" {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"success": false,
-			"message": "訂單 ID 不能為空",
-		})
+		response.BadRequest(c, "訂單 ID 不能為空")
 		return
 	}
 
 	var req interfaces.RejectOrderRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"success": false,
-			"message": "請求參數錯誤",
-			"error":   err.Error(),
-		})
+		response.BadRequest(c, "請求參數錯誤: "+err.Error())
 		return
 	}
 
 	result, err := h.service.RejectOrder(userID, orderID, &req)
 	if err != nil {
 		h.logger.Error("取消訂單失敗", zap.Error(err), zap.Int("userID", userID), zap.String("orderID", orderID))
-		statusCode := http.StatusInternalServerError
 		if err.Error() == "訂單不存在" || err.Error() == "訂單 ID 格式錯誤" || err.Error() == "無權操作此訂單" {
-			statusCode = http.StatusNotFound
+			response.NotFound(c, err.Error())
+		} else {
+			response.InternalError(c, err.Error())
 		}
-		c.JSON(statusCode, gin.H{
-			"success": false,
-			"message": err.Error(),
-		})
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{
-		"success": true,
-		"message": "取消訂單成功",
-		"data":    result,
-	})
+	response.SuccessWithMessage(c, "取消訂單成功", result)
 }

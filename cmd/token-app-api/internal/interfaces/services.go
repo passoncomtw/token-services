@@ -288,6 +288,13 @@ type OrderListSuccessResponse struct {
 	Data    *OrderListResponse `json:"data"`                     // 訂單列表資料
 }
 
+type OrderDetailSuccessResponse struct {
+	Code    string       `json:"code" example:"SUCCESS"` // 回應代碼
+	Success bool         `json:"success" example:"true"` // 是否成功
+	Message string       `json:"message" example:"操作成功"` // 訊息
+	Data    *OrderDetail `json:"data"`                   // 訂單詳情資料
+}
+
 type RejectOrderRequest struct {
 	CancelReason string `json:"cancelReason" binding:"required" example:"無法在時限內完成付款"` // 取消原因
 }
