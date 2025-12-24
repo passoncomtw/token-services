@@ -281,6 +281,13 @@ type OrderListResponse struct {
 	Total int64          `json:"total" example:"100"` // 總筆數
 }
 
+type OrderListSuccessResponse struct {
+	Code    string             `json:"code" example:"SUCCESS"`   // 回應代碼
+	Success bool               `json:"success" example:"true"`   // 是否成功
+	Message string             `json:"message" example:"取回列表成功"` // 訊息
+	Data    *OrderListResponse `json:"data"`                     // 訂單列表資料
+}
+
 type RejectOrderRequest struct {
 	CancelReason string `json:"cancelReason" binding:"required" example:"無法在時限內完成付款"` // 取消原因
 }

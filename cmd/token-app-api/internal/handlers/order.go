@@ -6,6 +6,7 @@ import (
 
 	"passontw-backend-services/cmd/token-app-api/internal/interfaces"
 	"passontw-backend-services/pkg/logger"
+	"passontw-backend-services/pkg/response"
 
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
@@ -41,30 +42,24 @@ func NewOrderHandlers(
 // @Param size query int false "取回幾筆資料" default(10)
 // @Param page query int false "取為第幾頁的資料" default(1)
 // @Security Bearer
-// @Success 200 {object} map[string]interface{} "取回列表成功"
-// @Failure 400 {object} map[string]interface{} "請求參數錯誤"
-// @Failure 401 {object} map[string]interface{} "未授權"
-// @Failure 500 {object} map[string]interface{} "伺服器錯誤"
+// @Success 200 {object} interfaces.OrderListSuccessResponse "取回列表成功"
+// @Failure 400 {object} response.ErrorResponse "請求參數錯誤"
+// @Failure 401 {object} response.ErrorResponse "未授權"
+// @Failure 500 {object} response.ErrorResponse "伺服器錯誤"
 // @Router /orders [get]
 func (h *OrderHandlers) GetOrders(c *gin.Context) {
 	// 從 context 取得 user_id，使用 MustGet 確保值存在
 	userIDInterface, exists := c.Get("user_id")
 	if !exists {
 		h.logger.Error("無法取得 user_id")
-		c.JSON(http.StatusUnauthorized, gin.H{
-			"success": false,
-			"message": "未授權",
-		})
+		response.Unauthorized(c, "未授權")
 		return
 	}
 
 	userID, ok := userIDInterface.(int)
 	if !ok {
 		h.logger.Error("user_id 類型錯誤", zap.Any("userID", userIDInterface))
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"success": false,
-			"message": "內部錯誤",
-		})
+		response.InternalError(c, "內部錯誤")
 		return
 	}
 
@@ -78,22 +73,14 @@ func (h *OrderHandlers) GetOrders(c *gin.Context) {
 	result, err := h.service.GetOrders(userID, page, size)
 	if err != nil {
 		h.logger.Error("取回訂單列表失敗", zap.Error(err), zap.Int("userID", userID))
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"success": false,
-			"message": "取回訂單列表失敗",
-			"error":   err.Error(),
-		})
+		response.InternalErrorWithDetail(c, "取回訂單列表失敗", err)
 		return
 	}
 
 	// 記錄查詢結果以便調試
 	h.logger.Info("查詢訂單列表成功", zap.Int("userID", userID), zap.Int64("total", result.Total), zap.Int("count", len(result.Rows)))
 
-	c.JSON(http.StatusOK, gin.H{
-		"success": true,
-		"message": "取回列表成功",
-		"data":    result,
-	})
+	response.SuccessWithMessage(c, "取回列表成功", result)
 }
 
 // CreateOrder godoc
