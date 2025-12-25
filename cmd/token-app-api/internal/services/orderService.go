@@ -362,10 +362,10 @@ func (s *OrderService) ApplyOrder(userID int, orderID string) (*interfaces.Order
 		return nil, errors.New("訂單狀態不正確")
 	}
 
-	// 更新訂單狀態為 2（已放行）
+	// 更新訂單狀態為 4（已放行/已完成）
 	now := time.Now()
 	if err := tx.Model(&order).Updates(map[string]interface{}{
-		"status":    2,
+		"status":    4,
 		"finish_at": now,
 	}).Error; err != nil {
 		tx.Rollback()

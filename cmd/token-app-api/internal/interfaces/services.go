@@ -264,7 +264,7 @@ type CreateOrderRequest struct {
 
 type OrderDetail struct {
 	ID           string              `json:"id" example:"ORD20240101001"`                       // 訂單 ID
-	Status       int                 `json:"status" example:"0"`                                // 訂單狀態：0=待付款, 1=已付款, 2=已完成, 3=已取消
+	Status       int                 `json:"status" example:"0"`                                // 訂單狀態：0=待付款, 1=已付款, 3=買家已取消, 4=已放行/已完成（賣家取消時也會是4，可透過cancelReason區分）
 	Amount       float64             `json:"amount" example:"5000.00"`                          // 交易金額
 	CancelReason string              `json:"cancelReason,omitempty" example:"買家取消交易"`           // 取消原因
 	FinishAt     string              `json:"finishAt,omitempty" example:"2024-01-01T01:00:00Z"` // 完成時間
