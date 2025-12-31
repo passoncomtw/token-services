@@ -12,11 +12,11 @@ import (
 
 // MerchantInfo 商家資訊
 type MerchantInfo struct {
-	CreateAt          int64                    `json:"createAt"`
-	Contactor         string                   `json:"contactor"`
-	Telegram          string                   `json:"telegram"`
-	BuyFeeType        int                      `json:"buyFeeType"`
-	SellFeeType       int                      `json:"sellFeeType"`
+	CreateAt          int64                    `json:"createAt" example:"1704067200"`
+	Contactor         string                   `json:"contactor" example:"張三"`
+	Telegram          string                   `json:"telegram" example:"@merchant001"`
+	BuyFeeType        int                      `json:"buyFeeType" example:"0"`
+	SellFeeType       int                      `json:"sellFeeType" example:"1"`
 	BuyPercentageFee  map[string]interface{}   `json:"buyPercentageFee"`
 	SellPercentageFee map[string]interface{}   `json:"sellPercentageFee"`
 	BuyLadderFee      []map[string]interface{} `json:"buyLadderFee"`
@@ -35,12 +35,16 @@ type WalletInfo struct {
 
 // UserBasicResponse 使用者基本回應
 type UserBasicResponse struct {
-	ID       int           `json:"id"`
-	Type     int           `json:"type"`
-	Account  string        `json:"account"`
-	Name     string        `json:"name"`
-	CreateAt int64         `json:"createAt"`
-	Merchant *MerchantInfo `json:"merchant"`
+	ID                int           `json:"id" example:"1"`
+	Type              int           `json:"type" example:"1"`
+	Account           string        `json:"account" example:"merchant001"`
+	Name              string        `json:"name" example:"商家一號"`
+	Status            int           `json:"status" example:"0"`
+	OrderStatus       int           `json:"orderStatus" example:"1"`
+	TransactionStatus int           `json:"transactionStatus" example:"1"`
+	Markup            *string       `json:"markup" example:"VIP商家"`
+	CreateAt          int64         `json:"createAt" example:"1704067200"`
+	Merchant          *MerchantInfo `json:"merchant"`
 }
 
 // UserDetailResponse 使用者詳細回應
@@ -216,11 +220,15 @@ type UserHandlersInterface interface {
 // ConvertToUserBasicResponse 將 model 轉換為基本回應格式
 func ConvertToUserBasicResponse(user *models.User) *UserBasicResponse {
 	resp := &UserBasicResponse{
-		ID:       user.ID,
-		Type:     user.Type,
-		Account:  user.Account,
-		Name:     user.Name,
-		CreateAt: user.CreatedAt.Unix(),
+		ID:                user.ID,
+		Type:              user.Type,
+		Account:           user.Account,
+		Name:              user.Name,
+		Status:            user.Status,
+		TransactionStatus: user.TransactionStatus,
+		OrderStatus:       user.OrderStatus,
+		Markup:            &user.Markup.String,
+		CreateAt:          user.CreatedAt.Unix(),
 	}
 
 	// 如果有商家資訊
