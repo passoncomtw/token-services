@@ -29,7 +29,7 @@ func NewPendingOrderService(db *gorm.DB, log logger.Logger) *PendingOrderService
 }
 
 // GetList 取得掛單列表
-func (s *PendingOrderService) GetList(query *interfaces.PendingOrderListQuery) (*interfaces.PendingOrderListResponse, error) {
+func (s *PendingOrderService) GetList(query *interfaces.PendingOrderListQuery) ([]*interfaces.PendingOrderResponse, int64, error) {
 	// 設定預設值
 	if query.Page == 0 {
 		query.Page = 1
@@ -98,10 +98,10 @@ func (s *PendingOrderService) GetList(query *interfaces.PendingOrderListQuery) (
 	}
 
 	// 查詢總數
-	var count int64
+	var totalCount int64
 	countDB := db.Session(&gorm.Session{})
-	if err := countDB.Count(&count).Error; err != nil {
-		return nil, err
+	if err := countDB.Count(&totalCount).Error; err != nil {
+		return nil, 0, err
 	}
 
 	// 分頁查詢
@@ -111,7 +111,7 @@ func (s *PendingOrderService) GetList(query *interfaces.PendingOrderListQuery) (
 		Order("pending_orders.created_at DESC").
 		Offset(offset).Limit(query.Size).
 		Find(&pendingOrders).Error; err != nil {
-		return nil, err
+		return nil, 0, err
 	}
 
 	// 轉換為回應格式
@@ -120,10 +120,7 @@ func (s *PendingOrderService) GetList(query *interfaces.PendingOrderListQuery) (
 		rows = append(rows, interfaces.ConvertToPendingOrderResponse(&po))
 	}
 
-	return &interfaces.PendingOrderListResponse{
-		Count: count,
-		Rows:  rows,
-	}, nil
+	return rows, totalCount, nil
 }
 
 // Stop 暫停掛單

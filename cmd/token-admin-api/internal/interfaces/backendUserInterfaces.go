@@ -51,7 +51,7 @@ type UpdateBackendUserRequest struct {
 
 // BackendUserServiceInterface 後台使用者服務介面
 type BackendUserServiceInterface interface {
-	GetList(query *BackendUserListQuery) ([]*BackendUserResponse, error)
+	GetList(query *BackendUserListQuery) ([]*BackendUserResponse, int64, error)
 	Create(req *CreateBackendUserRequest) (*BackendUserResponse, error)
 	Update(id int, req *UpdateBackendUserRequest) (*BackendUserResponse, error)
 	Delete(id int) error

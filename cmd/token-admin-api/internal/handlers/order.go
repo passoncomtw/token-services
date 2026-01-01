@@ -44,7 +44,7 @@ func NewOrderHandlers(service interfaces.OrderServiceInterface, log logger.Logge
 // @Param finishAtType query string false "交易時間，沒有值代表全部，overdue = 逾期, notOverdue = 未逾期"
 // @Param page query int false "頁數" default(1)
 // @Param size query int false "每頁數量" default(10)
-// @Success 200 {object} response.Response{data=interfaces.OrderListResponse}
+// @Success 200 {object} response.ListResponse{items=[]interfaces.OrderListItemResponse}
 // @Failure 400 {object} response.ErrorResponse
 // @Failure 500 {object} response.ErrorResponse
 // @Router /orders [get]
@@ -55,13 +55,28 @@ func (h *OrderHandlers) GetList(c *gin.Context) {
 		return
 	}
 
-	result, err := h.service.GetList(&query)
+	orders, totalCount, err := h.service.GetList(&query)
 	if err != nil {
-		response.InternalError(c)
+		h.logger.Error("取得訂單列表失敗", zap.Error(err))
+		response.InternalErrorWithDetail(c, err)
 		return
 	}
 
-	response.Success(c, result)
+	// 設定預設值
+	if query.Page == 0 {
+		query.Page = 1
+	}
+	if query.Size == 0 {
+		query.Size = 10
+	}
+
+	pagination := response.Pagination{
+		TotalCount: int(totalCount),
+		Page:       query.Page,
+		Size:       query.Size,
+	}
+
+	response.GetListResponse(c, orders, pagination)
 }
 
 // Complete godoc

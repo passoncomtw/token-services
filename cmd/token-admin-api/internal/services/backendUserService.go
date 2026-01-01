@@ -27,20 +27,8 @@ func NewBackendUserService(db *gorm.DB, log logger.Logger) *BackendUserService {
 	}
 }
 
-// GetList 取得後台使用者列表
-func (s *BackendUserService) GetList(query *interfaces.BackendUserListQuery) ([]*interfaces.BackendUserResponse, error) {
-	// 設定預設值
-	if query.Page == 0 {
-		query.Page = 1
-	}
-	if query.Size == 0 {
-		query.Size = 10
-	}
-
-	// 建立查詢
-	db := s.db.Model(&models.BackendUser{}).Preload("Actor")
-
-	// 過濾條件
+// applyBackendUserFilters 應用後台使用者列表的過濾條件
+func (s *BackendUserService) applyBackendUserFilters(db *gorm.DB, query *interfaces.BackendUserListQuery) *gorm.DB {
 	if query.Account != "" {
 		db = db.Where("account LIKE ?", "%"+query.Account+"%")
 	}
@@ -50,15 +38,41 @@ func (s *BackendUserService) GetList(query *interfaces.BackendUserListQuery) ([]
 	if query.Status != nil {
 		db = db.Where("status = ?", *query.Status)
 	}
+	return db
+}
+
+// GetList 取得後台使用者列表
+func (s *BackendUserService) GetList(query *interfaces.BackendUserListQuery) ([]*interfaces.BackendUserResponse, int64, error) {
+	// 設定預設值
+	if query.Page == 0 {
+		query.Page = 1
+	}
+	if query.Size == 0 {
+		query.Size = 10
+	}
+
+	// 建立基礎查詢（不含 Preload，用於 COUNT 查詢，效能更好）
+	baseDB := s.db.Model(&models.BackendUser{})
+	baseDB = s.applyBackendUserFilters(baseDB, query)
+
+	// 計算總數（不含 Preload，避免不必要的 JOIN）
+	var totalCount int64
+	if err := baseDB.Count(&totalCount).Error; err != nil {
+		return nil, 0, err
+	}
+
+	// 建立資料查詢（含 Preload）
+	dataDB := s.db.Model(&models.BackendUser{}).Preload("Actor")
+	dataDB = s.applyBackendUserFilters(dataDB, query)
 
 	// 分頁
 	offset := (query.Page - 1) * query.Size
-	db = db.Offset(offset).Limit(query.Size)
+	dataDB = dataDB.Offset(offset).Limit(query.Size)
 
 	// 執行查詢
 	var users []models.BackendUser
-	if err := db.Find(&users).Error; err != nil {
-		return nil, err
+	if err := dataDB.Find(&users).Error; err != nil {
+		return nil, 0, err
 	}
 
 	// 轉換為回應格式
@@ -67,7 +81,7 @@ func (s *BackendUserService) GetList(query *interfaces.BackendUserListQuery) ([]
 		result = append(result, interfaces.ConvertToBackendUserResponse(&user))
 	}
 
-	return result, nil
+	return result, totalCount, nil
 }
 
 // Create 新增後台使用者

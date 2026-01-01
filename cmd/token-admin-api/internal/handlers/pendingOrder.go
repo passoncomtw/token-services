@@ -43,7 +43,7 @@ func NewPendingOrderHandlers(service interfaces.PendingOrderServiceInterface, lo
 // @Param status query int false "掛單狀態，0 = 掛單中, 1 = 暫停掛單, 2 = 取消掛單, 3 = 已刪除掛單"
 // @Param page query int false "頁數" default(1)
 // @Param size query int false "每頁數量" default(10)
-// @Success 200 {object} response.Response{data=interfaces.PendingOrderListResponse}
+// @Success 200 {object} response.ListResponse{items=[]interfaces.PendingOrderResponse}
 // @Failure 400 {object} response.ErrorResponse
 // @Failure 500 {object} response.ErrorResponse
 // @Router /pending/orders [get]
@@ -54,13 +54,28 @@ func (h *PendingOrderHandlers) GetList(c *gin.Context) {
 		return
 	}
 
-	result, err := h.service.GetList(&query)
+	pendingOrders, totalCount, err := h.service.GetList(&query)
 	if err != nil {
-		response.InternalError(c)
+		h.logger.Error("取得掛單列表失敗", zap.Error(err))
+		response.InternalErrorWithDetail(c, err)
 		return
 	}
 
-	response.Success(c, result)
+	// 設定預設值
+	if query.Page == 0 {
+		query.Page = 1
+	}
+	if query.Size == 0 {
+		query.Size = 10
+	}
+
+	pagination := response.Pagination{
+		TotalCount: int(totalCount),
+		Page:       query.Page,
+		Size:       query.Size,
+	}
+
+	response.GetListResponse(c, pendingOrders, pagination)
 }
 
 // Stop godoc

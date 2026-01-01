@@ -37,7 +37,7 @@ func NewBackendUserHandlers(service interfaces.BackendUserServiceInterface, log 
 // @Param status query int false "帳號狀態，0=啟用, 1=停用"
 // @Param page query int false "頁數" default(1)
 // @Param size query int false "每頁資訊" default(10)
-// @Success 200 {object} response.Response{data=[]interfaces.BackendUserResponse}
+// @Success 200 {object} response.ListResponse{items=[]interfaces.BackendUserResponse}
 // @Failure 400 {object} response.ErrorResponse
 // @Failure 500 {object} response.ErrorResponse
 // @Router /backendusers [get]
@@ -48,13 +48,28 @@ func (h *BackendUserHandlers) GetList(c *gin.Context) {
 		return
 	}
 
-	users, err := h.service.GetList(&query)
+	users, totalCount, err := h.service.GetList(&query)
 	if err != nil {
-		response.InternalError(c)
+		h.logger.Error("取得後台使用者列表失敗", zap.Error(err))
+		response.InternalErrorWithDetail(c, err)
 		return
 	}
 
-	response.Success(c, users)
+	// 設定預設值
+	if query.Page == 0 {
+		query.Page = 1
+	}
+	if query.Size == 0 {
+		query.Size = 10
+	}
+
+	pagination := response.Pagination{
+		TotalCount: int(totalCount),
+		Page:       query.Page,
+		Size:       query.Size,
+	}
+
+	response.GetListResponse(c, users, pagination)
 }
 
 // Create godoc

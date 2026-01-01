@@ -30,7 +30,7 @@ func NewBackendActorHandlers(service interfaces.BackendActorServiceInterface, lo
 // @Accept json
 // @Produce json
 // @Security Bearer
-// @Success 200 {object} response.Response{data=[]interfaces.BackendActorResponse}
+// @Success 200 {object} response.ListResponseWithoutPagination{items=[]interfaces.BackendActorResponse}
 // @Failure 500 {object} response.ErrorResponse
 // @Router /backendactors [get]
 func (h *BackendActorHandlers) GetAll(c *gin.Context) {
@@ -40,7 +40,7 @@ func (h *BackendActorHandlers) GetAll(c *gin.Context) {
 		return
 	}
 
-	response.Success(c, actors)
+	response.GetListResponseWithoutPagination(c, actors)
 }
 
 // Create godoc
@@ -78,7 +78,7 @@ func (h *BackendActorHandlers) Create(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Security Bearer
-// @Success 200 {object} response.Response{data=interfaces.PermissionNode}
+// @Success 200 {object} response.ListResponseWithoutPagination{items=interfaces.PermissionNode}
 // @Failure 500 {object} response.ErrorResponse
 // @Router /backendactors/permissions [get]
 func (h *BackendActorHandlers) GetPermissions(c *gin.Context) {
@@ -88,5 +88,5 @@ func (h *BackendActorHandlers) GetPermissions(c *gin.Context) {
 		return
 	}
 
-	response.Success(c, permissions)
+	response.GetListResponseWithoutPagination(c, permissions)
 }

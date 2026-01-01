@@ -66,7 +66,7 @@ type CancelOrderRequest struct {
 
 // OrderServiceInterface 訂單服務介面
 type OrderServiceInterface interface {
-	GetList(query *OrderListQuery) (*OrderListResponse, error)
+	GetList(query *OrderListQuery) ([]*OrderListItemResponse, int64, error)
 	Complete(orderID string) (*OrderDetailResponse, error)
 	Cancel(orderID string, req *CancelOrderRequest) (*OrderDetailResponse, error)
 }

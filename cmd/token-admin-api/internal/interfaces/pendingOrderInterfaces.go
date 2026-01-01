@@ -27,7 +27,7 @@ type PendingOrderListQuery struct {
 
 // PendingOrderServiceInterface 掛單服務介面
 type PendingOrderServiceInterface interface {
-	GetList(query *PendingOrderListQuery) (*PendingOrderListResponse, error)
+	GetList(query *PendingOrderListQuery) ([]*PendingOrderResponse, int64, error)
 	Stop(pendingOrderID string) error
 	Open(pendingOrderID string) error
 	Cancel(pendingOrderID string) error

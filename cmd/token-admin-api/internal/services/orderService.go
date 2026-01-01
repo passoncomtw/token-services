@@ -29,7 +29,7 @@ func NewOrderService(db *gorm.DB, log logger.Logger) *OrderService {
 }
 
 // GetList 取得訂單列表
-func (s *OrderService) GetList(query *interfaces.OrderListQuery) (*interfaces.OrderListResponse, error) {
+func (s *OrderService) GetList(query *interfaces.OrderListQuery) ([]*interfaces.OrderListItemResponse, int64, error) {
 	// 設定預設值
 	if query.Page == 0 {
 		query.Page = 1
@@ -113,10 +113,10 @@ func (s *OrderService) GetList(query *interfaces.OrderListQuery) (*interfaces.Or
 	}
 
 	// 查詢總數
-	var count int64
+	var totalCount int64
 	countDB := db.Session(&gorm.Session{})
-	if err := countDB.Count(&count).Error; err != nil {
-		return nil, err
+	if err := countDB.Count(&totalCount).Error; err != nil {
+		return nil, 0, err
 	}
 
 	// 分頁查詢
@@ -126,7 +126,7 @@ func (s *OrderService) GetList(query *interfaces.OrderListQuery) (*interfaces.Or
 		Order("orders.created_at DESC").
 		Offset(offset).Limit(query.Size).
 		Find(&orders).Error; err != nil {
-		return nil, err
+		return nil, 0, err
 	}
 
 	// 轉換為回應格式
@@ -135,10 +135,7 @@ func (s *OrderService) GetList(query *interfaces.OrderListQuery) (*interfaces.Or
 		rows = append(rows, interfaces.ConvertToOrderListItemResponse(&order))
 	}
 
-	return &interfaces.OrderListResponse{
-		Count: count,
-		Rows:  rows,
-	}, nil
+	return rows, totalCount, nil
 }
 
 // Complete 完成訂單
