@@ -38,9 +38,9 @@ func NewBankCardHandlers(service interfaces.BankCardServiceInterface, log logger
 // @Param bankName query string false "開戶行"
 // @Param name query string false "銀行卡使用者姓名"
 // @Param account query string false "銀行卡使用者帳號"
-// @Param page query int true "頁數" default(1)
-// @Param size query int true "每頁筆數" default(10)
-// @Success 200 {object} response.Response{data=interfaces.BankCardListResponse}
+// @Param page query int false "頁數" default(1)
+// @Param size query int false "每頁筆數" default(10)
+// @Success 200 {object} response.ListResponse{items=[]interfaces.BankCardDetailResponse}
 // @Failure 400 {object} response.ErrorResponse
 // @Failure 500 {object} response.ErrorResponse
 // @Router /bankcards [get]
@@ -51,13 +51,27 @@ func (h *BankCardHandlers) GetList(c *gin.Context) {
 		return
 	}
 
-	result, err := h.service.GetList(&query)
+	bankCards, totalCount, err := h.service.GetList(&query)
 	if err != nil {
 		response.InternalError(c)
 		return
 	}
 
-	response.Success(c, result)
+	// 設定預設值
+	if query.Page == 0 {
+		query.Page = 1
+	}
+	if query.Size == 0 {
+		query.Size = 10
+	}
+
+	pagination := response.Pagination{
+		TotalCount: int(totalCount),
+		Page:       query.Page,
+		Size:       query.Size,
+	}
+
+	response.GetListResponse(c, bankCards, pagination)
 }
 
 // GetDetail godoc
@@ -67,7 +81,7 @@ func (h *BankCardHandlers) GetList(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Security Bearer
-// @Param bankcardId path int true "銀行卡 ID"
+// @Param bankcardId path int true "銀行卡 ID" default(1)
 // @Success 200 {object} response.Response{data=interfaces.BankCardDetailResponse}
 // @Failure 400 {object} response.ErrorResponse
 // @Failure 404 {object} response.ErrorResponse
@@ -75,8 +89,21 @@ func (h *BankCardHandlers) GetList(c *gin.Context) {
 // @Router /bankcards/{bankcardId} [get]
 func (h *BankCardHandlers) GetDetail(c *gin.Context) {
 	idStr := c.Param("bankcardId")
-	id, err := strconv.Atoi(idStr)
+
+	// 使用 ParseInt 來更好地處理大數字和範圍檢查
+	id64, err := strconv.ParseInt(idStr, 10, 32)
 	if err != nil {
+		h.logger.Error("無效的銀行卡 ID 格式", zap.String("id", idStr), zap.Error(err))
+		response.BadRequest(c)
+		return
+	}
+
+	// 轉換為 int（已確保在 int32 範圍內）
+	id := int(id64)
+
+	// 驗證 ID 範圍（必須大於 0）
+	if id < 1 {
+		h.logger.Error("銀行卡 ID 必須大於 0", zap.String("id", idStr))
 		response.BadRequest(c)
 		return
 	}
@@ -87,7 +114,8 @@ func (h *BankCardHandlers) GetDetail(c *gin.Context) {
 			response.NotFound(c)
 			return
 		}
-		response.InternalError(c)
+		h.logger.Error("取得銀行卡詳細資訊失敗", zap.Int("id", id), zap.Error(err))
+		response.InternalErrorWithDetail(c, err)
 		return
 	}
 

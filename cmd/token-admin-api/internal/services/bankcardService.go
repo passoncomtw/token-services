@@ -27,7 +27,7 @@ func NewBankCardService(db *gorm.DB, log logger.Logger) *BankCardService {
 }
 
 // GetList 取得銀行卡列表
-func (s *BankCardService) GetList(query *interfaces.BankCardListQuery) (*interfaces.BankCardListResponse, error) {
+func (s *BankCardService) GetList(query *interfaces.BankCardListQuery) ([]*interfaces.BankCardDetailResponse, int64, error) {
 	// 建立基礎查詢
 	db := s.db.Model(&models.BankCard{})
 
@@ -61,10 +61,10 @@ func (s *BankCardService) GetList(query *interfaces.BankCardListQuery) (*interfa
 	}
 
 	// 查詢總數（需要使用相同的過濾條件）
-	var count int64
+	var totalCount int64
 	countDB := db.Session(&gorm.Session{})
-	if err := countDB.Count(&count).Error; err != nil {
-		return nil, err
+	if err := countDB.Count(&totalCount).Error; err != nil {
+		return nil, 0, err
 	}
 
 	// 分頁查詢
@@ -75,7 +75,7 @@ func (s *BankCardService) GetList(query *interfaces.BankCardListQuery) (*interfa
 	if err := db.Preload("Bank").Preload("User").
 		Offset(offset).Limit(query.Size).
 		Find(&bankCards).Error; err != nil {
-		return nil, err
+		return nil, 0, err
 	}
 
 	// 轉換為回應格式
@@ -84,10 +84,7 @@ func (s *BankCardService) GetList(query *interfaces.BankCardListQuery) (*interfa
 		rows = append(rows, interfaces.ConvertToBankCardDetailResponse(&card))
 	}
 
-	return &interfaces.BankCardListResponse{
-		Count: count,
-		Rows:  rows,
-	}, nil
+	return rows, totalCount, nil
 }
 
 // GetDetail 取得銀行卡詳細資訊

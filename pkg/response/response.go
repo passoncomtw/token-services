@@ -24,14 +24,14 @@ type Response struct {
  * @brief Response 統一回應格式
  */
 type ListResponse struct {
-	Items      []interface{} `json:"items,omitempty"`
-	Code       string        `json:"code,omitempty" example:"200"`
-	Pagination Pagination    `json:"pagination,omitempty"`
+	Items      interface{} `json:"items,omitempty"`
+	Code       string      `json:"code,omitempty" example:"200"`
+	Pagination Pagination  `json:"pagination,omitempty"`
 }
 
-type ItemResponse struct {
-	Data interface{} `json:"data,omitempty"`
-	Code string      `json:"code,omitempty" example:"200"`
+type ListResponseWithoutPagination struct {
+	Items interface{} `json:"items,omitempty"`
+	Code  string      `json:"code,omitempty" example:"200"`
 }
 
 /**
@@ -67,11 +67,18 @@ const (
 	CodeServiceUnavailable = "503"
 )
 
-func GetListResponse(c *gin.Context, respData []interface{}, pagination Pagination) {
+func GetListResponse(c *gin.Context, respData interface{}, pagination Pagination) {
 	c.JSON(http.StatusOK, ListResponse{
 		Items:      respData,
 		Pagination: pagination,
 		Code:       "200",
+	})
+}
+
+func GetListResponseWithoutPagination(c *gin.Context, respData interface{}) {
+	c.JSON(http.StatusOK, ListResponseWithoutPagination{
+		Items: respData,
+		Code:  "200",
 	})
 }
 

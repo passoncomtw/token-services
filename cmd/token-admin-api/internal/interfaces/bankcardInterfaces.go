@@ -42,7 +42,7 @@ type BankCardListQuery struct {
 
 // BankCardServiceInterface 銀行卡服務介面
 type BankCardServiceInterface interface {
-	GetList(query *BankCardListQuery) (*BankCardListResponse, error)
+	GetList(query *BankCardListQuery) ([]*BankCardDetailResponse, int64, error)
 	GetDetail(id int) (*BankCardDetailResponse, error)
 }
 

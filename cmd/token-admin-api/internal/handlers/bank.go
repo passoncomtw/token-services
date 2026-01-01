@@ -32,17 +32,18 @@ func NewBankHandlers(service interfaces.BankServiceInterface, log logger.Logger)
 // @Accept json
 // @Produce json
 // @Security Bearer
-// @Success 200 {object} response.Response{data=[]interfaces.BankResponse}
+// @Success 200 {object} response.ListResponseWithoutPagination{items=[]interfaces.BankResponse}
 // @Failure 500 {object} response.ErrorResponse
 // @Router /banks [get]
 func (h *BankHandlers) GetList(c *gin.Context) {
 	banks, err := h.service.GetList()
 	if err != nil {
-		response.InternalError(c)
+		h.logger.Error("取得銀行列表失敗", zap.Error(err))
+		response.InternalErrorWithDetail(c, err)
 		return
 	}
 
-	response.Success(c, banks)
+	response.GetListResponseWithoutPagination(c, banks)
 }
 
 // Create godoc
@@ -70,7 +71,8 @@ func (h *BankHandlers) Create(c *gin.Context) {
 			response.BadRequest(c)
 			return
 		}
-		response.InternalError(c)
+		h.logger.Error("新增銀行失敗", zap.Error(err))
+		response.InternalErrorWithDetail(c, err)
 		return
 	}
 
@@ -84,7 +86,7 @@ func (h *BankHandlers) Create(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Security Bearer
-// @Param bankId path int true "銀行 ID"
+// @Param bankId path int true "銀行 ID" default(1)
 // @Param body body interfaces.UpdateBankRequest true "銀行資料"
 // @Success 200 {object} response.Response{data=interfaces.BankResponse}
 // @Failure 400 {object} response.ErrorResponse
@@ -93,8 +95,21 @@ func (h *BankHandlers) Create(c *gin.Context) {
 // @Router /banks/{bankId} [put]
 func (h *BankHandlers) Update(c *gin.Context) {
 	idStr := c.Param("bankId")
-	id, err := strconv.Atoi(idStr)
+
+	// 使用 ParseInt 來更好地處理大數字和範圍檢查
+	id64, err := strconv.ParseInt(idStr, 10, 32)
 	if err != nil {
+		h.logger.Error("無效的銀行 ID 格式", zap.String("id", idStr), zap.Error(err))
+		response.BadRequest(c)
+		return
+	}
+
+	// 轉換為 int（已確保在 int32 範圍內）
+	id := int(id64)
+
+	// 驗證 ID 範圍（必須大於 0）
+	if id < 1 {
+		h.logger.Error("銀行 ID 必須大於 0", zap.String("id", idStr))
 		response.BadRequest(c)
 		return
 	}
@@ -115,7 +130,8 @@ func (h *BankHandlers) Update(c *gin.Context) {
 			response.BadRequest(c)
 			return
 		}
-		response.InternalError(c)
+		h.logger.Error("編輯銀行失敗", zap.Int("id", id), zap.Error(err))
+		response.InternalErrorWithDetail(c, err)
 		return
 	}
 
