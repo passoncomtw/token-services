@@ -158,22 +158,22 @@ type OrderResponse struct {
 
 // PendingOrderResponse 掛單回應
 type PendingOrderResponse struct {
-	ID                 string                 `json:"id"`
-	Type               int                    `json:"type"`
-	Status             int                    `json:"status"`
-	Amount             int64                  `json:"amount"`
-	MinAmount          int64                  `json:"minAmount"`
-	Balance            int64                  `json:"balance"`
-	TransactionMinutes int                    `json:"transactionMinutes"`
+	ID                 string                 `json:"id" example:"550e8400-e29b-41d4-a716-446655440000"`
+	Type               int                    `json:"type" example:"0"`
+	Status             int                    `json:"status" example:"0"`
+	Amount             int64                  `json:"amount" example:"1000000"`
+	MinAmount          int64                  `json:"minAmount" example:"10000"`
+	Balance            int64                  `json:"balance" example:"950000"`
+	TransactionMinutes int                    `json:"transactionMinutes" example:"30"`
 	User               map[string]interface{} `json:"user"`
 	BankCard           map[string]interface{} `json:"bankcard"`
-	CreateAt           string                 `json:"createAt"`
-	CancelAmount       int64                  `json:"cancelAmount"`
-	ProcessAmount      int64                  `json:"processAmount"`
-	DoneAmount         int64                  `json:"doneAmount"`
-	CancelCount        int                    `json:"cancelCount"`
-	DoneCount          int                    `json:"doneCount"`
-	ProcessCount       int                    `json:"processCount"`
+	CreateAt           string                 `json:"createAt" example:"2024-01-01 00:00:00"`
+	CancelAmount       int64                  `json:"cancelAmount" example:"0"`
+	ProcessAmount      int64                  `json:"processAmount" example:"50000"`
+	DoneAmount         int64                  `json:"doneAmount" example:"0"`
+	CancelCount        int                    `json:"cancelCount" example:"0"`
+	DoneCount          int                    `json:"doneCount" example:"0"`
+	ProcessCount       int                    `json:"processCount" example:"1"`
 }
 
 // PendingOrderListResponse 掛單列表回應
