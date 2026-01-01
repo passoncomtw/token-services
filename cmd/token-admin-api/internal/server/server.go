@@ -100,9 +100,6 @@ func (s *Server) Start(lc fx.Lifecycle) {
 					zap.String("local", fmt.Sprintf("http://localhost:%d/swagger/index.html", s.port)),
 					zap.String("network", fmt.Sprintf("http://%s/swagger/index.html", s.swagHost)),
 				)
-				s.logger.Info("🔍 Health Check",
-					zap.String("url", fmt.Sprintf("http://%s/health-check", s.swagHost)),
-				)
 				s.logger.Info("========================================")
 
 				if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {

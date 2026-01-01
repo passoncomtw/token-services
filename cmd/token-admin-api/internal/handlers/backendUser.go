@@ -44,13 +44,13 @@ func NewBackendUserHandlers(service interfaces.BackendUserServiceInterface, log 
 func (h *BackendUserHandlers) GetList(c *gin.Context) {
 	var query interfaces.BackendUserListQuery
 	if err := c.ShouldBindQuery(&query); err != nil {
-		response.BadRequest(c, "請求參數錯誤")
+		response.BadRequest(c)
 		return
 	}
 
 	users, err := h.service.GetList(&query)
 	if err != nil {
-		response.InternalError(c, "取得使用者列表失敗")
+		response.InternalError(c)
 		return
 	}
 
@@ -72,17 +72,17 @@ func (h *BackendUserHandlers) GetList(c *gin.Context) {
 func (h *BackendUserHandlers) Create(c *gin.Context) {
 	var req interfaces.CreateBackendUserRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		response.BadRequest(c, "請求參數錯誤")
+		response.BadRequest(c)
 		return
 	}
 
 	user, err := h.service.Create(&req)
 	if err != nil {
 		if err.Error() == "帳號已存在" || err.Error() == "角色不存在" {
-			response.BadRequest(c, err.Error())
+			response.BadRequest(c)
 			return
 		}
-		response.InternalError(c, "新增使用者失敗")
+		response.InternalError(c)
 		return
 	}
 
@@ -107,27 +107,27 @@ func (h *BackendUserHandlers) Update(c *gin.Context) {
 	idStr := c.Param("backendUserId")
 	id, err := strconv.Atoi(idStr)
 	if err != nil {
-		response.BadRequest(c, "使用者 ID 格式錯誤")
+		response.BadRequest(c)
 		return
 	}
 
 	var req interfaces.UpdateBackendUserRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		response.BadRequest(c, "請求參數錯誤")
+		response.BadRequest(c)
 		return
 	}
 
 	user, err := h.service.Update(id, &req)
 	if err != nil {
 		if err.Error() == "使用者不存在" {
-			response.NotFound(c, "使用者不存在")
+			response.NotFound(c)
 			return
 		}
 		if err.Error() == "帳號已被使用" || err.Error() == "角色不存在" {
-			response.BadRequest(c, err.Error())
+			response.BadRequest(c)
 			return
 		}
-		response.InternalError(c, "編輯使用者失敗")
+		response.InternalError(c)
 		return
 	}
 
@@ -151,16 +151,16 @@ func (h *BackendUserHandlers) Delete(c *gin.Context) {
 	idStr := c.Param("backendUserId")
 	id, err := strconv.Atoi(idStr)
 	if err != nil {
-		response.BadRequest(c, "使用者 ID 格式錯誤")
+		response.BadRequest(c)
 		return
 	}
 
 	if err := h.service.Delete(id); err != nil {
 		if err.Error() == "使用者不存在" {
-			response.NotFound(c, "使用者不存在")
+			response.NotFound(c)
 			return
 		}
-		response.InternalError(c, "刪除使用者失敗")
+		response.InternalError(c)
 		return
 	}
 

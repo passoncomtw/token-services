@@ -30,7 +30,7 @@ func NewUserService(db *gorm.DB, log logger.Logger) *UserService {
 }
 
 // GetList 取得使用者列表
-func (s *UserService) GetList(query *interfaces.UserListQuery) ([]*interfaces.UserBasicResponse, error) {
+func (s *UserService) GetList(query *interfaces.UserListQuery) ([]*interfaces.UserBasicResponse, int64, error) {
 	// 設定預設值
 	if query.Page == 0 {
 		query.Page = 1
@@ -39,7 +39,7 @@ func (s *UserService) GetList(query *interfaces.UserListQuery) ([]*interfaces.Us
 		query.Size = 10
 	}
 
-	// 建立查詢
+	// 建立查詢（用於取得資料）
 	db := s.db.Model(&models.User{}).Preload("Merchant")
 
 	// 過濾條件
@@ -71,6 +71,13 @@ func (s *UserService) GetList(query *interfaces.UserListQuery) ([]*interfaces.Us
 		}
 	}
 
+	// 計算總數（使用 Session 複製查詢，確保與資料查詢使用相同的過濾條件）
+	var totalCount int64
+	countDB := db.Session(&gorm.Session{})
+	if err := countDB.Count(&totalCount).Error; err != nil {
+		return nil, 0, err
+	}
+
 	// 分頁
 	offset := (query.Page - 1) * query.Size
 	db = db.Offset(offset).Limit(query.Size)
@@ -78,7 +85,7 @@ func (s *UserService) GetList(query *interfaces.UserListQuery) ([]*interfaces.Us
 	// 執行查詢
 	var users []models.User
 	if err := db.Find(&users).Error; err != nil {
-		return nil, err
+		return nil, 0, err
 	}
 
 	// 轉換為回應格式
@@ -87,7 +94,7 @@ func (s *UserService) GetList(query *interfaces.UserListQuery) ([]*interfaces.Us
 		result = append(result, interfaces.ConvertToUserBasicResponse(&user))
 	}
 
-	return result, nil
+	return result, totalCount, nil
 }
 
 // Create 新增使用者

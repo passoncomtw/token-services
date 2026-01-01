@@ -51,13 +51,13 @@ func NewOrderHandlers(service interfaces.OrderServiceInterface, log logger.Logge
 func (h *OrderHandlers) GetList(c *gin.Context) {
 	var query interfaces.OrderListQuery
 	if err := c.ShouldBindQuery(&query); err != nil {
-		response.BadRequest(c, "請求參數錯誤")
+		response.BadRequest(c)
 		return
 	}
 
 	result, err := h.service.GetList(&query)
 	if err != nil {
-		response.InternalError(c, "取得訂單列表失敗")
+		response.InternalError(c)
 		return
 	}
 
@@ -84,13 +84,13 @@ func (h *OrderHandlers) Complete(c *gin.Context) {
 	if err != nil {
 		switch err.Error() {
 		case "訂單 ID 格式錯誤":
-			response.BadRequest(c, err.Error())
+			response.BadRequest(c)
 		case "訂單不存在":
-			response.NotFound(c, err.Error())
+			response.NotFound(c)
 		case "訂單已完成", "訂單已取消":
-			response.BadRequest(c, err.Error())
+			response.BadRequest(c)
 		default:
-			response.InternalError(c, "完成訂單失敗")
+			response.InternalError(c)
 		}
 		return
 	}
@@ -117,7 +117,7 @@ func (h *OrderHandlers) Cancel(c *gin.Context) {
 
 	var req interfaces.CancelOrderRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		response.BadRequest(c, "請求參數錯誤")
+		response.BadRequest(c)
 		return
 	}
 
@@ -125,13 +125,13 @@ func (h *OrderHandlers) Cancel(c *gin.Context) {
 	if err != nil {
 		switch err.Error() {
 		case "訂單 ID 格式錯誤":
-			response.BadRequest(c, err.Error())
+			response.BadRequest(c)
 		case "訂單不存在":
-			response.NotFound(c, err.Error())
+			response.NotFound(c)
 		case "訂單已完成，無法取消", "訂單已取消":
-			response.BadRequest(c, err.Error())
+			response.BadRequest(c)
 		default:
-			response.InternalError(c, "取消訂單失敗")
+			response.InternalError(c)
 		}
 		return
 	}

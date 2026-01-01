@@ -42,17 +42,17 @@ func NewAuthHandlers(authService interfaces.AuthServiceInterface, cfg *config.Co
 func (r *AuthHandlers) Login(c *gin.Context) {
 	var req interfaces.LoginRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		response.BadRequest(c, "請求參數錯誤")
+		response.BadRequest(c)
 		return
 	}
 
 	loginResponse, err := r.authService.Login(&req)
 	if err != nil {
-		response.Unauthorized(c, err.Error())
+		response.Unauthorized(c)
 		return
 	}
 
-	response.SuccessWithMessage(c, "登入成功", loginResponse)
+	response.SuccessWithMessage(c, loginResponse)
 }
 
 // Logout godoc
@@ -67,11 +67,11 @@ func (r *AuthHandlers) Login(c *gin.Context) {
 // @Router /auth/logout [post]
 func (r *AuthHandlers) Logout(c *gin.Context) {
 	if err := r.authService.Logout(); err != nil {
-		response.InternalError(c, "登出失敗")
+		response.InternalError(c)
 		return
 	}
 
-	response.SuccessWithMessage(c, "登出成功", nil)
+	response.SuccessWithMessage(c, nil)
 }
 
 // JWTAuthMiddleware JWT 認證中間件
@@ -80,7 +80,7 @@ func (h *AuthHandlers) JWTAuthMiddleware() gin.HandlerFunc {
 		// 從 Header 取得 token
 		authHeader := c.GetHeader("Authorization")
 		if authHeader == "" {
-			response.Unauthorized(c, "未提供認證 token")
+			response.Unauthorized(c)
 			c.Abort()
 			return
 		}
@@ -88,7 +88,7 @@ func (h *AuthHandlers) JWTAuthMiddleware() gin.HandlerFunc {
 		// 檢查 Bearer 格式
 		parts := strings.SplitN(authHeader, " ", 2)
 		if len(parts) != 2 || parts[0] != "Bearer" {
-			response.Unauthorized(c, "認證格式錯誤")
+			response.Unauthorized(c)
 			c.Abort()
 			return
 		}
@@ -98,7 +98,7 @@ func (h *AuthHandlers) JWTAuthMiddleware() gin.HandlerFunc {
 		// 驗證 token
 		claims, err := auth.ValidateToken(h.jwtConfig, tokenString)
 		if err != nil {
-			response.Unauthorized(c, "無效的 token")
+			response.Unauthorized(c)
 			c.Abort()
 			return
 		}

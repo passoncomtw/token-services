@@ -47,13 +47,13 @@ func NewBankCardHandlers(service interfaces.BankCardServiceInterface, log logger
 func (h *BankCardHandlers) GetList(c *gin.Context) {
 	var query interfaces.BankCardListQuery
 	if err := c.ShouldBindQuery(&query); err != nil {
-		response.BadRequest(c, "請求參數錯誤")
+		response.BadRequest(c)
 		return
 	}
 
 	result, err := h.service.GetList(&query)
 	if err != nil {
-		response.InternalError(c, "取得銀行卡列表失敗")
+		response.InternalError(c)
 		return
 	}
 
@@ -77,17 +77,17 @@ func (h *BankCardHandlers) GetDetail(c *gin.Context) {
 	idStr := c.Param("bankcardId")
 	id, err := strconv.Atoi(idStr)
 	if err != nil {
-		response.BadRequest(c, "銀行卡 ID 格式錯誤")
+		response.BadRequest(c)
 		return
 	}
 
 	bankCard, err := h.service.GetDetail(id)
 	if err != nil {
 		if err.Error() == "銀行卡不存在" {
-			response.NotFound(c, "銀行卡不存在")
+			response.NotFound(c)
 			return
 		}
-		response.InternalError(c, "取得銀行卡資訊失敗")
+		response.InternalError(c)
 		return
 	}
 

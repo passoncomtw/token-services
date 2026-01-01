@@ -38,17 +38,17 @@ func NewUserHandlers(userService interfaces.UserServiceInterface, logger logger.
 func (h *UserHandlers) Register(c *gin.Context) {
 	var req interfaces.RegisterRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		response.BadRequest(c, "請求參數錯誤: "+err.Error())
+		response.BadRequest(c)
 		return
 	}
 
 	user, err := h.userService.Register(&req)
 	if err != nil {
-		response.BadRequest(c, err.Error())
+		response.BadRequest(c)
 		return
 	}
 
-	response.SuccessWithMessage(c, "註冊成功", user)
+	response.SuccessWithMessage(c, user)
 }
 
 // GetUser godoc
@@ -65,17 +65,17 @@ func (h *UserHandlers) Register(c *gin.Context) {
 func (h *UserHandlers) GetUser(c *gin.Context) {
 	userID, err := strconv.Atoi(c.Param("user_id"))
 	if err != nil {
-		response.BadRequest(c, "無效的使用者 ID")
+		response.BadRequest(c)
 		return
 	}
 
 	user, err := h.userService.GetUser(userID)
 	if err != nil {
-		response.NotFound(c, err.Error())
+		response.NotFound(c)
 		return
 	}
 
-	response.SuccessWithMessage(c, "取回使用者資訊成功", user)
+	response.SuccessWithMessage(c, user)
 }
 
 // UpdateUser godoc
@@ -95,30 +95,30 @@ func (h *UserHandlers) GetUser(c *gin.Context) {
 func (h *UserHandlers) UpdateUser(c *gin.Context) {
 	userID, err := strconv.Atoi(c.Param("user_id"))
 	if err != nil {
-		response.BadRequest(c, "無效的使用者 ID")
+		response.BadRequest(c)
 		return
 	}
 
 	// TODO: 驗證使用者只能更新自己的資訊
 	// currentUserID := c.GetInt("user_id")
 	// if currentUserID != userID {
-	//     response.Forbidden(c, "無權操作")
+	//     response.Forbidden(c)
 	//     return
 	// }
 
 	var req interfaces.UpdateUserRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		response.BadRequest(c, "請求參數錯誤: "+err.Error())
+		response.BadRequest(c)
 		return
 	}
 
 	user, err := h.userService.UpdateUser(userID, &req)
 	if err != nil {
-		response.BadRequest(c, err.Error())
+		response.BadRequest(c)
 		return
 	}
 
-	response.SuccessWithMessage(c, "修改使用者成功", user)
+	response.SuccessWithMessage(c, user)
 }
 
 // UpdateLoginPassword godoc
@@ -138,16 +138,16 @@ func (h *UserHandlers) UpdateLoginPassword(c *gin.Context) {
 
 	var req interfaces.UpdateLoginPasswordRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		response.BadRequest(c, "請求參數錯誤: "+err.Error())
+		response.BadRequest(c)
 		return
 	}
 
 	if err := h.userService.UpdateLoginPassword(userID, &req); err != nil {
-		response.BadRequest(c, err.Error())
+		response.BadRequest(c)
 		return
 	}
 
-	response.SuccessWithMessage(c, "編輯登入密碼成功", nil)
+	response.SuccessWithMessage(c, nil)
 }
 
 // UpdateTransactionCode godoc
@@ -167,16 +167,16 @@ func (h *UserHandlers) UpdateTransactionCode(c *gin.Context) {
 
 	var req interfaces.UpdateTransactionCodeRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		response.BadRequest(c, "請求參數錯誤: "+err.Error())
+		response.BadRequest(c)
 		return
 	}
 
 	if err := h.userService.UpdateTransactionCode(userID, &req); err != nil {
-		response.BadRequest(c, err.Error())
+		response.BadRequest(c)
 		return
 	}
 
-	response.SuccessWithMessage(c, "修改成功", nil)
+	response.SuccessWithMessage(c, nil)
 }
 
 // StoreValue godoc
@@ -193,16 +193,15 @@ func (h *UserHandlers) UpdateTransactionCode(c *gin.Context) {
 func (h *UserHandlers) StoreValue(c *gin.Context) {
 	userID, err := strconv.Atoi(c.Param("user_id"))
 	if err != nil {
-		response.BadRequest(c, "無效的使用者 ID")
+		response.BadRequest(c)
 		return
 	}
 
 	user, err := h.userService.StoreValue(userID)
 	if err != nil {
-		response.BadRequest(c, err.Error())
+		response.BadRequest(c)
 		return
 	}
 
-	response.SuccessWithMessage(c, "取回使用者資訊成功", user)
+	response.SuccessWithMessage(c, user)
 }
-

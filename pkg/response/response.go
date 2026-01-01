@@ -6,24 +6,40 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+type Pagination struct {
+	TotalCount int `json:"totalCount" example:"100"`
+	Page       int `json:"page" example:"1"`
+	Size       int `json:"size" example:"10"`
+}
+
 /**
  * @brief Response 統一回應格式
  */
 type Response struct {
-	Success bool        `json:"success" example:"true"`
-	Message string      `json:"message" example:"操作成功"`
-	Data    interface{} `json:"data,omitempty"`
-	Code    string      `json:"code,omitempty" example:"SUCCESS"`
+	Data interface{} `json:"data,omitempty"`
+	Code string      `json:"code,omitempty" example:"200"`
+}
+
+/**
+ * @brief Response 統一回應格式
+ */
+type ListResponse struct {
+	Items      []interface{} `json:"items,omitempty"`
+	Code       string        `json:"code,omitempty" example:"200"`
+	Pagination Pagination    `json:"pagination,omitempty"`
+}
+
+type ItemResponse struct {
+	Data interface{} `json:"data,omitempty"`
+	Code string      `json:"code,omitempty" example:"200"`
 }
 
 /**
  * @brief ErrorResponse 錯誤回應格式
  */
 type ErrorResponse struct {
-	Success bool   `json:"success" example:"false"`
-	Message string `json:"message" example:"操作失敗"`
-	Code    string `json:"code" example:"ERROR"`
-	Error   string `json:"error,omitempty" example:"詳細錯誤訊息"`
+	Code  string `json:"code" example:"500"`
+	Error string `json:"error,omitempty" example:"詳細錯誤訊息"`
 }
 
 /**
@@ -38,18 +54,26 @@ type ValidationErrorResponse struct {
 
 // 常用的錯誤碼
 const (
-	CodeSuccess          = "SUCCESS"
-	CodeError            = "ERROR"
-	CodeValidationError  = "VALIDATION_ERROR"
-	CodeUnauthorized     = "UNAUTHORIZED"
-	CodeForbidden        = "FORBIDDEN"
-	CodeNotFound         = "NOT_FOUND"
-	CodeInternalError    = "INTERNAL_ERROR"
-	CodeBadRequest       = "BAD_REQUEST"
-	CodeConflict         = "CONFLICT"
-	CodeTooManyRequests  = "TOO_MANY_REQUESTS"
-	CodeServiceUnavailable = "SERVICE_UNAVAILABLE"
+	CodeSuccess            = "200"
+	CodeError              = "500"
+	CodeValidationError    = "400"
+	CodeUnauthorized       = "401"
+	CodeForbidden          = "403"
+	CodeNotFound           = "404"
+	CodeInternalError      = "500"
+	CodeBadRequest         = "400"
+	CodeConflict           = "409"
+	CodeTooManyRequests    = "429"
+	CodeServiceUnavailable = "503"
 )
+
+func GetListResponse(c *gin.Context, respData []interface{}, pagination Pagination) {
+	c.JSON(http.StatusOK, ListResponse{
+		Items:      respData,
+		Pagination: pagination,
+		Code:       "200",
+	})
+}
 
 /**
  * @brief Success 回傳成功訊息
@@ -58,10 +82,8 @@ const (
  */
 func Success(c *gin.Context, data interface{}) {
 	c.JSON(http.StatusOK, Response{
-		Success: true,
-		Message: "操作成功",
-		Data:    data,
-		Code:    CodeSuccess,
+		Data: data,
+		Code: "200",
 	})
 }
 
@@ -71,12 +93,10 @@ func Success(c *gin.Context, data interface{}) {
  * @param message 訊息內容
  * @param data 回應資料
  */
-func SuccessWithMessage(c *gin.Context, message string, data interface{}) {
+func SuccessWithMessage(c *gin.Context, data interface{}) {
 	c.JSON(http.StatusOK, Response{
-		Success: true,
-		Message: message,
-		Data:    data,
-		Code:    CodeSuccess,
+		Data: data,
+		Code: CodeSuccess,
 	})
 }
 
@@ -86,12 +106,10 @@ func SuccessWithMessage(c *gin.Context, message string, data interface{}) {
  * @param statusCode HTTP 狀態碼
  * @param message 錯誤訊息
  */
-func Error(c *gin.Context, statusCode int, message string) {
+func Error(c *gin.Context, statusCode int) {
 	code := getCodeByStatus(statusCode)
 	c.JSON(statusCode, ErrorResponse{
-		Success: false,
-		Message: message,
-		Code:    code,
+		Code: code,
 	})
 }
 
@@ -102,11 +120,9 @@ func Error(c *gin.Context, statusCode int, message string) {
  * @param code 錯誤碼
  * @param message 錯誤訊息
  */
-func ErrorWithCode(c *gin.Context, statusCode int, code string, message string) {
+func ErrorWithCode(c *gin.Context, statusCode int, code string) {
 	c.JSON(statusCode, ErrorResponse{
-		Success: false,
-		Message: message,
-		Code:    code,
+		Code: code,
 	})
 }
 
@@ -117,17 +133,15 @@ func ErrorWithCode(c *gin.Context, statusCode int, code string, message string) 
  * @param message 錯誤訊息
  * @param err 錯誤詳情
  */
-func ErrorWithDetail(c *gin.Context, statusCode int, message string, err error) {
+func ErrorWithDetail(c *gin.Context, statusCode int, err error) {
 	code := getCodeByStatus(statusCode)
 	errorDetail := ""
 	if err != nil {
 		errorDetail = err.Error()
 	}
 	c.JSON(statusCode, ErrorResponse{
-		Success: false,
-		Message: message,
-		Code:    code,
-		Error:   errorDetail,
+		Code:  code,
+		Error: errorDetail,
 	})
 }
 
@@ -150,8 +164,8 @@ func ValidationError(c *gin.Context, errors map[string]interface{}) {
  * @param c Gin Context
  * @param message 錯誤訊息
  */
-func BadRequest(c *gin.Context, message string) {
-	Error(c, http.StatusBadRequest, message)
+func BadRequest(c *gin.Context) {
+	Error(c, http.StatusBadRequest)
 }
 
 /**
@@ -159,8 +173,8 @@ func BadRequest(c *gin.Context, message string) {
  * @param c Gin Context
  * @param message 錯誤訊息
  */
-func Unauthorized(c *gin.Context, message string) {
-	Error(c, http.StatusUnauthorized, message)
+func Unauthorized(c *gin.Context) {
+	Error(c, http.StatusUnauthorized)
 }
 
 /**
@@ -168,8 +182,8 @@ func Unauthorized(c *gin.Context, message string) {
  * @param c Gin Context
  * @param message 錯誤訊息
  */
-func Forbidden(c *gin.Context, message string) {
-	Error(c, http.StatusForbidden, message)
+func Forbidden(c *gin.Context) {
+	Error(c, http.StatusForbidden)
 }
 
 /**
@@ -177,8 +191,8 @@ func Forbidden(c *gin.Context, message string) {
  * @param c Gin Context
  * @param message 錯誤訊息
  */
-func NotFound(c *gin.Context, message string) {
-	Error(c, http.StatusNotFound, message)
+func NotFound(c *gin.Context) {
+	Error(c, http.StatusNotFound)
 }
 
 /**
@@ -186,27 +200,25 @@ func NotFound(c *gin.Context, message string) {
  * @param c Gin Context
  * @param message 錯誤訊息
  */
-func Conflict(c *gin.Context, message string) {
-	Error(c, http.StatusConflict, message)
+func Conflict(c *gin.Context) {
+	Error(c, http.StatusConflict)
 }
 
 /**
  * @brief InternalError 回傳 500 錯誤
  * @param c Gin Context
- * @param message 錯誤訊息
  */
-func InternalError(c *gin.Context, message string) {
-	Error(c, http.StatusInternalServerError, message)
+func InternalError(c *gin.Context) {
+	Error(c, http.StatusInternalServerError)
 }
 
 /**
  * @brief InternalErrorWithDetail 回傳 500 錯誤（含詳細錯誤）
  * @param c Gin Context
- * @param message 錯誤訊息
  * @param err 錯誤詳情
  */
-func InternalErrorWithDetail(c *gin.Context, message string, err error) {
-	ErrorWithDetail(c, http.StatusInternalServerError, message, err)
+func InternalErrorWithDetail(c *gin.Context, err error) {
+	ErrorWithDetail(c, http.StatusInternalServerError, err)
 }
 
 /**

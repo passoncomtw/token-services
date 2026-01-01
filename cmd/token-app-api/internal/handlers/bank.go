@@ -34,10 +34,9 @@ func NewBankHandlers(bankService interfaces.BankServiceInterface, logger logger.
 func (h *BankHandlers) GetBanks(c *gin.Context) {
 	banks, err := h.bankService.GetBanks()
 	if err != nil {
-		response.InternalError(c, "取回銀行列表失敗")
+		response.InternalError(c)
 		return
 	}
 
-	response.SuccessWithMessage(c, "取回列表成功", banks)
+	response.SuccessWithMessage(c, banks)
 }
-

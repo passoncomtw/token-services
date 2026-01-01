@@ -50,13 +50,13 @@ func NewPendingOrderHandlers(service interfaces.PendingOrderServiceInterface, lo
 func (h *PendingOrderHandlers) GetList(c *gin.Context) {
 	var query interfaces.PendingOrderListQuery
 	if err := c.ShouldBindQuery(&query); err != nil {
-		response.BadRequest(c, "請求參數錯誤")
+		response.BadRequest(c)
 		return
 	}
 
 	result, err := h.service.GetList(&query)
 	if err != nil {
-		response.InternalError(c, "取得掛單列表失敗")
+		response.InternalError(c)
 		return
 	}
 
@@ -83,13 +83,13 @@ func (h *PendingOrderHandlers) Stop(c *gin.Context) {
 	if err != nil {
 		switch err.Error() {
 		case "掛單 ID 格式錯誤":
-			response.BadRequest(c, err.Error())
+			response.BadRequest(c)
 		case "掛單不存在":
-			response.NotFound(c, err.Error())
+			response.NotFound(c)
 		case "掛單已暫停", "掛單已取消或刪除":
-			response.BadRequest(c, err.Error())
+			response.BadRequest(c)
 		default:
-			response.InternalError(c, "暫停掛單失敗")
+			response.InternalError(c)
 		}
 		return
 	}
@@ -117,13 +117,13 @@ func (h *PendingOrderHandlers) Open(c *gin.Context) {
 	if err != nil {
 		switch err.Error() {
 		case "掛單 ID 格式錯誤":
-			response.BadRequest(c, err.Error())
+			response.BadRequest(c)
 		case "掛單不存在":
-			response.NotFound(c, err.Error())
+			response.NotFound(c)
 		case "掛單已開啟", "掛單已取消或刪除":
-			response.BadRequest(c, err.Error())
+			response.BadRequest(c)
 		default:
-			response.InternalError(c, "開啟掛單失敗")
+			response.InternalError(c)
 		}
 		return
 	}
@@ -151,13 +151,13 @@ func (h *PendingOrderHandlers) Cancel(c *gin.Context) {
 	if err != nil {
 		switch err.Error() {
 		case "掛單 ID 格式錯誤":
-			response.BadRequest(c, err.Error())
+			response.BadRequest(c)
 		case "掛單不存在":
-			response.NotFound(c, err.Error())
+			response.NotFound(c)
 		case "掛單已取消", "掛單已刪除":
-			response.BadRequest(c, err.Error())
+			response.BadRequest(c)
 		default:
-			response.InternalError(c, "取消掛單失敗")
+			response.InternalError(c)
 		}
 		return
 	}
@@ -185,11 +185,11 @@ func (h *PendingOrderHandlers) Delete(c *gin.Context) {
 	if err != nil {
 		switch err.Error() {
 		case "掛單 ID 格式錯誤":
-			response.BadRequest(c, err.Error())
+			response.BadRequest(c)
 		case "掛單不存在":
-			response.NotFound(c, err.Error())
+			response.NotFound(c)
 		default:
-			response.InternalError(c, "刪除掛單失敗")
+			response.InternalErrorWithDetail(c, err)
 		}
 		return
 	}

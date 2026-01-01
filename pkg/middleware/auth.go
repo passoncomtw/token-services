@@ -27,7 +27,7 @@ func (m *AuthMiddleware) Authenticate() gin.HandlerFunc {
 		// 從 Header 取得 Authorization token
 		authHeader := c.GetHeader("Authorization")
 		if authHeader == "" {
-			response.Unauthorized(c, "缺少認證 token")
+			response.Unauthorized(c)
 			c.Abort()
 			return
 		}
@@ -35,7 +35,7 @@ func (m *AuthMiddleware) Authenticate() gin.HandlerFunc {
 		// 檢查 Bearer token 格式
 		parts := strings.SplitN(authHeader, " ", 2)
 		if len(parts) != 2 || parts[0] != "Bearer" {
-			response.Unauthorized(c, "認證 token 格式錯誤")
+			response.Unauthorized(c)
 			c.Abort()
 			return
 		}
@@ -45,7 +45,7 @@ func (m *AuthMiddleware) Authenticate() gin.HandlerFunc {
 		// 驗證 token
 		claims, err := auth.ValidateToken(m.jwtConfig, tokenString)
 		if err != nil {
-			response.Unauthorized(c, "無效的認證 token")
+			response.Unauthorized(c)
 			c.Abort()
 			return
 		}

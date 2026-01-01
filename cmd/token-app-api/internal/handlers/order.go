@@ -51,14 +51,14 @@ func (h *OrderHandlers) GetOrders(c *gin.Context) {
 	userIDInterface, exists := c.Get("user_id")
 	if !exists {
 		h.logger.Error("無法取得 user_id")
-		response.Unauthorized(c, "未授權")
+		response.Unauthorized(c)
 		return
 	}
 
 	userID, ok := userIDInterface.(int)
 	if !ok {
 		h.logger.Error("user_id 類型錯誤", zap.Any("userID", userIDInterface))
-		response.InternalError(c, "內部錯誤")
+		response.InternalError(c)
 		return
 	}
 
@@ -72,14 +72,14 @@ func (h *OrderHandlers) GetOrders(c *gin.Context) {
 	result, err := h.service.GetOrders(userID, page, size)
 	if err != nil {
 		h.logger.Error("取回訂單列表失敗", zap.Error(err), zap.Int("userID", userID))
-		response.InternalErrorWithDetail(c, "取回訂單列表失敗", err)
+		response.InternalErrorWithDetail(c, err)
 		return
 	}
 
 	// 記錄查詢結果以便調試
 	h.logger.Info("查詢訂單列表成功", zap.Int("userID", userID), zap.Int64("total", result.Total), zap.Int("count", len(result.Rows)))
 
-	response.SuccessWithMessage(c, "取回列表成功", result)
+	response.SuccessWithMessage(c, result)
 }
 
 // CreateOrder godoc
@@ -100,18 +100,18 @@ func (h *OrderHandlers) CreateOrder(c *gin.Context) {
 
 	var req interfaces.CreateOrderRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		response.BadRequest(c, "請求參數錯誤: "+err.Error())
+		response.BadRequest(c)
 		return
 	}
 
 	result, err := h.service.CreateOrder(userID, &req)
 	if err != nil {
 		h.logger.Error("建立訂單失敗", zap.Error(err), zap.Int("userID", userID))
-		response.InternalError(c, err.Error())
+		response.InternalError(c)
 		return
 	}
 
-	response.SuccessWithMessage(c, "新增成功", result)
+	response.SuccessWithMessage(c, result)
 }
 
 // MarkAsPaid godoc
@@ -133,7 +133,7 @@ func (h *OrderHandlers) MarkAsPaid(c *gin.Context) {
 
 	orderID := c.Param("order_id")
 	if orderID == "" {
-		response.BadRequest(c, "訂單 ID 不能為空")
+		response.BadRequest(c)
 		return
 	}
 
@@ -141,14 +141,14 @@ func (h *OrderHandlers) MarkAsPaid(c *gin.Context) {
 	if err != nil {
 		h.logger.Error("標記已付款失敗", zap.Error(err), zap.Int("userID", userID), zap.String("orderID", orderID))
 		if err.Error() == "訂單不存在或無權操作" || err.Error() == "訂單 ID 格式錯誤" {
-			response.NotFound(c, err.Error())
+			response.NotFound(c)
 		} else {
-			response.InternalError(c, err.Error())
+			response.InternalError(c)
 		}
 		return
 	}
 
-	response.SuccessWithMessage(c, "付款已完成", result)
+	response.SuccessWithMessage(c, result)
 }
 
 // ApplyOrder godoc
@@ -170,7 +170,7 @@ func (h *OrderHandlers) ApplyOrder(c *gin.Context) {
 
 	orderID := c.Param("order_id")
 	if orderID == "" {
-		response.BadRequest(c, "訂單 ID 不能為空")
+		response.BadRequest(c)
 		return
 	}
 
@@ -178,14 +178,14 @@ func (h *OrderHandlers) ApplyOrder(c *gin.Context) {
 	if err != nil {
 		h.logger.Error("放行失敗", zap.Error(err), zap.Int("userID", userID), zap.String("orderID", orderID))
 		if err.Error() == "訂單不存在" || err.Error() == "訂單 ID 格式錯誤" || err.Error() == "無權操作此訂單" {
-			response.NotFound(c, err.Error())
+			response.NotFound(c)
 		} else {
-			response.InternalError(c, err.Error())
+			response.InternalError(c)
 		}
 		return
 	}
 
-	response.SuccessWithMessage(c, "放行成功", result)
+	response.SuccessWithMessage(c, result)
 }
 
 // RejectOrder godoc
@@ -208,13 +208,13 @@ func (h *OrderHandlers) RejectOrder(c *gin.Context) {
 
 	orderID := c.Param("order_id")
 	if orderID == "" {
-		response.BadRequest(c, "訂單 ID 不能為空")
+		response.BadRequest(c)
 		return
 	}
 
 	var req interfaces.RejectOrderRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		response.BadRequest(c, "請求參數錯誤: "+err.Error())
+		response.BadRequest(c)
 		return
 	}
 
@@ -222,12 +222,12 @@ func (h *OrderHandlers) RejectOrder(c *gin.Context) {
 	if err != nil {
 		h.logger.Error("取消訂單失敗", zap.Error(err), zap.Int("userID", userID), zap.String("orderID", orderID))
 		if err.Error() == "訂單不存在" || err.Error() == "訂單 ID 格式錯誤" || err.Error() == "無權操作此訂單" {
-			response.NotFound(c, err.Error())
+			response.NotFound(c)
 		} else {
-			response.InternalError(c, err.Error())
+			response.InternalError(c)
 		}
 		return
 	}
 
-	response.SuccessWithMessage(c, "取消訂單成功", result)
+	response.SuccessWithMessage(c, result)
 }

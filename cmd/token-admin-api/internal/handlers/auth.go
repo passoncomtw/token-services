@@ -43,13 +43,13 @@ type LoginRequest struct {
 func (r *AuthHandlers) Login(c *gin.Context) {
 	var req LoginRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		response.BadRequest(c, "請求參數錯誤")
+		response.BadRequest(c)
 		return
 	}
 
 	loginResponse, err := r.authService.Login(req.Account, req.Password)
 	if err != nil {
-		response.Unauthorized(c, err.Error())
+		response.Unauthorized(c)
 		return
 	}
 
@@ -68,7 +68,7 @@ func (r *AuthHandlers) Login(c *gin.Context) {
 // @Router /auth/logout [post]
 func (r *AuthHandlers) Logout(c *gin.Context) {
 	if err := r.authService.Logout(); err != nil {
-		response.InternalError(c, "登出失敗")
+		response.InternalError(c)
 		return
 	}
 
@@ -82,7 +82,7 @@ func (h *AuthHandlers) JWTAuthMiddleware() gin.HandlerFunc {
 		// 從 Header 取得 token
 		token := c.GetHeader("Authorization")
 		if token == "" {
-			response.Unauthorized(c, "未提供認證 token")
+			response.Unauthorized(c)
 			c.Abort()
 			return
 		}
@@ -95,7 +95,7 @@ func (h *AuthHandlers) JWTAuthMiddleware() gin.HandlerFunc {
 		// TODO: 實作真正的 JWT 驗證邏輯
 		// 這裡暫時只檢查 token 不為空
 		if token == "" {
-			response.Unauthorized(c, "無效的認證 token")
+			response.Unauthorized(c)
 			c.Abort()
 			return
 		}

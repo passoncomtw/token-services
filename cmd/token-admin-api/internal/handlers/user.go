@@ -41,24 +41,38 @@ func NewUserHandlers(service interfaces.UserServiceInterface, log logger.Logger)
 // @Param isMerchant query bool false "是否為商家"
 // @Param page query int false "頁數" default(1)
 // @Param size query int false "每頁資訊" default(10)
-// @Success 200 {object} response.Response{data=[]interfaces.UserBasicResponse}
+// @Success 200 {object} response.ListResponse{items=[]interfaces.UserBasicResponse}
 // @Failure 400 {object} response.ErrorResponse
 // @Failure 500 {object} response.ErrorResponse
 // @Router /users [get]
 func (h *UserHandlers) GetList(c *gin.Context) {
 	var query interfaces.UserListQuery
 	if err := c.ShouldBindQuery(&query); err != nil {
-		response.BadRequest(c, "請求參數錯誤")
+		response.BadRequest(c)
 		return
 	}
 
-	users, err := h.service.GetList(&query)
+	users, totalCount, err := h.service.GetList(&query)
 	if err != nil {
-		response.InternalError(c, "取得使用者列表失敗")
+		response.InternalError(c)
 		return
 	}
 
-	response.Success(c, users)
+	// 設定預設值
+	if query.Page == 0 {
+		query.Page = 1
+	}
+	if query.Size == 0 {
+		query.Size = 10
+	}
+
+	pagination := response.Pagination{
+		TotalCount: int(totalCount),
+		Page:       query.Page,
+		Size:       query.Size,
+	}
+
+	response.GetListResponse(c, users, pagination)
 }
 
 // Create godoc
@@ -76,17 +90,17 @@ func (h *UserHandlers) GetList(c *gin.Context) {
 func (h *UserHandlers) Create(c *gin.Context) {
 	var req interfaces.CreateUserRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		response.BadRequest(c, "請求參數錯誤")
+		response.BadRequest(c)
 		return
 	}
 
 	user, err := h.service.Create(&req)
 	if err != nil {
 		if err.Error() == "帳號已存在" {
-			response.BadRequest(c, err.Error())
+			response.BadRequest(c)
 			return
 		}
-		response.InternalError(c, "新增使用者失敗")
+		response.InternalError(c)
 		return
 	}
 
@@ -110,17 +124,17 @@ func (h *UserHandlers) GetDetail(c *gin.Context) {
 	idStr := c.Param("userId")
 	id, err := strconv.Atoi(idStr)
 	if err != nil {
-		response.BadRequest(c, "使用者 ID 格式錯誤")
+		response.BadRequest(c)
 		return
 	}
 
 	user, err := h.service.GetDetail(id)
 	if err != nil {
 		if err.Error() == "使用者不存在" {
-			response.NotFound(c, "使用者不存在")
+			response.NotFound(c)
 			return
 		}
-		response.InternalError(c, "取得使用者資訊失敗")
+		response.InternalError(c)
 		return
 	}
 
@@ -145,23 +159,23 @@ func (h *UserHandlers) Update(c *gin.Context) {
 	idStr := c.Param("userId")
 	id, err := strconv.Atoi(idStr)
 	if err != nil {
-		response.BadRequest(c, "使用者 ID 格式錯誤")
+		response.BadRequest(c)
 		return
 	}
 
 	var req interfaces.UpdateUserRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		response.BadRequest(c, "請求參數錯誤")
+		response.BadRequest(c)
 		return
 	}
 
 	user, err := h.service.Update(id, &req)
 	if err != nil {
 		if err.Error() == "使用者不存在" {
-			response.NotFound(c, "使用者不存在")
+			response.NotFound(c)
 			return
 		}
-		response.InternalError(c, "編輯使用者失敗")
+		response.InternalError(c)
 		return
 	}
 
@@ -185,17 +199,17 @@ func (h *UserHandlers) Unlock(c *gin.Context) {
 	idStr := c.Param("userId")
 	id, err := strconv.Atoi(idStr)
 	if err != nil {
-		response.BadRequest(c, "使用者 ID 格式錯誤")
+		response.BadRequest(c)
 		return
 	}
 
 	user, err := h.service.Unlock(id)
 	if err != nil {
 		if err.Error() == "使用者不存在" {
-			response.NotFound(c, "使用者不存在")
+			response.NotFound(c)
 			return
 		}
-		response.InternalError(c, "解鎖使用者失敗")
+		response.InternalError(c)
 		return
 	}
 
@@ -220,26 +234,26 @@ func (h *UserHandlers) UpdateLoginPassword(c *gin.Context) {
 	idStr := c.Param("userId")
 	id, err := strconv.Atoi(idStr)
 	if err != nil {
-		response.BadRequest(c, "使用者 ID 格式錯誤")
+		response.BadRequest(c)
 		return
 	}
 
 	var req interfaces.UpdateLoginPasswordRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		response.BadRequest(c, "請求參數錯誤")
+		response.BadRequest(c)
 		return
 	}
 
 	if err := h.service.UpdateLoginPassword(id, &req); err != nil {
 		if err.Error() == "使用者不存在" {
-			response.NotFound(c, "使用者不存在")
+			response.NotFound(c)
 			return
 		}
 		if err.Error() == "舊密碼錯誤" {
-			response.BadRequest(c, "舊密碼錯誤")
+			response.BadRequest(c)
 			return
 		}
-		response.InternalError(c, "更新密碼失敗")
+		response.InternalError(c)
 		return
 	}
 
@@ -264,23 +278,23 @@ func (h *UserHandlers) UpdateTransactionPassword(c *gin.Context) {
 	idStr := c.Param("userId")
 	id, err := strconv.Atoi(idStr)
 	if err != nil {
-		response.BadRequest(c, "使用者 ID 格式錯誤")
+		response.BadRequest(c)
 		return
 	}
 
 	var req interfaces.UpdateTransactionPasswordRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		response.BadRequest(c, "請求參數錯誤")
+		response.BadRequest(c)
 		return
 	}
 
 	user, err := h.service.UpdateTransactionPassword(id, &req)
 	if err != nil {
 		if err.Error() == "使用者不存在" {
-			response.NotFound(c, "使用者不存在")
+			response.NotFound(c)
 			return
 		}
-		response.InternalError(c, "更新交易密碼失敗")
+		response.InternalError(c)
 		return
 	}
 
@@ -306,20 +320,20 @@ func (h *UserHandlers) UpdateOwnLoginPassword(c *gin.Context) {
 
 	var req interfaces.UpdateLoginPasswordRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		response.BadRequest(c, "請求參數錯誤")
+		response.BadRequest(c)
 		return
 	}
 
 	if err := h.service.UpdateLoginPassword(userID, &req); err != nil {
 		if err.Error() == "使用者不存在" {
-			response.NotFound(c, "使用者不存在")
+			response.NotFound(c)
 			return
 		}
 		if err.Error() == "舊密碼錯誤" {
-			response.BadRequest(c, "舊密碼錯誤")
+			response.BadRequest(c)
 			return
 		}
-		response.InternalError(c, "更新密碼失敗")
+		response.InternalError(c)
 		return
 	}
 
@@ -345,23 +359,23 @@ func (h *UserHandlers) GetBankCards(c *gin.Context) {
 	idStr := c.Param("userId")
 	id, err := strconv.Atoi(idStr)
 	if err != nil {
-		response.BadRequest(c, "使用者 ID 格式錯誤")
+		response.BadRequest(c)
 		return
 	}
 
 	var query interfaces.PaginationQuery
 	if err := c.ShouldBindQuery(&query); err != nil {
-		response.BadRequest(c, "請求參數錯誤")
+		response.BadRequest(c)
 		return
 	}
 
 	bankCards, err := h.service.GetBankCards(id, &query)
 	if err != nil {
 		if err.Error() == "使用者不存在" {
-			response.NotFound(c, "使用者不存在")
+			response.NotFound(c)
 			return
 		}
-		response.InternalError(c, "取得銀行卡列表失敗")
+		response.InternalError(c)
 		return
 	}
 
@@ -385,17 +399,17 @@ func (h *UserHandlers) GetOrders(c *gin.Context) {
 	idStr := c.Param("userId")
 	id, err := strconv.Atoi(idStr)
 	if err != nil {
-		response.BadRequest(c, "使用者 ID 格式錯誤")
+		response.BadRequest(c)
 		return
 	}
 
 	orders, err := h.service.GetOrders(id)
 	if err != nil {
 		if err.Error() == "使用者不存在" {
-			response.NotFound(c, "使用者不存在")
+			response.NotFound(c)
 			return
 		}
-		response.InternalError(c, "取得訂單列表失敗")
+		response.InternalError(c)
 		return
 	}
 
@@ -421,23 +435,23 @@ func (h *UserHandlers) GetPendingOrders(c *gin.Context) {
 	idStr := c.Param("userId")
 	id, err := strconv.Atoi(idStr)
 	if err != nil {
-		response.BadRequest(c, "使用者 ID 格式錯誤")
+		response.BadRequest(c)
 		return
 	}
 
 	var query interfaces.PaginationQuery
 	if err := c.ShouldBindQuery(&query); err != nil {
-		response.BadRequest(c, "請求參數錯誤")
+		response.BadRequest(c)
 		return
 	}
 
 	pendingOrders, err := h.service.GetPendingOrders(id, &query)
 	if err != nil {
 		if err.Error() == "使用者不存在" {
-			response.NotFound(c, "使用者不存在")
+			response.NotFound(c)
 			return
 		}
-		response.InternalError(c, "取得掛單列表失敗")
+		response.InternalError(c)
 		return
 	}
 

@@ -40,11 +40,11 @@ func (h *BankCardHandlers) GetBankCards(c *gin.Context) {
 
 	bankCards, err := h.bankCardService.GetBankCards(userID)
 	if err != nil {
-		response.InternalError(c, "取回銀行卡列表失敗")
+		response.InternalError(c)
 		return
 	}
 
-	response.SuccessWithMessage(c, "取回列表成功", bankCards)
+	response.SuccessWithMessage(c, bankCards)
 }
 
 // CreateBankCard godoc
@@ -64,17 +64,17 @@ func (h *BankCardHandlers) CreateBankCard(c *gin.Context) {
 
 	var req interfaces.CreateBankCardRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		response.BadRequest(c, "請求參數錯誤: "+err.Error())
+		response.BadRequest(c)
 		return
 	}
 
 	bankCard, err := h.bankCardService.CreateBankCard(userID, &req)
 	if err != nil {
-		response.BadRequest(c, err.Error())
+		response.BadRequest(c)
 		return
 	}
 
-	response.SuccessWithMessage(c, "新增成功", bankCard)
+	response.SuccessWithMessage(c, bankCard)
 }
 
 // UpdateBankCard godoc
@@ -96,23 +96,23 @@ func (h *BankCardHandlers) UpdateBankCard(c *gin.Context) {
 
 	bankcardID, err := strconv.Atoi(c.Param("bankcard_id"))
 	if err != nil {
-		response.BadRequest(c, "無效的銀行卡 ID")
+		response.BadRequest(c)
 		return
 	}
 
 	var req interfaces.UpdateBankCardRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		response.BadRequest(c, "請求參數錯誤: "+err.Error())
+		response.BadRequest(c)
 		return
 	}
 
 	bankCard, err := h.bankCardService.UpdateBankCard(userID, bankcardID, &req)
 	if err != nil {
-		response.BadRequest(c, err.Error())
+		response.BadRequest(c)
 		return
 	}
 
-	response.SuccessWithMessage(c, "新增成功", bankCard)
+	response.SuccessWithMessage(c, bankCard)
 }
 
 // DeleteBankCard godoc
@@ -133,14 +133,14 @@ func (h *BankCardHandlers) DeleteBankCard(c *gin.Context) {
 
 	bankcardID, err := strconv.Atoi(c.Param("bankcard_id"))
 	if err != nil {
-		response.BadRequest(c, "無效的銀行卡 ID")
+		response.BadRequest(c)
 		return
 	}
 
 	if err := h.bankCardService.DeleteBankCard(userID, bankcardID); err != nil {
-		response.BadRequest(c, err.Error())
+		response.BadRequest(c)
 		return
 	}
 
-	response.SuccessWithMessage(c, "刪除成功", nil)
+	response.SuccessWithMessage(c, nil)
 }

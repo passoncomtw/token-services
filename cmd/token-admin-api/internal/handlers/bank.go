@@ -38,7 +38,7 @@ func NewBankHandlers(service interfaces.BankServiceInterface, log logger.Logger)
 func (h *BankHandlers) GetList(c *gin.Context) {
 	banks, err := h.service.GetList()
 	if err != nil {
-		response.InternalError(c, "取得銀行列表失敗")
+		response.InternalError(c)
 		return
 	}
 
@@ -60,17 +60,17 @@ func (h *BankHandlers) GetList(c *gin.Context) {
 func (h *BankHandlers) Create(c *gin.Context) {
 	var req interfaces.CreateBankRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		response.BadRequest(c, "請求參數錯誤")
+		response.BadRequest(c)
 		return
 	}
 
 	bank, err := h.service.Create(&req)
 	if err != nil {
 		if err.Error() == "銀行代碼已存在" {
-			response.BadRequest(c, err.Error())
+			response.BadRequest(c)
 			return
 		}
-		response.InternalError(c, "新增銀行失敗")
+		response.InternalError(c)
 		return
 	}
 
@@ -95,27 +95,27 @@ func (h *BankHandlers) Update(c *gin.Context) {
 	idStr := c.Param("bankId")
 	id, err := strconv.Atoi(idStr)
 	if err != nil {
-		response.BadRequest(c, "銀行 ID 格式錯誤")
+		response.BadRequest(c)
 		return
 	}
 
 	var req interfaces.UpdateBankRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		response.BadRequest(c, "請求參數錯誤")
+		response.BadRequest(c)
 		return
 	}
 
 	bank, err := h.service.Update(id, &req)
 	if err != nil {
 		if err.Error() == "銀行不存在" {
-			response.NotFound(c, "銀行不存在")
+			response.NotFound(c)
 			return
 		}
 		if err.Error() == "銀行代碼已被使用" {
-			response.BadRequest(c, err.Error())
+			response.BadRequest(c)
 			return
 		}
-		response.InternalError(c, "編輯銀行失敗")
+		response.InternalError(c)
 		return
 	}
 

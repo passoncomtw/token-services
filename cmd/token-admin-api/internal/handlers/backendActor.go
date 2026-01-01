@@ -36,7 +36,7 @@ func NewBackendActorHandlers(service interfaces.BackendActorServiceInterface, lo
 func (h *BackendActorHandlers) GetAll(c *gin.Context) {
 	actors, err := h.service.GetAll()
 	if err != nil {
-		response.InternalError(c, "取得角色列表失敗")
+		response.InternalError(c)
 		return
 	}
 
@@ -58,13 +58,13 @@ func (h *BackendActorHandlers) GetAll(c *gin.Context) {
 func (h *BackendActorHandlers) Create(c *gin.Context) {
 	var req interfaces.CreateBackendActorRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		response.BadRequest(c, "請求參數錯誤")
+		response.BadRequest(c)
 		return
 	}
 
 	actor, err := h.service.Create(&req)
 	if err != nil {
-		response.InternalError(c, "新增角色失敗")
+		response.InternalError(c)
 		return
 	}
 
@@ -84,7 +84,7 @@ func (h *BackendActorHandlers) Create(c *gin.Context) {
 func (h *BackendActorHandlers) GetPermissions(c *gin.Context) {
 	permissions, err := h.service.GetPermissions()
 	if err != nil {
-		response.InternalError(c, "取得權限列表失敗")
+		response.InternalError(c)
 		return
 	}
 

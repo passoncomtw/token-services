@@ -48,7 +48,7 @@ CREATE TABLE "public"."users" (
     "updated_at" timestamptz NOT NULL,
     "deleted_at" timestamptz,
     "type" int4 NOT NULL,
-    "status" int4 NOT NULL DEFAULT 0,
+    "status" int4 NOT NULL DEFAULT 1,
     "transaction_status" int4 NOT NULL DEFAULT 1,
     "order_status" int4 NOT NULL DEFAULT 1,
     "login_time" timestamptz,

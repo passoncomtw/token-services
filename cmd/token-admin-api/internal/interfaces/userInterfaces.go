@@ -190,7 +190,7 @@ type PaginationQuery struct {
 
 // UserServiceInterface 使用者服務介面
 type UserServiceInterface interface {
-	GetList(query *UserListQuery) ([]*UserBasicResponse, error)
+	GetList(query *UserListQuery) ([]*UserBasicResponse, int64, error)
 	Create(req *CreateUserRequest) (*UserBasicResponse, error)
 	GetDetail(id int) (*UserDetailResponse, error)
 	Update(id int, req *UpdateUserRequest) (*UserBasicResponse, error)
