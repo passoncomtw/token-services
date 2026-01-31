@@ -1,0 +1,21 @@
+schema: spec-driven
+
+# Project context: four backend services in cmd/
+context: |
+  Tech stack: Go, GORM, shared pkg/ (auth, config, database, logger, middleware, models, response, swagger).
+  Monorepo with four services under cmd/:
+  - pos-backend-api: backend admin API (merchants, backend users, auth).
+  - pos-merchant-api: merchant-facing API (orders, products, auth, rate limit).
+  - token-admin-api: token platform admin API (users, orders, pending orders, banks, bankcards, backend actors/users).
+  - token-app-api: token app API (users, orders, pending orders, banks, bankcards, auth).
+  We use conventional commits. Domain: POS + token trading platform.
+
+# Per-artifact rules (optional)
+# Add custom rules for specific artifacts.
+# Example:
+#   rules:
+#     proposal:
+#       - Keep proposals under 500 words
+#       - Always include a "Non-goals" section
+#     tasks:
+#       - Break tasks into chunks of max 2 hours
