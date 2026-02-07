@@ -30,7 +30,5 @@ Thumbs.db
 .env
 .env.local
 
-.cursor
-
 # Golang swagger docs
 docs
